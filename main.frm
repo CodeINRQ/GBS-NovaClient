@@ -156,15 +156,15 @@ Begin VB.Form frmMain
       TabCaption(5)   =   "Organisation"
       TabPicture(5)   =   "main.frx":0B6E
       Tab(5).ControlEnabled=   0   'False
-      Tab(5).Control(0)=   "ucEditOrg"
+      Tab(5).Control(0)=   "ucOrgDictType"
       Tab(5).Control(1)=   "ucOrgPriority"
-      Tab(5).Control(2)=   "ucOrgDictType"
+      Tab(5).Control(2)=   "ucEditOrg"
       Tab(5).ControlCount=   3
       TabCaption(6)   =   "Systeminställningar"
       TabPicture(6)   =   "main.frx":0B8A
       Tab(6).ControlEnabled=   0   'False
-      Tab(6).Control(0)=   "ucEditSysSettings"
-      Tab(6).Control(1)=   "ucEditGroup"
+      Tab(6).Control(0)=   "ucEditGroup"
+      Tab(6).Control(1)=   "ucEditSysSettings"
       Tab(6).ControlCount=   2
       TabCaption(7)   =   "Tab 6"
       TabPicture(7)   =   "main.frx":0BA6
@@ -561,6 +561,7 @@ Private LastOrgidForNewDictation As Long
 Private LastDictTypeIdForNewDictation As Long
 
 Private IsDictButtonPressed As Boolean
+Private DictButton As Long
 
 Private DictRecoveryMode As TempDictInfoTypeEnum
 Private DictRecovery As clsDict
@@ -598,9 +599,9 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
    Select Case K
       Case Client.SysSettings.PlayerKeyRec
          If Me.Toolbar1.Buttons(1).Visible Then
-            Debug.Print "frmMain KeyDown Before RecordNewDictation"
+            'Debug.Print "frmMain KeyDown Before RecordNewDictation"
             Set Dict = New clsDict
-            RecordNewDictation Dict, True
+            RecordNewDictation Dict, True, 0
          End If
    End Select
 End Sub
@@ -625,7 +626,7 @@ Private Sub Form_Load()
       GotoPrevInstance
    End If
 
-   Debug.Print App.StartMode
+   'Debug.Print App.StartMode
    
    
    SetUpStatusBar
@@ -1178,10 +1179,11 @@ Private Sub mDSSRec_GruEvent(EventType As Gru_Event, Data As Long)
    Select Case EventType
       Case GRU_BUTTONPRESS
          Select Case Data
-            Case GRU_BUT_DICT, GRU_BUT_INSERT
+            Case GRU_BUT_DICT, GRU_BUT_INSERT, GRU_BUT_BUTREC, GRU_BUT_RECPAUSE
                If Not RecorderInUse Then
                   If RecordingAllowed Then
                      IsDictButtonPressed = True
+                     DictButton = Data
                   End If
                End If
             Case GRU_BUT_INDEX
@@ -1190,7 +1192,7 @@ Private Sub mDSSRec_GruEvent(EventType As Gru_Event, Data As Long)
                      If frmMain.Toolbar1.Buttons(3).Value = tbrPressed Then
                         frmMain.Toolbar1.Buttons(3).Value = tbrUnpressed
                      Else
-                        mDSSRec.SetMicRecordMode True
+                        mDSSRec.SetMicRecordMode True, False
                         frmMain.Toolbar1.Buttons(3).Value = tbrPressed
                      End If
                      mVx.Activate = frmMain.Toolbar1.Buttons(3).Value = tbrPressed
@@ -1281,12 +1283,12 @@ Private Sub mVx_ChangeListening(NewValue As vxListeningEnum)
          mVx.vxListening = vxListeningOff
       Else
          frmMain.Toolbar1.Buttons(3).Value = tbrPressed
-         mDSSRec.SetMicRecordMode 1
+         mDSSRec.SetMicRecordMode 1, False
       End If
    Else
       frmMain.Toolbar1.Buttons(3).Value = tbrUnpressed
       If Not RecorderInUse Then
-         mDSSRec.SetMicRecordMode 0
+         mDSSRec.SetMicRecordMode 0, False
       End If
    End If
 End Sub
@@ -1306,8 +1308,8 @@ Private Sub tmrCheckButtons_Timer()
    If DictRecoveryMode = tdiNew Then
       DictRecoveryMode = tdiEmpty
       If Not RecorderInUse Then
-         Debug.Print "frmMain tmrCheckButtons Before RecordNewDictation"
-         RecordNewDictation DictRecovery, False
+         'Debug.Print "frmMain tmrCheckButtons Before RecordNewDictation"
+         RecordNewDictation DictRecovery, False, 0
       End If
    End If
    
@@ -1316,16 +1318,16 @@ Private Sub tmrCheckButtons_Timer()
    If IsDictButtonPressed Then
       IsDictButtonPressed = False
       Set Dict = New clsDict
-      Debug.Print "frmMain tmrCheckButtons Before RecordNewDictation"
-      RecordNewDictation Dict, True ' CurrentOrg = 30005
+      'Debug.Print "frmMain tmrCheckButtons Before RecordNewDictation"
+      RecordNewDictation Dict, True, DictButton ' CurrentOrg = 30005
    End If
    If IsRecNewFromAPI Then
       IsRecNewFromAPI = False
       If RecordingAllowed Then
          If Not RecorderInUse Then
             Set Dict = New clsDict
-            Debug.Print "frmMain tmrCheckButtons Before RecordNewDictation"
-            RecordNewDictation Dict, False ' CurrentOrg = 30005
+            'Debug.Print "frmMain tmrCheckButtons Before RecordNewDictation"
+            RecordNewDictation Dict, False, 0 ' CurrentOrg = 30005
          End If
       End If
    End If
@@ -1478,7 +1480,7 @@ Private Sub tmrUpdateList_Timer()
             OldUpdateInterval = NewUpdateInterval
          End If
          NextTickForAction = TickNow + NewUpdateInterval
-         Debug.Print "Interval: " & CStr(NewUpdateInterval) & " MeanTime: " & CStr(MeanTime) & " Last: " & CStr(TimeForUpdates.LastMeasurement)
+         'Debug.Print "Interval: " & CStr(NewUpdateInterval) & " MeanTime: " & CStr(MeanTime) & " Last: " & CStr(TimeForUpdates.LastMeasurement)
       End If
    End If
 End Sub
@@ -1490,8 +1492,8 @@ Private Sub Toolbar1_ButtonClick(ByVal Button As MSComctlLib.Button)
    Select Case Button.Index
       Case 1
          Set Dict = New clsDict
-         Debug.Print "frmMain Tollbar1 Before RecordNewDictation"
-         RecordNewDictation Dict, True ' CurrentOrg = 30005
+         'Debug.Print "frmMain Tollbar1 Before RecordNewDictation"
+         RecordNewDictation Dict, True, 0 ' CurrentOrg = 30005
       Case 3
          mVx.Activate = frmMain.Toolbar1.Buttons(3).Value = tbrPressed
       Case 5
@@ -1557,7 +1559,7 @@ Private Sub ucDictList_RightClick(DictId As Long)
    End If
    If ShowPopupAudit Or ShowPopupUnlock Then
       On Error Resume Next
-      Debug.Print DictId
+      'Debug.Print DictId
       mPopupForm.Id = DictId
       mPopupForm.mnuDictList(10).Visible = ShowPopupUnlock
       mPopupForm.mnuDictList(20).Visible = ShowPopupAudit
@@ -1577,7 +1579,7 @@ Private Sub ucEditUser_RightClick(UserId As Long)
    End If
    If ShowPopupAudit Then
       On Error Resume Next
-      Debug.Print UserId
+      'Debug.Print UserId
       mPopupForm.Id = UserId
       mPopupForm.mnuUserList(10).Visible = ShowPopupAudit
       PopupMenu mPopupForm.mnuPopup(2)
@@ -1731,7 +1733,7 @@ Private Sub UpdateCurrentView()
    
    AlreadyInThisUpdate = False
 End Sub
-Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
+Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean, DictButton As Long)
 
    Static AllreadyStarted As Boolean
    Dim ThereIsALocalFile As Boolean
@@ -1808,7 +1810,7 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
    Set mDictForm = New frmDict
    Load mDictForm
    mDictForm.RestoreSettings DictFormSettings
-   mDictForm.EditDictation Dict, Not ThereIsALocalFile
+   mDictForm.EditDictation Dict, Not ThereIsALocalFile, DictButton
    mDictForm.CloseText(0) = Client.Texts.Txt(1000501, "Radera diktatet")
    mDictForm.CloseTip(0) = Client.Texts.ToolTip(1000501, "Inspelningen kastas!")
    mDictForm.CloseText(1) = Client.Texts.Txt(1000502, "Fortsätt diktera senare")
@@ -2006,7 +2008,7 @@ Private Sub ImportNewDictationInternal(Fn As String, Dict As clsDict, WithDialog
          Set mDictForm = New frmDict
          Load mDictForm
          mDictForm.RestoreSettings DictFormSettings
-         mDictForm.EditDictation Dict, False
+         mDictForm.EditDictation Dict, False, 0
          mDictForm.CloseText(0) = Client.Texts.Txt(1000501, "Radera diktatet")
          mDictForm.CloseTip(0) = Client.Texts.ToolTip(1000501, "Inspelningen kastas!")
          mDictForm.CloseText(1) = Client.Texts.Txt(1000502, "Fortsätt diktera senare")
@@ -2088,7 +2090,7 @@ Public Sub EditExistingDictation(DictId As Long)
          Load mDictForm
          mDictForm.RestoreSettings DictFormSettings
          Client.Trace.AddRow Trace_Level_Full, "10006", "10006C", "", CStr(Dict.DictId), CStr(Dict.StatusId)
-         mDictForm.EditDictation Dict, False
+         mDictForm.EditDictation Dict, False, 0
          Client.Trace.AddRow Trace_Level_Full, "10006", "10006D", "", CStr(Dict.DictId), CStr(Dict.StatusId)
          If IsUserAuthor And Dict.AuthorId = Client.User.UserId Then
             If Dict.StatusId < Recorded Then

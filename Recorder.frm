@@ -45,15 +45,27 @@ Private mComPort As String
 Public WithEvents Adapter As ADAPTERSERVERLib.AdapterControl
 Attribute Adapter.VB_VarHelpID = -1
 Public Overwrite As Boolean
+Public RecPuse As Boolean
 Private m_bCreated As Long
 
-Public Sub SetMicRecordMode(Start As Boolean)
+Public Sub SetMicRecordMode(Start As Boolean, Optional Overwrite As Boolean = True, Optional Pause As Boolean = False)
 
    Const FuncName As String = "SetMicRecordMode"
    
+   Dim binsert As Long
+   If Overwrite Then
+       binsert = 0
+   Else
+       binsert = 1
+   End If
+   
+   If Pause Then
+      binsert = binsert + 2
+   End If
+
    If Start Then
       Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "BeginRecord"
-      Adapter.BeginRecord
+      Adapter.BeginRecordEx binsert, 0
       Client.Trace.AddRow Trace_Level_DSSRec, ModuleName, FuncName, "UnmuteMicMuteSum"
       DssRecorderBase.UnmuteMicMuteSum
    Else
@@ -76,6 +88,8 @@ Private Sub Adapter_MicStat(ByVal MicStat As Long, ByVal description As String)
    'RaiseEvent MicStat(MicStat)
    
    Const FuncName As String = "Adapter_MicStat"
+
+   Debug.Print , , , , , MicStat, description
 
    Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "MicStat", CStr(MicStat)
    RaiseEvent MicStat(MicStat)
@@ -128,7 +142,8 @@ Private Sub DssRecorderBase_OnBeginRecord()
        binsert = 1
    End If
    
-   Aret = Adapter.BeginRecordEx(binsert, 0)
+   Debug.Print "On BeginRecord"
+   
    Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "BeginRecordEx", CStr(binsert) & ",0", CStr(Aret)
 
    m_InRecordMode = True
@@ -140,12 +155,14 @@ Private Sub DssRecorderBase_OnEndRecord()
 
    Const FuncName As String = "DssRecorderBase_OnEndRecord"
 
+   Debug.Print "On EndRecord"
+
    If m_InRecordMode Then
       Client.Trace.AddRow Trace_Level_DSSRec, ModuleName, FuncName, "MuteMicUnmuteSum"
       DssRecorderBase.MuteMicUnmuteSum
       Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "EndRecord"
       On Error Resume Next
-      Adapter.EndRecord
+      SetMicRecordMode False
    '   Adapter.EndRecord
    '   DssRecorderBase.MuteMicUnmuteSum
       m_InRecordMode = False
@@ -163,6 +180,8 @@ End Sub
 Private Sub DssRecorderBase_OnModeChanged(ByVal mode As DSSSDK2LibCtl.PlayerMode)
 
    Const FuncName As String = "DssRecorderBase_OnModeChanged"
+   
+   'Debug.Print "OnModeChanged" & CStr(mode)
    
    Client.Trace.AddRow Trace_Level_DSSRec, ModuleName, FuncName, "OnModeChanged", CStr(mode)
    RaiseEvent DssOnModeChanged(CLng(mode))

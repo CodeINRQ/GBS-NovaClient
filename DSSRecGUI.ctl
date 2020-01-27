@@ -656,8 +656,6 @@ End Sub
 
 Private Sub optPlayer_Click(Index As Integer)
 
-   Dim L As Long
-
    If Not InGruEventHandler Then
       Select Case Index
          Case butPlay
@@ -667,21 +665,17 @@ Private Sub optPlayer_Click(Index As Integer)
          Case butStop
             DSSRec.PlayStop
          Case butStart
-            DSSRec.MoveTo 0
+            DSSRec.GotoStart
             optPlayer(butPause).Value = True
-            DSSRec.PlayPause
          Case butRewind
             DSSRec.Rewind
          Case butForward
             DSSRec.FastForward
          Case butEnd
-            DSSRec.GetLength L
-            DSSRec.MoveTo L
             optPlayer(butPause).Value = True
-            DSSRec.PlayPause
          Case butRec
             StartRecordingMonitoring
-            DSSRec.Rec
+            DSSRec.Rec True
       End Select
    End If
    If LastState = GRU_RECPAUSED Then
@@ -706,31 +700,40 @@ Private Sub DSSRec_GruEvent(EventType As Gru_Event, Data As Long)
             LastOkPos = Data
          End If
          UpdatePos Data
-         Debug.Print RecMonitor_StartPos & ":" & Data - RecMonitor_StartPos & ":" & RecMonitor_MaxLevel & ":" & RecMonitor_LastWarningPos & ":" & Data - RecMonitor_LastWarningPos
+         'Debug.Print RecMonitor_StartPos & ":" & Data - RecMonitor_StartPos & ":" & RecMonitor_MaxLevel & ":" & RecMonitor_LastWarningPos & ":" & Data - RecMonitor_LastWarningPos
          CheckForLowRecLevel Data
       Case GRU_STATECHANGED
          LastState = Data
          Select Case LastState
             Case GRU_STOPPED
+               Debug.Print "Stopped" & " " & CStr(LastState)
                StopRecordingMonitoring
                optPlayer(butPause).Value = True
             Case GRU_PLAY
+               Debug.Print "Playing" & " " & CStr(LastState)
                StopRecordingMonitoring
                optPlayer(butPlay).Value = True
             Case GRU_RECPAUSED
+               Debug.Print "RecPausing" & " " & CStr(LastState)
                StartRecordingMonitoring
                optPlayer(butPause).Value = True
             Case GRU_REC
+               Debug.Print "Recording" & " " & CStr(LastState)
                StartRecordingMonitoring
                optPlayer(butRec).Value = True
             Case GRU_REWIND
+               Debug.Print "Rewinding" & " " & CStr(LastState)
                StopRecordingMonitoring
                optPlayer(butRewind).Value = True
             Case GRU_FORWARD
+               Debug.Print "Forwarding" & " " & CStr(LastState)
                StopRecordingMonitoring
                optPlayer(butForward).Value = True
+            Case Else
+               Debug.Print "Unknown state"
          End Select
          tmrBlink.Enabled = LastState = GRU_RECPAUSED
+         DSSRec.SetMicRecordMode LastState = GRU_REC Or LastState = GRU_RECPAUSED, LastState = GRU_RECPAUSED
          If LastState = GRU_REC Or LastState = GRU_RECPAUSED Then
             optInsert(0).Enabled = False
             optInsert(1).Enabled = False
@@ -749,7 +752,7 @@ Private Sub DSSRec_GruEvent(EventType As Gru_Event, Data As Long)
             If Client.SysSettings.PlayerIndexButtonAsInsertRec Then
                optInsert(0).Value = True
                StartRecordingMonitoring
-               DSSRec.Rec
+               DSSRec.Rec False
             End If
          ElseIf Data = GRU_BUT_INSERT Then
             If Client.SysSettings.PlayerAllowInsertFromMic Then
@@ -757,7 +760,7 @@ Private Sub DSSRec_GruEvent(EventType As Gru_Event, Data As Long)
                   optInsert(0).Value = True
                End If
                StartRecordingMonitoring
-               DSSRec.Rec
+               DSSRec.Rec True
             End If
          End If
       Case GRU_INPUTCHANGE
@@ -913,7 +916,7 @@ Private Sub ReOpenNowPlayingFile()
    DSSRec.MoveTo LastOkPos
    ShowPos LastOkPos, L
 End Sub
-Public Sub CreateNewFile(FileName As String)
+Public Sub CreateNewFile(FileName As String, ButDevice As Boolean)
 
    Trc "ucDSS CreateNewFile", ""
    InitPlayerBeforeUse
@@ -925,7 +928,7 @@ Public Sub CreateNewFile(FileName As String)
          EnableControls True
       End If
       StartRecordingMonitoring
-      DSSRec.Rec
+      DSSRec.Rec ButDevice
    End If
 End Sub
 Private Sub InitPlayerBeforeUse()

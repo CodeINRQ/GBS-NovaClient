@@ -656,7 +656,7 @@ End Function
 
 Private Sub DisplayNoteInLabelControl()
 
-   Debug.Print Now & " " & lstDict.ActiveRow
+   'Debug.Print Now & " " & lstDict.ActiveRow
    lstDict.Row = lstDict.ActiveRow
    lstDict.Col = lstDict.GetColFromID("3")
    lblNote.Caption = lstDict.Text

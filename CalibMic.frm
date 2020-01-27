@@ -135,7 +135,7 @@ Private Sub Form_Load()
       TemFileName = CreateTempFileName("dss")
       KillFileIgnoreError TemFileName
       G.LoadFile TemFileName, 0, 1
-      G.Rec
+      G.Rec False
       Me.ucVUmeter1.Value = 0
    End If
    

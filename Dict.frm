@@ -830,7 +830,7 @@ Public Sub SaveSettings(Settings As clsStringStore)
    Settings.AddBool "Window", "Floating", mFloating
    Settings.AddLong "Player", "AutoRewind", CLng(mAutoRewind)
 End Sub
-Public Sub EditDictation(ByRef Dictation As clsDict, ByVal NewDict As Boolean)
+Public Sub EditDictation(ByRef Dictation As clsDict, ByVal NewDict As Boolean, DictButton As Long)
 
    mUserIsSysAdmin = Client.OrgMgr.CheckUserRole(Dictation.OrgId, RTSysAdmin)
    Set mDict = Dictation
@@ -852,7 +852,7 @@ Public Sub EditDictation(ByRef Dictation As clsDict, ByVal NewDict As Boolean)
       ucDSSRecGUI.AutoRewind = mAutoRewind
       If mNewDict Then
          ucDSSRecGUI.ReadOnly = mSoundReadOnly
-         ucDSSRecGUI.CreateNewFile mDict.LocalDictFile.LocalFilenamePlay
+         ucDSSRecGUI.CreateNewFile mDict.LocalDictFile.LocalFilenamePlay, DictButton = GRU_BUT_BUTREC
       Else
          ucDSSRecGUI.ReadOnly = mSoundReadOnly
          ucDSSRecGUI.OpenAndPlay mDict.LocalDictFile.LocalFilenamePlay
@@ -1124,7 +1124,7 @@ End Sub
 
 Private Sub ucDSSRecGUI_WarningLowInputWhenRecording(TimeWithLowInput As Long, MaxInput As Long)
 
-   Debug.Print "Warning: " & TimeWithLowInput & ":" & MaxInput
+   'Debug.Print "Warning: " & TimeWithLowInput & ":" & MaxInput
    If TimeWithLowInput > 0 Then
       picWarning.Visible = True
       SetWindowTopMostAndForeground Me

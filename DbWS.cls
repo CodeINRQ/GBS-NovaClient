@@ -309,7 +309,7 @@ OpenDisconnectedRecordset_Start:
    Rs.Open Fn, , , , adCmdFile
    KillFileIgnoreError Fn
    
-   Debug.Print SQL, Format$(Timer - T, "0.00")
+   'Debug.Print SQL, Format$(Timer - T, "0.00")
    Exit Sub
    
 OpenDisconnectedRecordset_err:
@@ -425,7 +425,7 @@ ExecuteCommand_Start:
       ExecuteCommand = CLng(RecordsAffected)
    End If
    
-   Debug.Print Cmd.CommandText, Format$(Timer - T, "0.00")
+   'Debug.Print Cmd.CommandText, Format$(Timer - T, "0.00")
    Exit Function
    
 ExecuteCommand_err:
@@ -463,7 +463,7 @@ ExecuteCommandWithRsResult_Start:
    Rs.Open Fn, , , , adCmdFile
    KillFileIgnoreError Fn
    
-   Debug.Print Cmd.CommandText, Format$(Timer - T, "0.00")
+   'Debug.Print Cmd.CommandText, Format$(Timer - T, "0.00")
    Exit Sub
    
 ExecuteCommandWithRsResult_err:

@@ -110,7 +110,7 @@ Public Function CreateList(ByVal OrgId As Long, TimeStamp As Double, ByRef TooMa
    
    DictCacheIndex = 0
    CreateList = FillCache(OrgId, TooMany)
-   Debug.Print "DictCacheNumber " & CStr(DictCacheNumber)
+   'Debug.Print "DictCacheNumber " & CStr(DictCacheNumber)
 End Function
 
 Public Function ListNextItem(ByRef Dict As clsDict) As Boolean
@@ -146,9 +146,9 @@ Private Function FillCache(ByVal OrgId As Long, ByRef TooMany As Boolean) As Dou
       DictCacheTimeStampOrg(OrgId) = FillCacheFromFilter(OrgId, TooMany)
       FillCache = DictCacheTimeStampOrg(OrgId)
    Else
-      Debug.Print DictCacheTimeStampTot
+      'Debug.Print DictCacheTimeStampTot
       Client.Server.CreateDictList 0, 0, 0, 0, 255, DictCacheTimeStampTot
-      Debug.Print DictCacheTimeStampTot
+      'Debug.Print DictCacheTimeStampTot
       MaxTimeStamp = DictCacheTimeStampTot
       FirstUpdate = True
       Do While Client.Server.DictListGetNext(Dict)
@@ -396,7 +396,7 @@ Private Function FillCacheFromFilter(ByVal OrgId As Long, ByRef TooMany As Boole
          If NumberDictInSearchResult >= MaxNumberDictInSearchResult Then
             TooMany = True
          End If
-         Debug.Print "Tid: " & Format$(Timer - T, "0.00")
+         'Debug.Print "Tid: " & Format$(Timer - T, "0.00")
       End If
    Next Flt
    FillCacheFromFilter = MaxTimeStamp
@@ -624,7 +624,7 @@ Private Function FilterByTxt(ByVal Dtxt As String, ByVal Ftxt As String) As Bool
             FilterByTxt = False
             Exit Function
          Else
-            Debug.Print Dtxt
+            'Debug.Print Dtxt
          End If
       End If
    Loop

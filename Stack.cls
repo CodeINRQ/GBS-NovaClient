@@ -20,7 +20,7 @@ Public Sub Push(O As Object)
 
    Set ObjArr(mStackDepth) = O
    mStackDepth = mStackDepth + 1
-   Debug.Print "mStackDepth " & CStr(mStackDepth)
+   'Debug.Print "mStackDepth " & CStr(mStackDepth)
 End Sub
 Public Sub Pop(O As Object)
 

@@ -596,7 +596,7 @@ End Property
 
 Private Sub Class_Initialize()
 
-   Debug.Print "ClientAPI Initialize"
+   'Debug.Print "ClientAPI Initialize"
 End Sub
 
 Private Sub Class_Terminate()

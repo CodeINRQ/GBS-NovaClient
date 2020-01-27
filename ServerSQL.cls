@@ -1068,7 +1068,7 @@ End Sub
 Public Function clsServer_DictListGetNext(ByRef Dict As clsDict) As Boolean
 
    If RsDictList.EOF Then
-      Debug.Print "DictListCount: " & CStr(DictListCount)
+      'Debug.Print "DictListCount: " & CStr(DictListCount)
       clsServer_DictListGetNext = False
       RsDictList.Close
       Set RsDictList = Nothing
@@ -1928,7 +1928,7 @@ OpenDisconnectedRecordset_Start:
    SQL = clsServer_BuildSQL(SelectFrom, WhereClause, GroupByClause, OrderClause)
    T = Timer
    Rs.Open SQL
-   Debug.Print SQL, Format$(Timer - T, "0.00")
+   'Debug.Print SQL, Format$(Timer - T, "0.00")
    Set Rs.ActiveConnection = Nothing
    Exit Sub
    
@@ -1959,7 +1959,7 @@ OpenRecordset_Start:
    
    T = Timer
    Rs.Open SQL, Db, adOpenDynamic, adLockOptimistic
-   Debug.Print SQL, Format$(Timer - T, "0.00")
+   'Debug.Print SQL, Format$(Timer - T, "0.00")
    Exit Sub
    
 OpenRecordset_err:
@@ -2036,7 +2036,7 @@ ExecuteCommand_Start:
 
    T = Timer
    Cmd.Execute RecordsAffected
-   Debug.Print Cmd.CommandText, Format$(Timer - T, "0.00")
+   'Debug.Print Cmd.CommandText, Format$(Timer - T, "0.00")
    ExecuteCommand = RecordsAffected
    Exit Function
    
@@ -2068,11 +2068,11 @@ ExecuteCommandWithRsResult_Start:
    Rs.CursorType = adOpenForwardOnly
    Rs.LockType = adLockOptimistic
 
-   Debug.Print Cmd.ActiveConnection.State
+   'Debug.Print Cmd.ActiveConnection.State
    'If Cmd.ActiveConnection.State <> adStateOpen Then Stop '!!!
    T = Timer
    Set Rs = Cmd.Execute
-   Debug.Print Cmd.CommandText, Format$(Timer - T, "0.00")
+   'Debug.Print Cmd.CommandText, Format$(Timer - T, "0.00")
    Exit Sub
    
 ExecuteCommandWithRsResult_err:
@@ -2411,7 +2411,7 @@ Function FileToBlob(fld As ADODB.Field, FileName As String, Optional ChunkSize A
    Else
       KBytePerSecond = 0
    End If
-   Debug.Print "FileToBlob (" & CStr(TotalBytes) & "/" & Format(KBytePerSecond, "0.0") & ")", Format$(TotalTime, "0.00")
+   'Debug.Print "FileToBlob (" & CStr(TotalBytes) & "/" & Format(KBytePerSecond, "0.0") & ")", Format$(TotalTime, "0.00")
 
 End Function
 Sub BlobToFile(fld As ADODB.Field, FileName As String, Optional ChunkSize As Long = 8192)
@@ -2454,5 +2454,5 @@ Sub BlobToFile(fld As ADODB.Field, FileName As String, Optional ChunkSize As Lon
    Else
       KBytePerSecond = 0
    End If
-   Debug.Print "BlobToFile (" & CStr(TotalBytes) & "/" & Format(KBytePerSecond, "0.0") & ")", Format$(TotalTime, "0.00")
+   'Debug.Print "BlobToFile (" & CStr(TotalBytes) & "/" & Format(KBytePerSecond, "0.0") & ")", Format$(TotalTime, "0.00")
 End Sub

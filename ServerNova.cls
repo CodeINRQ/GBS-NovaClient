@@ -50,7 +50,7 @@ Attribute Db.VB_VarHelpID = -1
 
 Private Sub Class_Initialize()
 
-   Debug.Print "A"
+   'Debug.Print "A"
 End Sub
 
 Public Property Get clsServer_SQLDateStringFormat() As String
@@ -944,7 +944,7 @@ End Sub
 Public Function clsServer_DictListGetNext(ByRef Dict As clsDict) As Boolean
 
    If RsDictList.EOF Then
-      Debug.Print "DictListCount: " & CStr(DictListCount)
+      'Debug.Print "DictListCount: " & CStr(DictListCount)
       clsServer_DictListGetNext = False
       RsDictList.Close
       Set RsDictList = Nothing

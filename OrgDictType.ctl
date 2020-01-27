@@ -260,7 +260,7 @@ Private Sub cmdSave_Click()
       
       For r = 1 To .MaxRows
          .Row = r
-         .Col = 1: Debug.Print .Value
+         .Col = 1: 'Debug.Print .Value
          .Col = 2: E = .Value
          .Col = 3: D = .Value
       

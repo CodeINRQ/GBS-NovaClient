@@ -39,24 +39,24 @@ Public Function RestoreCalibration() As Boolean
    Dim IsCalibStoredInDb As Boolean
    Dim OldIniFile As String
    
-   IsCalibStoredInDb = Client.Server.ReadStationData("Audio", "Calib", "", Ver) = "Y"
+   'IsCalibStoredInDb = Client.Server.ReadStationData("Audio", "Calib", "", Ver) = "Y"
    
-   AudioSettings = Client.Server.ReadStationData("Audio", "Settings", "", Ver)
-   If Len(AudioSettings) > 0 Then
-      FileForSettings = WriteStringToTempFile(AudioSettings)
-      VCPrepareSettingsForPlayer 1, FileForSettings
-      KillFileIgnoreError FileForSettings
-   End If
-   RestoreCalibration = IsCalibStoredInDb
+   'AudioSettings = Client.Server.ReadStationData("Audio", "Settings", "", Ver)
+   'If Len(AudioSettings) > 0 Then
+   '   FileForSettings = WriteStringToTempFile(AudioSettings)
+   '   VCPrepareSettingsForPlayer 1, FileForSettings
+   '   KillFileIgnoreError FileForSettings
+   'End If
+   'RestoreCalibration = IsCalibStoredInDb
 End Function
 Public Sub StartCalibration()
 
-   Load frmCalibMic
+   'Load frmCalibMic
 End Sub
 Public Sub SaveCalibration()
 
-   SaveAudioSettings
-   Client.Server.WriteStationData "Audio", "Calib", "Y"
+   'SaveAudioSettings
+   'Client.Server.WriteStationData "Audio", "Calib", "Y"
 End Sub
 Public Sub RestoreAudioSettings()
 
