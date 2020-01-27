@@ -12,7 +12,7 @@ Begin VB.UserControl ucHistList
       Height          =   255
       HelpContextID   =   1140000
       Left            =   4560
-      TabIndex        =   3
+      TabIndex        =   2
       Tag             =   "1140101"
       Top             =   30
       Width           =   1335
@@ -23,7 +23,7 @@ Begin VB.UserControl ucHistList
       ItemData        =   "HistList.ctx":0000
       Left            =   3360
       List            =   "HistList.ctx":0002
-      TabIndex        =   2
+      TabIndex        =   1
       Top             =   0
       Width           =   1095
    End
@@ -33,7 +33,7 @@ Begin VB.UserControl ucHistList
       ItemData        =   "HistList.ctx":0004
       Left            =   0
       List            =   "HistList.ctx":0006
-      TabIndex        =   1
+      TabIndex        =   0
       Top             =   0
       Width           =   3255
    End
@@ -41,7 +41,7 @@ Begin VB.UserControl ucHistList
       Height          =   4215
       HelpContextID   =   1140000
       Left            =   0
-      TabIndex        =   0
+      TabIndex        =   3
       Top             =   360
       Width           =   9495
       _Version        =   458752
@@ -96,6 +96,10 @@ Dim CurrentHistYear As Integer
 Private RowTotal(SheetMax, MaxRows) As Long
 Private ColTotal(SheetMax, MaxCols) As Long
 Private GrandTotal(SheetMax) As Long
+Public Sub ExportExcelFile(Fn As String)
+
+   lstHist.ExportExcelBook Fn, ""
+End Sub
 Public Sub Init()
 
    cboType.Clear
@@ -129,6 +133,7 @@ Public Sub NewLanguage()
       Client.Texts.ApplyToControl UserControl.Controls(I)
    Next I
 End Sub
+
 
 Private Sub cmdGo_Click()
 

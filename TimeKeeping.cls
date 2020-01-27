@@ -13,13 +13,13 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Private Values(100) As Double    '0 is new 100 old
+Private Values(100) As Long    '0 is new 100 old
 Private AccValue As Double
 Private NumberOfValues As Long
 Private IsStarted As Boolean
-Private StartValue As Double
-Private MaxValue As Double
-Private MinValue As Double
+Private StartValue As Long
+Private MaxValue As Long
+Private MinValue As Long
 
 Private Sub Class_Initialize()
 
@@ -28,15 +28,15 @@ Private Sub Class_Initialize()
 End Sub
 Public Sub StartMeasure()
 
-   StartValue = Timer
+   StartValue = GetTickCount()
    IsStarted = True
 End Sub
 Public Sub StopMeasure()
 
-   Dim StopValue As Double
-   Dim MeasuredValue As Double
+   Dim StopValue As Long
+   Dim MeasuredValue As Long
 
-   StopValue = Timer
+   StopValue = GetTickCount()
    If IsStarted Then
       MeasuredValue = StopValue - StartValue
       If MeasuredValue < 0 Then
@@ -46,7 +46,7 @@ Public Sub StopMeasure()
    End If
    IsStarted = False
 End Sub
-Private Sub SaveValue(NewValue As Double)
+Private Sub SaveValue(NewValue As Long)
 
    Dim I As Integer
 
@@ -78,23 +78,23 @@ Public Property Get NumberOfMeasurements() As Long
 
    NumberOfMeasurements = NumberOfValues
 End Property
-Public Property Get TotalTime() As Double
+Public Property Get TotalTimeInMilliSec() As Double
 
-   TotalTime = AccValue
+   TotalTimeInMilliSec = AccValue
 End Property
-Public Property Get MaxValueInSlidingWindow() As Long
+Public Property Get MaxValuesInSlidingWindow() As Long
 
-   MaxValueInSlidingWindow = UBound(Values)
+   MaxValuesInSlidingWindow = UBound(Values)
 End Property
-Public Property Get MeanValue() As Double
+Public Property Get MeanTimeInMilliSec() As Long
 
    If NumberOfValues > 0 Then
-      MeanValue = AccValue / NumberOfValues
+      MeanTimeInMilliSec = CLng(AccValue / NumberOfValues)
    Else
-      MeanValue = 0
+      MeanTimeInMilliSec = 0
    End If
 End Property
-Public Property Get SlidingMeanValue(NumberOfMeasurmentsInSlidingMeanValue As Long, Optional ExcludeExtremeValues As Boolean = False) As Double
+Public Property Get SlidingMeanTimeInMilliSec(NumberOfMeasurmentsInSlidingMeanValue As Long, Optional ExcludeExtremeValues As Boolean = False) As Long
 
    Dim NumOfM As Long
    Dim Tot As Double
@@ -121,11 +121,15 @@ Public Property Get SlidingMeanValue(NumberOfMeasurmentsInSlidingMeanValue As Lo
          End If
       Next I
       If NumInTot > 0 Then
-         SlidingMeanValue = Tot / NumInTot
+         SlidingMeanTimeInMilliSec = CLng(Tot / NumInTot)
       Else
-         SlidingMeanValue = 0
+         SlidingMeanTimeInMilliSec = 0
       End If
    Else
-      SlidingMeanValue = 0
+      SlidingMeanTimeInMilliSec = 0
    End If
+End Property
+Public Property Get LastMeasurement() As Long
+
+   LastMeasurement = Values(0)
 End Property

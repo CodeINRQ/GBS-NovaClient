@@ -12,7 +12,7 @@ Begin VB.UserControl ucCloseChoice
       Height          =   1695
       HelpContextID   =   1060000
       Left            =   0
-      TabIndex        =   4
+      TabIndex        =   7
       Tag             =   "1060101"
       Top             =   0
       Width           =   2535
@@ -21,7 +21,7 @@ Begin VB.UserControl ucCloseChoice
          Enabled         =   0   'False
          Height          =   275
          Left            =   120
-         TabIndex        =   0
+         TabIndex        =   6
          Tag             =   "1060102"
          Top             =   1350
          Width           =   2295
@@ -42,7 +42,7 @@ Begin VB.UserControl ucCloseChoice
          Index           =   1
          Left            =   240
          Picture         =   "CloseChoice.ctx":0502
-         TabIndex        =   2
+         TabIndex        =   3
          Top             =   615
          Width           =   255
       End
@@ -52,7 +52,7 @@ Begin VB.UserControl ucCloseChoice
          Index           =   2
          Left            =   240
          Picture         =   "CloseChoice.ctx":0A04
-         TabIndex        =   3
+         TabIndex        =   5
          Top             =   975
          Width           =   255
       End
@@ -104,7 +104,7 @@ Begin VB.UserControl ucCloseChoice
          Height          =   255
          Index           =   0
          Left            =   600
-         TabIndex        =   7
+         TabIndex        =   0
          Top             =   315
          UseMnemonic     =   0   'False
          Width           =   1935
@@ -114,7 +114,7 @@ Begin VB.UserControl ucCloseChoice
          Height          =   255
          Index           =   1
          Left            =   600
-         TabIndex        =   6
+         TabIndex        =   2
          Top             =   675
          UseMnemonic     =   0   'False
          Width           =   1935
@@ -124,7 +124,7 @@ Begin VB.UserControl ucCloseChoice
          Height          =   255
          Index           =   2
          Left            =   600
-         TabIndex        =   5
+         TabIndex        =   4
          Top             =   1035
          UseMnemonic     =   0   'False
          Width           =   1935
@@ -155,8 +155,14 @@ Public Property Let ChoiceText(Index As Integer, Text As String)
 
    If Index >= 0 And Index <= 2 Then
       lblText(Index).Caption = Text
-      optChoice(Index).Enabled = Len(Text) > 0
+      If Len(Text) > 0 Then
+         optChoice(Index).Enabled = True
+         optChoice(Index).Value = True
+      Else
+         optChoice(Index).Value = False
+      End If
    End If
+   'cmdClose.Default = Client.SysSettings.PlayerCloseDefault
 End Property
 Public Property Get ChoiceText(Index As Integer) As String
 

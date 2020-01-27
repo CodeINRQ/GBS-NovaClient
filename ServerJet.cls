@@ -203,7 +203,6 @@ Private Sub AddHistory(Dict As clsDict)
    Dim SQL As String
    Dim Whr As String
 
-   On Error Resume Next
    SQL = BuildSQL("Select * from History", "", "", "")
 
    Set Rs = New ADODB.Recordset

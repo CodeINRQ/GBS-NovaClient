@@ -1,108 +1,118 @@
 VERSION 5.00
 Begin VB.UserControl ucEditGroup 
-   ClientHeight    =   2205
+   ClientHeight    =   2490
    ClientLeft      =   0
    ClientTop       =   0
    ClientWidth     =   8265
-   ScaleHeight     =   2205
+   ScaleHeight     =   2490
    ScaleWidth      =   8265
    Begin VB.Frame fraGroups 
       Caption         =   "Grupper"
-      Height          =   2175
+      Height          =   2415
       HelpContextID   =   1100000
       Left            =   0
       TabIndex        =   0
       Tag             =   "1100101"
       Top             =   0
       Width           =   8175
+      Begin VB.CheckBox chkTextEditor 
+         Caption         =   "&Text redigerare"
+         Enabled         =   0   'False
+         Height          =   255
+         Left            =   3120
+         TabIndex        =   6
+         Tag             =   "1100112"
+         Top             =   1320
+         Width           =   2775
+      End
       Begin VB.TextBox txtDelayedHours 
          Enabled         =   0   'False
          Height          =   285
          Left            =   5160
-         TabIndex        =   12
-         Top             =   1800
+         TabIndex        =   11
+         Top             =   2040
          Width           =   615
       End
       Begin VB.CheckBox chkDelayed 
-         Caption         =   "Fördröjd"
+         Caption         =   "För&dröjd"
          Enabled         =   0   'False
          Height          =   255
          Left            =   3360
-         TabIndex        =   11
+         TabIndex        =   9
          Tag             =   "1100110"
-         Top             =   1800
+         Top             =   2040
          Width           =   1695
       End
       Begin VB.TextBox txtOrgText 
          Enabled         =   0   'False
          Height          =   285
          Left            =   3120
-         TabIndex        =   10
+         TabIndex        =   3
          Top             =   480
          Width           =   2775
       End
       Begin VB.CommandButton cmdSaveRoles 
-         Caption         =   "&Spara roller"
+         Caption         =   "Spara &roller"
          Height          =   300
          Left            =   6000
-         TabIndex        =   9
+         TabIndex        =   14
          Tag             =   "1100109"
          Top             =   960
          Width           =   2055
       End
       Begin VB.CheckBox chkSupervisor 
-         Caption         =   "Administratör"
+         Caption         =   "&Administratör"
          Enabled         =   0   'False
          Height          =   255
          Left            =   3120
-         TabIndex        =   8
+         TabIndex        =   5
          Tag             =   "1100108"
          Top             =   1080
-         Width           =   2295
+         Width           =   2775
       End
       Begin VB.CheckBox chkListener 
-         Caption         =   "Lyssnare"
+         Caption         =   "L&yssnare"
          Enabled         =   0   'False
          Height          =   255
          Left            =   3120
          TabIndex        =   7
          Tag             =   "1100107"
-         Top             =   1320
-         Width           =   2295
+         Top             =   1560
+         Width           =   2775
       End
       Begin VB.CheckBox chkTranscriber 
          Caption         =   "Utskrivare"
          Enabled         =   0   'False
          Height          =   255
          Left            =   3120
-         TabIndex        =   6
+         TabIndex        =   8
          Tag             =   "1100106"
-         Top             =   1560
-         Width           =   2055
+         Top             =   1800
+         Width           =   2775
       End
       Begin VB.CheckBox chkAuthor 
-         Caption         =   "Intalare"
+         Caption         =   "&Intalare"
          Enabled         =   0   'False
          Height          =   255
          Left            =   3120
-         TabIndex        =   5
+         TabIndex        =   4
          Tag             =   "1100105"
          Top             =   840
-         Width           =   2295
+         Width           =   2775
       End
       Begin VB.CommandButton cmdChange 
          Caption         =   "&Ändra..."
          Height          =   300
          Left            =   6000
-         TabIndex        =   3
+         TabIndex        =   13
          Tag             =   "1100103"
          Top             =   600
          Width           =   2055
       End
       Begin VB.ListBox lstGroup 
-         Height          =   1620
+         Height          =   2010
          Left            =   120
-         TabIndex        =   2
+         TabIndex        =   1
          Top             =   240
          Width           =   2775
       End
@@ -110,25 +120,25 @@ Begin VB.UserControl ucEditGroup
          Caption         =   "&Lägg till..."
          Height          =   300
          Left            =   6000
-         TabIndex        =   1
+         TabIndex        =   12
          Tag             =   "1100102"
          Top             =   240
          Width           =   2055
       End
       Begin VB.Label lblDelayedHoursTitle 
-         Caption         =   "timmar"
+         Caption         =   "t&immar"
          Height          =   255
          Left            =   5880
-         TabIndex        =   13
+         TabIndex        =   10
          Tag             =   "1100111"
-         Top             =   1800
+         Top             =   2040
          Width           =   2175
       End
       Begin VB.Label lblTitla 
-         Caption         =   "Roller i organisationsenheten:"
+         Caption         =   "Roller i &organisationsenheten:"
          Height          =   255
          Left            =   3120
-         TabIndex        =   4
+         TabIndex        =   2
          Tag             =   "1100104"
          Top             =   240
          Width           =   2895
@@ -202,6 +212,12 @@ Private Sub chkAuthor_Click()
    SetEnabled
 End Sub
 
+Private Sub chkTextEditor_Click()
+
+   RolesChanged = True
+   SetEnabled
+End Sub
+
 Private Sub chkDelayed_Click()
 
    RolesChanged = True
@@ -219,6 +235,7 @@ Private Sub chkSupervisor_Click()
    RolesChanged = True
    SetEnabled
 End Sub
+
 
 Private Sub chkTranscriber_Click()
 
@@ -252,6 +269,9 @@ Private Sub cmdSaveRoles_Click()
    cmdSaveRoles.Enabled = False
    If chkAuthor.Enabled Then
       R.Author = chkAuthor.Value = vbChecked
+   End If
+   If chkTextEditor.Enabled Then
+      R.TextEditor = chkTextEditor.Value = vbChecked
    End If
    If chkTranscriber.Enabled Then
       R.Transcriber = chkTranscriber.Value = vbChecked
@@ -311,6 +331,7 @@ Private Sub ShowRolesForOrgIdAndGroupId()
          Dim Roles As clsRoles
          
          chkAuthor.Value = vbUnchecked: chkAuthor.Enabled = False
+         chkTextEditor.Value = vbUnchecked: chkTextEditor.Enabled = False
          chkTranscriber.Value = vbUnchecked: chkTranscriber.Enabled = False
          chkListener.Value = vbUnchecked: chkListener.Enabled = False
          chkSupervisor.Value = vbUnchecked: chkSupervisor.Enabled = False
@@ -325,6 +346,7 @@ Private Sub ShowRolesForOrgIdAndGroupId()
                IsCurrentGroupSysAdmin = LCase(CurrGroup.GroupText) = "sysadmin"
                
                chkAuthor.Value = vbUnchecked: chkAuthor.Enabled = Not IsCurrentGroupSysAdmin
+               chkTextEditor.Value = vbUnchecked: chkTextEditor.Enabled = Not IsCurrentGroupSysAdmin
                chkTranscriber.Value = vbUnchecked: chkTranscriber.Enabled = Not IsCurrentGroupSysAdmin
                chkDelayed.Value = vbUnchecked: chkDelayed.Enabled = Not IsCurrentGroupSysAdmin
                txtDelayedHours.Text = "": txtDelayedHours.Enabled = Not IsCurrentGroupSysAdmin
@@ -337,6 +359,12 @@ Private Sub ShowRolesForOrgIdAndGroupId()
                         chkAuthor.Value = vbChecked
                         If Org.OrgId <> CurrOrgId Then
                            chkAuthor.Enabled = False
+                        End If
+                     End If
+                     If Roles.TextEditor Then
+                        chkTextEditor.Value = vbChecked
+                        If Org.OrgId <> CurrOrgId Then
+                           chkTextEditor.Enabled = False
                         End If
                      End If
                      If Roles.Transcriber Then

@@ -23,5 +23,5 @@ Public HomeOrgId     As Long
 
 Public Property Get LoggData() As String
 
-   LoggData = ShortName & "/" & LoginName & "/" & CStr(UserId)
+   LoggData = ShortName & "/" & LoginName & "/" & CStr(UserId) & "/" & CStr(HomeOrgId)
 End Property

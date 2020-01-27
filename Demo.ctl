@@ -116,16 +116,16 @@ Public Sub NewLanguage()
 End Sub
 Private Sub cmdDemo_Click()
 
-   Dim NumDict As Integer
+   Dim NumDict As Long
    Dim DaysHist As Integer
    Dim MaxPerDay As Integer
    Dim MinPerDay As Integer
    
    On Error Resume Next
-   NumDict = CInt(txtNumberOfDemoDictations.Text)
-   If NumDict > MaxNumberOfDictation Then
-      NumDict = MaxNumberOfDictation
-   End If
+   NumDict = CLng(txtNumberOfDemoDictations.Text)
+   'If NumDict > MaxNumberOfDictation Then
+   '   NumDict = MaxNumberOfDictation
+   'End If
    DaysHist = CInt(txtDaysInHistory.Text)
    MaxPerDay = CInt(txtMaxPerDay.Text)
    MinPerDay = CInt(txtMinPerDay.Text)
@@ -175,7 +175,6 @@ Private Sub txtNumberOfDemoDictations_Change()
 End Sub
 
 Private Sub txtNumberOfDemoDictations_KeyPress(KeyAscii As Integer)
-
 
    If Not ((KeyAscii >= 48 And KeyAscii <= 57) Or KeyAscii < 32 Or KeyAscii = 45) Then
       KeyAscii = 0

@@ -1,15 +1,15 @@
 VERSION 5.00
 Object = "{F856EC8B-F03C-4515-BDC6-64CBD617566A}#7.0#0"; "FPSPR70.ocx"
 Begin VB.UserControl ucEditSysSettings 
-   ClientHeight    =   2610
+   ClientHeight    =   2370
    ClientLeft      =   0
    ClientTop       =   0
    ClientWidth     =   8265
-   ScaleHeight     =   2610
+   ScaleHeight     =   2370
    ScaleWidth      =   8265
    Begin VB.Frame fraSettings 
       Caption         =   "Inställningar"
-      Height          =   2535
+      Height          =   2295
       HelpContextID   =   1120000
       Left            =   0
       TabIndex        =   0
@@ -35,14 +35,14 @@ Begin VB.UserControl ucEditSysSettings
          Width           =   2055
       End
       Begin FPSpreadADO.fpSpread lstSettings 
-         Height          =   2160
+         Height          =   1920
          Left            =   120
          TabIndex        =   1
          Top             =   240
          Width           =   5775
          _Version        =   458752
          _ExtentX        =   10186
-         _ExtentY        =   3810
+         _ExtentY        =   3387
          _StockProps     =   64
          BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
             Name            =   "MS Sans Serif"
@@ -91,7 +91,7 @@ Private Sub FillSettingList(Spread As fpSpread)
    Dim Row As Integer
    Dim Col As Integer
    
-   
+   cmdSave.Enabled = False
    SetupSpread lstSettings
    mSettings.Filter = ""
    Col = 1: SetupColumn Spread, 0, Col, "Section", TypeHAlignLeft, 15, White
@@ -101,6 +101,7 @@ Private Sub FillSettingList(Spread As fpSpread)
    With Spread
       Row = 1
       Do While mSettings.GetNextFromFilter(Se, Ke, Va)
+         .MaxRows = Row
          Col = 1:       SetCellString Spread, 0, Row, Col, Se
          Col = Col + 1: SetCellString Spread, 0, Row, Col, Ke
          Col = Col + 1: SetCellString Spread, 0, Row, Col, Va
@@ -186,6 +187,7 @@ Private Sub cmdSave_Click()
    Dim Ke As String
    Dim Va As String
 
+   cmdSave.Enabled = False
    Set mSettings = New clsStringStore
    For I = 1 To lstSettings.MaxRows
        Se = GetCellString(lstSettings, 0, I, 1)
@@ -207,3 +209,7 @@ Private Function GetCellString(Spread As fpSpread, Sheet As Integer, Row As Inte
    End With
 End Function
 
+Private Sub lstSettings_EditChange(ByVal Col As Long, ByVal Row As Long)
+
+   cmdSave.Enabled = True
+End Sub

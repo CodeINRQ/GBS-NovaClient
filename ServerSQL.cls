@@ -22,6 +22,7 @@ Private Const DBUserid As String = "ct_public"
 Private Const DBPassword As String = "ssdjgfUhssdF&&ghdsj3kjek34094fkkkkkk"
 Private Const ct_app_default_password = "kjsd9sd9873hewls983939899%%3_98kdfjjknvy111"
 Private Const ct_app_crypto_key = "dkllsahd84h5uig78djdslkf5%%7udfsn#nkgkk"
+Private Const ct_ext_crypto_key = "dfgslkjdfsjdjh843y4jas%&ukj&%hkjdjfg¤&9s8fd"
 'Private Const DBUseridAdmin As String = "CTAdmin"
 'Private Const DBPasswordAdmin As String = "ssdjgfUhssdFkdhh555"
 
@@ -29,17 +30,21 @@ Private Settings As clsSettings
 
 Private DictationStorageSoundPath As String
 Private DictationStoragePath As String
-Private SQLDateStringFormat As String
-Private SQLDateDelimiter As String
-Private mStorageOpened As Boolean
-Private mStoreageShouldBeReopened As Boolean
-Private mWindowsAuthenticationUsed As Boolean
-Private mAuthMethod As Integer
-Private mCryptoAppRolePassword As String
+Public SQLDateStringFormat As String
+Public SQLDateDelimiter As String
 
-Public Db As ADODB.Connection
+Private mConnectionString As String
+Private mStorageOpened As Boolean               'True is Storage opened (connections may be temp closed)
+Private mAuthMethod As Integer                  '0 ct_user, 1 SQL user, 2 Trusted connection
+Private mCryptoAppRolePassword As String        'Encrypted password for app role ct_app
+
+Private Db As ADODB.Connection
+Private SQLServer As String
+Private SQLDatabase As String
+
 Private RsDictList As ADODB.Recordset
 Private RsDictTypeList As ADODB.Recordset
+Private RsOrgDictTypeList As ADODB.Recordset
 Private RsGroupList As ADODB.Recordset
 Private RsGroupListForUser As ADODB.Recordset
 Private RsPriorityList As ADODB.Recordset
@@ -59,6 +64,14 @@ Private RsExtSystemOrg As ADODB.Recordset
 Private RsExtSystemPriority As ADODB.Recordset
 
 Private DictListCount As Long
+Public Property Get Server() As String
+
+   Server = SQLServer
+End Property
+Public Property Get Database() As String
+
+   Database = SQLDatabase
+End Property
 Public Property Get StorageOpened() As Boolean
 
    StorageOpened = mStorageOpened
@@ -84,14 +97,6 @@ Public Sub DeleteAllDictations()
 
    Cmd.CommandTimeout = 500
    OpenStoredProcWithCommand "s_Dictation_DeleteAll", Cmd
-End Sub
-Private Sub DeleteOneDictation(DictId As Long)
-   
-   Dim Cmd As New ADODB.Command
-   
-   Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , DictId)
-   
-   OpenStoredProcWithCommand "s_Dictation_DeleteByDictId", Cmd
 End Sub
 Public Sub DeleteHistory(DeleteOlderThanDays As Integer)
 
@@ -144,6 +149,15 @@ Private Sub AddHistory(ByRef Dict As clsDict)
    OpenStoredProcWithCommand "s_History_Insert", Cmd
    Client.Trace.AddRow Trace_Level_Full, "AH", "AHC", "", CStr(Dict.DictId), CStr(Dict.StatusId)
    
+End Sub
+Private Sub DeleteHistoryByDictId(DictId As Long)
+
+   Dim Cmd As New ADODB.Command
+   
+   Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , DictId)
+   
+   On Error Resume Next
+   OpenStoredProcWithCommand "s_History_DeleteByDictId", Cmd
 End Sub
 Public Function GetRoles(Roles As clsRoles, ByVal GroupId As Long, ByVal OrgId As Long) As Boolean
 
@@ -277,6 +291,31 @@ Public Sub SaveUser(Usr As clsUser)
    Usr.UserId = Rs("UserId")
    CloseRecordset Rs
 End Sub
+Public Sub SaveUserHomeOrg(Usr As clsUser)
+
+   Dim Rs As ADODB.Recordset
+   Dim SQL As String
+   
+   If LCase$(Usr.LoginName) = "sa" Then Exit Sub   'Can't change sa
+   
+   SQL = BuildSQL("Select * from Users", "UserId=" & CStr(Usr.UserId), "", "")
+   
+   Set Rs = New ADODB.Recordset
+   Rs.CursorLocation = adUseClient
+   Rs.CursorType = adOpenDynamic
+   Rs.LockType = adLockPessimistic
+   OpenRecordset Rs, SQL
+   
+   If Not Rs.EOF Then
+      If Usr.HomeOrgId > 0 Then
+         Rs("HomeOrgId") = Usr.HomeOrgId
+      Else
+         Rs("HomeOrgId") = Null
+      End If
+      Rs.Update
+   End If
+   CloseRecordset Rs
+End Sub
 Public Sub DeleteUser(Usr As clsUser)
 
    Dim Rs As ADODB.Recordset
@@ -346,7 +385,7 @@ Function CheckInNewDemo(ByRef Dict As clsDict)
    Dim SQL As String
    Dim Dirty As Boolean
    
-   SQL = Client.Server.BuildSQL("Select * from Dictation", "", "", "")
+   SQL = Client.Server.BuildSQL("Dictation", "", "", "")
    
    Set Rs = New ADODB.Recordset
    Rs.CursorLocation = adUseClient
@@ -402,10 +441,9 @@ Function CheckInNewDemo(ByRef Dict As clsDict)
    End If
    CheckInNewDemo = 0
    
-   Rs.Close
-   Set Rs = Nothing
+   CloseRecordset Rs
 End Function
-Public Sub CreateDictIdList(OrgId As Long, AuthorId As Long, TranscriberId As Long)
+Public Sub CreateDictIdList(OrgId As Long, AuthorId As Long, TranscriberId As Long, Optional PatId As String = "", Optional PatId2 As String = "")
 
    Dim Cmd As New ADODB.Command
    
@@ -418,6 +456,10 @@ Public Sub CreateDictIdList(OrgId As Long, AuthorId As Long, TranscriberId As Lo
    ElseIf TranscriberId <> 0 Then
       Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , TranscriberId)
       OpenStoredProcWithRsResultAndCommand RsDictIdList, "s_Dictation_GetIdByTranscriberId", Cmd
+   ElseIf Len(PatId) > 0 Or Len(PatId2) > 0 Then
+      Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 12, PatId)
+      Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 12, PatId2)
+      OpenStoredProcWithRsResultAndCommand RsDictIdList, "s_Dictation_GetIdByPatId", Cmd
    Else
       OpenStoredProcWithRsResult RsDictIdList, "s_Dictation_GetIdList"
    End If
@@ -533,7 +575,12 @@ Public Function NeedLoginInfo() As Boolean
    NeedLoginInfo = mAuthMethod < 2
 End Function
 
-Public Function UserLogin(ByRef User As clsUser, ByVal LoginName As String, ByVal Password As String, ByVal NewPassword As String) As Integer
+Public Function UserLogin(User As clsUser, _
+                          LoginName As String, _
+                          Password As String, _
+                          NewPassword As String, _
+                          ExtSystem As String, _
+                          ExtPassword As String) As Integer
 
    Dim Rs As New ADODB.Recordset
    Dim SQL As String
@@ -550,7 +597,7 @@ Public Function UserLogin(ByRef User As clsUser, ByVal LoginName As String, ByVa
    
    If mAuthMethod < 2 Then
       SQL = BuildSQL("SELECT * FROM Users", "LoginName='" & UCase$(LoginName) & "'", "", "")
-      Rs.Open SQL, Db, adOpenDynamic, adLockPessimistic
+      OpenRecordset Rs, SQL
       If Not Rs.EOF Then
          RightPassword = Rs("Password")
       Else
@@ -565,33 +612,37 @@ Public Function UserLogin(ByRef User As clsUser, ByVal LoginName As String, ByVa
       If Not Rs.EOF Then
          If nvl(Rs("UserLockedUntil"), 0) > Now Then
             UserLogin = 1
-         ElseIf RightPassword = Password Then
-            User.UserId = Rs("UserId")
-            User.LoginName = Rs("LoginName")
-            User.ShortName = Rs("ShortName")
-            User.LongName = Rs("LongName")
-            User.HomeOrgId = nvl(Rs("HomeOrgid"), 0)
-            Rs("LastSuccessfulLogin") = Now
-            Rs("LoginFailureCount") = 0
-            Rs("UserLockedUntil") = Null
-            If Len(NewPassword) > 0 Then
-               Rs("Password") = NewPassword
-            End If
-            UserLogin = 0
-         ElseIf Rs("LoginFailureCount") >= Client.SysSettings.LoginMaxRetries Then
-            Rs("LoginFailureCount") = 0
-            Rs("UserLockedUntil") = DateAdd("n", Client.SysSettings.LoginLockoutMinutes, Now)
-            UserLogin = 1
          Else
-            Rs("LoginFailureCount") = Rs("LoginFailureCount") + 1
-            UserLogin = 2
+            If (Len(ExtPassword) > 0 And ExtPassword = Client.ExtSystemMgr.GetExtSystemPassword(ExtSystem)) Or RightPassword = Password Then
+               User.UserId = Rs("UserId")
+               User.LoginName = Rs("LoginName")
+               User.ShortName = Rs("ShortName")
+               User.LongName = Rs("LongName")
+               User.HomeOrgId = nvl(Rs("HomeOrgid"), 0)
+               User.Password = nvl(Rs("Password"), "")
+               Rs("LastSuccessfulLogin") = Now
+               Rs("LoginFailureCount") = 0
+               Rs("UserLockedUntil") = Null
+               If Len(NewPassword) > 0 Then
+                  Rs("Password") = NewPassword
+               End If
+               UserLogin = 0
+            Else
+               If Rs("LoginFailureCount") >= Client.SysSettings.LoginMaxRetries Then
+                  Rs("LoginFailureCount") = 0
+                  Rs("UserLockedUntil") = DateAdd("n", Client.SysSettings.LoginLockoutMinutes, Now)
+                  UserLogin = 1
+               Else
+                  Rs("LoginFailureCount") = Rs("LoginFailureCount") + 1
+                  UserLogin = 2
+               End If
+            End If
          End If
          Rs.Update
       Else
          UserLogin = 3
       End If
-      Rs.Close
-      Set Rs = Nothing
+      CloseRecordset Rs
    End If
 End Function
 Private Function SetUserFromSQLLoginName(User As clsUser) As Boolean
@@ -733,9 +784,19 @@ Public Function ExtSystemGetNext(ByRef E As clsExtSystem) As Boolean
 End Function
 Private Sub ConvertExtSystemRsToClass(ByRef Rs As ADODB.Recordset, ByRef E As clsExtSystem)
 
+   Dim S As String
+   
    Set E = New clsExtSystem
    With E
       .ExtSystem = Rs("ExtSystem")
+      On Error Resume Next    'Ok if field is not in table
+      S = nvl(Rs("ExtSystemPw"), "")
+      If Len(S) > 0 Then
+         .ExtSystemPw = RC4(S, ct_ext_crypto_key)
+      Else
+         .ExtSystemPw = ""
+      End If
+      On Error GoTo 0
    End With
 End Sub
 Public Sub CreateExtSystemDictTypeList()
@@ -935,14 +996,20 @@ Private Sub GetRolesFromOrgParent(Res As clsRoles, ByVal Id As Long)
    End If
 End Sub
 
-Public Sub CreateDictList(ByVal OrgId As Long, ByVal AuthorId As Long, ByVal TranscriberId As Long, StatusIdStart As Long, StatusIdEnd As Long, TimeStamp As Double)
+Public Sub CreateDictList(ByVal OrgId As Long, ByVal AuthorId As Long, ByVal TranscriberId As Long, StatusIdStart As Long, StatusIdEnd As Long, TimeStamp As Double, Optional PatId As String = "", Optional PatId2 As String = "")
 
-   Dim Rs As ADODB.Recordset
    Dim Cmd As New ADODB.Command
    
    DictListCount = 0
    
-   If OrgId <> 0 Then
+   If Len(PatId) > 0 Or Len(PatId2) > 0 Then
+      Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 12, PatId)
+      Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 12, PatId2)
+      Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , StatusIdStart)
+      Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , StatusIdEnd)
+      
+      OpenStoredProcWithRsResultAndCommand RsDictList, "s_Dictation_GetListByPatid", Cmd
+   ElseIf OrgId <> 0 Then
       Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , OrgId)
       Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , StatusIdStart)
       Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , StatusIdEnd)
@@ -968,6 +1035,12 @@ Public Sub CreateDictList(ByVal OrgId As Long, ByVal AuthorId As Long, ByVal Tra
       OpenStoredProcWithRsResultAndCommand RsDictList, "s_Dictation_GetListByTimeStamp", Cmd
    End If
 End Sub
+Public Sub CreateDictListFromSQL(SQL As String)
+
+   DictListCount = 0
+   OpenRecordset RsDictList, SQL
+End Sub
+
 Public Function DictListGetNext(ByRef Dict As clsDict) As Boolean
 
    If RsDictList.EOF Then
@@ -1050,6 +1123,73 @@ Private Sub ConvertDictTypeRsToClass(ByRef Rs As ADODB.Recordset, ByRef DictType
       .DictTypeText = Rs("DictTypeText")
    End With
 End Sub
+Public Sub CreateOrgDictTypeList()
+
+   OpenStoredProcWithRsResult RsOrgDictTypeList, "s_OrgDictType_Get"
+End Sub
+Public Function OrgDictTypeListGetNext(OrgDictType As clsOrgDictType) As Boolean
+
+   If RsOrgDictTypeList.EOF Then
+      OrgDictTypeListGetNext = False
+      RsOrgDictTypeList.Close
+      Set RsOrgDictTypeList = Nothing
+   Else
+      ConvertOrgDictTypeRsToClass RsOrgDictTypeList, OrgDictType
+      RsOrgDictTypeList.MoveNext
+      OrgDictTypeListGetNext = True
+   End If
+End Function
+Private Sub ConvertOrgDictTypeRsToClass(ByRef Rs As ADODB.Recordset, ByRef OrgDictType As clsOrgDictType)
+
+   Set OrgDictType = New clsOrgDictType
+
+   With OrgDictType
+      .OrgId = Rs("OrgId")
+      .DictTypeId = Rs("DictTypeId")
+      .Def = Rs("Def") <> 0
+   End With
+End Sub
+Public Sub DeleteOrgDictTypeByOrgId(OrgId As Long)
+
+   Dim Rs As ADODB.Recordset
+   Dim SQL As String
+   
+   SQL = BuildSQL("Select * from OrgDictType", "OrgId=" & CStr(OrgId), "", "")
+   
+   Set Rs = New ADODB.Recordset
+   Rs.CursorLocation = adUseClient
+   Rs.CursorType = adOpenDynamic
+   Rs.LockType = adLockPessimistic
+   OpenRecordset Rs, SQL
+   
+   Do While Not Rs.EOF
+      Rs.Delete
+      Rs.MoveNext
+   Loop
+   
+   CloseRecordset Rs
+End Sub
+Public Sub SaveOrgDictType(OrgId As Long, DictTypeId As Integer, DictTypeDefault As Boolean)
+
+   Dim Rs As ADODB.Recordset
+   Dim SQL As String
+   
+   SQL = BuildSQL("Select * from OrgDictType", "", "", "")
+   
+   Set Rs = New ADODB.Recordset
+   Rs.CursorLocation = adUseClient
+   Rs.CursorType = adOpenDynamic
+   Rs.LockType = adLockPessimistic
+   OpenRecordset Rs, SQL
+   
+   Rs.AddNew
+   Rs("OrgId") = OrgId
+   Rs("DictTypeId") = DictTypeId
+   Rs("Def") = SaveBool(DictTypeDefault)
+   Rs.Update
+   
+   CloseRecordset Rs
+End Sub
 Public Sub CreateGroupList()
 
    OpenStoredProcWithRsResult RsGroupList, "s_Group_Get"
@@ -1101,8 +1241,7 @@ Public Function UserListGetNext(Usr As clsUser) As Boolean
 
    If RsUsers.EOF Then
       UserListGetNext = False
-      RsUsers.Close
-      Set RsUsers = Nothing
+      CloseRecordset RsUsers
    Else
       ConvertUsersRsToClass RsUsers, Usr
       RsUsers.MoveNext
@@ -1162,17 +1301,17 @@ Private Sub Class_Terminate()
    
 End Sub
 
-Public Function DictationStorageOpen(UserId As String, Password As String) As Boolean
+Public Function DictationStorageOpen(Server As String, _
+                                     Database As String, _
+                                     UserId As String, _
+                                     Password As String) As Boolean
 
    Dim Rs As New ADODB.Recordset
    Dim CS As String
    Dim Provider As String
-   Dim SQLServer As String
-   Dim SQLDatabase As String
    Dim Cred As String
    Dim CurrUserid As String
    Dim CurrPassword As String
-   Dim TrustedUsed As Boolean
    Dim UseTrustedInSettings As Boolean
 
    SQLDateStringFormat = Settings.GetString("DictationStorage", "SQLDateStringFormat", "mm/dd/yyyy")
@@ -1182,8 +1321,18 @@ Public Function DictationStorageOpen(UserId As String, Password As String) As Bo
    DictationStorageSoundPath = Settings.GetFolder("DictationStorage", "SoundFolder", DictationStoragePath)
    
    Provider = Settings.GetString("DictationStorage", "Provider", "sqloledb")
-   SQLServer = Settings.GetString("DictationStorage", "Server", "")
-   SQLDatabase = Settings.GetString("DictationStorage", "Database", "CareTalk")
+   If Len(Server) = 0 Then
+      SQLServer = Settings.GetString("DictationStorage", "Server", "")
+   Else
+      SQLServer = Server
+   End If
+      
+   If Len(Database) = 0 Then
+      SQLDatabase = Settings.GetString("DictationStorage", "Database", "CareTalk")
+   Else
+      SQLDatabase = Database
+   End If
+   
    UseTrustedInSettings = Settings.GetBool("DictationStorage", "TrustedConnection", False)
    
    CS = "Provider=" & Provider
@@ -1191,44 +1340,74 @@ Public Function DictationStorageOpen(UserId As String, Password As String) As Bo
    CS = CS & ";Database=" & SQLDatabase
    
    CS = Settings.GetString("DictationStorage", "ConnectionString", CS)
-   
-   Set Db = New ADODB.Connection
-   
+     
    If UseTrustedInSettings Then
       Cred = "Trusted_Connection=yes"
-      TrustedUsed = True
-      
-      Db.ConnectionString = CS & ";" & Cred
-      Db.CommandTimeout = 180
-      On Error Resume Next
-      Db.Open
-      mStorageOpened = Err = 0
-   
-      If mStorageOpened And TrustedUsed Then
-         mWindowsAuthenticationUsed = True
-         mAuthMethod = 2
-      End If
+      mConnectionString = CS & ";" & Cred
+      mAuthMethod = 2
    Else
       Cred = "User Id=" & DBUserid & ";Password=" & DBPassword
-      Db.ConnectionString = CS & ";" & Cred
-      On Error Resume Next
-      Db.Open
-      mStorageOpened = Err = 0
-      mWindowsAuthenticationUsed = False
+      mConnectionString = CS & ";" & Cred
       mAuthMethod = 0
    End If
+   Db_ConnectionOpen
+   DictationStorageOpen = mStorageOpened
+End Function
+Private Sub Db_ConnectionOpen()
+
+   On Error Resume Next
+   Db_ConnectionCloseIfOpened
+   
+   Set Db = New ADODB.Connection
+   Db.ConnectionString = mConnectionString
+   Db.CommandTimeout = 180
+   Db.Open
+   mStorageOpened = Err = 0
 
    If mStorageOpened Then
-      If Not GetAppInfo() Then
+      Db_LoginToAppRole
+   End If
+End Sub
+Private Sub Db_PrepareConnection()
+
+   If Db Is Nothing Then
+      Db_ConnectionOpen
+   ElseIf Db.State = adStateClosed Then
+      Db_ConnectionOpen
+   End If
+End Sub
+Private Sub Db_TryToRepaireConnection()
+
+   Dim I As Integer
+   
+   I = 3
+   Do
+      MsgWaitObj 2000
+      Db_ConnectionOpen
+      I = I - 1
+   Loop Until I <= 0 Or mStorageOpened
+End Sub
+Private Sub Db_ConnectionCloseIfOpened()
+
+   On Error Resume Next
+   If Not Db Is Nothing Then
+      Db.Close
+   End If
+   Set Db = Nothing
+End Sub
+Private Sub Db_LoginToAppRole()
+
+   If mStorageOpened Then
+      If Not Db_GetAppInfo() Then
          DictationStorageClose
       End If
-      If Not ActivateAppRole() Then
+      If Not Db_ActivateAppRole() Then
          DictationStorageClose
       End If
    End If
-   DictationStorageOpen = mStorageOpened
-End Function
-Private Function ActivateAppRole() As Boolean
+End Sub
+
+Private Function Db_ActivateAppRole() As Boolean
 
    Dim App_password As String
    
@@ -1240,29 +1419,28 @@ Private Function ActivateAppRole() As Boolean
 
    On Error GoTo ActivateAppRole_Err
    Db.Execute "EXEC sp_setapprole 'ct_app', '" & App_password & "'"
-   ActivateAppRole = True
+   Db_ActivateAppRole = True
    Exit Function
    
 ActivateAppRole_Err:
-   ActivateAppRole = False
+   Db_ActivateAppRole = False
    Exit Function
 End Function
-Private Function GetAppInfo() As Boolean
+Private Function Db_GetAppInfo() As Boolean
 
    Dim Rs As ADODB.Recordset
 
    On Error GoTo GetAppInfo_Err
    OpenStoredProcWithRsResult Rs, "s_AppInfo"
    If Not Rs.EOF Then
-      'mAuthMethod = Rs("AuthMethod")
       mCryptoAppRolePassword = nvl(Rs("AppPw"), "")
    End If
    CloseRecordset Rs
-   GetAppInfo = True
+   Db_GetAppInfo = True
    Exit Function
    
 GetAppInfo_Err:
-   GetAppInfo = False
+   Db_GetAppInfo = False
    CloseRecordset Rs
    Exit Function
 End Function
@@ -1309,10 +1487,9 @@ End Function
 
 Public Sub DictationStorageClose()
 
+   On Error Resume Next
    mStorageOpened = False
-   Db.Close
-   Set Db = Nothing
-   
+   Db_ConnectionCloseIfOpened
    DictationStorageSoundPath = ""
 End Sub
 
@@ -1329,8 +1506,7 @@ Public Function CheckOutDict(ByRef Dict As clsDict, ByVal DictId As Long, ByVal 
       OpenStoredProcWithRsResultAndCommand Rs, "s_Dictation_GetById", Cmd
    
       If Rs.EOF Then
-         Rs.Close
-         Set Rs = Nothing
+         CloseRecordset Rs
          CheckOutDict = 2
          GoTo CheckOutDict_Exit
       End If
@@ -1340,9 +1516,7 @@ Public Function CheckOutDict(ByRef Dict As clsDict, ByVal DictId As Long, ByVal 
          Dict.LocalFilename = LocalTempFileName
          CopyFileFromSoundStorage DictId, LocalTempFileName
       End If
-   
-      Dict.ReadOnly = Dict.AuthorId <> Client.User.UserId Or Dict.StatusId > 30
-   
+     
       CheckOutDict = 0
    Else
       CheckOutDict = 1
@@ -1414,7 +1588,7 @@ Public Function CheckInDict(ByRef Dict As clsDict, DiscardChanges As Boolean)
          Client.Trace.AddRow Trace_Level_Full, "CID", "CIDG", "", CStr(Dict.DictId), CStr(Dict.StatusId)
          If Not DiscardChanges Then
             Client.Trace.AddRow Trace_Level_Full, "CID", "CIDH", "", CStr(Dict.DictId), CStr(Dict.StatusId)
-            If Rs("AuthorId") = Client.User.UserId Then
+            'If Rs("AuthorId") = Client.User.UserId Then
                If Rs("NoPatient") <> Dict.NoPatient Then
                   Dirty = True
                End If
@@ -1452,8 +1626,14 @@ Public Function CheckInDict(ByRef Dict As clsDict, DiscardChanges As Boolean)
                If Dirty Or Dict.SoundDirty Then
                   Dict.Changed = Now
                End If
-            End If
+            'End If
             Client.Trace.AddRow Trace_Level_Full, "CID", "CIDI", "", CStr(Dict.DictId), CStr(Dict.StatusId)
+            If Rs("StatusId") > Recorded And Dict.StatusId <= Recorded Then
+               DeleteHistoryByDictId Dict.DictId
+               Dict.TranscribedDate = 0
+               Dict.TranscriberId = 0
+               Dict.TranscriberOrgId = 0
+            End If
             If Rs("StatusId") < BeingTrancribed And Dict.StatusId >= BeingTrancribed Then
                Dict.TranscriberId = Client.User.UserId
                If Client.User.HomeOrgId > 0 Then
@@ -1480,8 +1660,7 @@ Public Function CheckInDict(ByRef Dict As clsDict, DiscardChanges As Boolean)
          End If
       End If
    End If
-   Rs.Close
-   Set Rs = Nothing
+   CloseRecordset Rs
    RaiseEvent UIStatusClear
 End Function
 Private Function CheckInDictInternal(ByRef Dict As clsDict) As Integer
@@ -1557,7 +1736,7 @@ Private Sub AddRole(SumRoles As clsRoles, ByVal Roles2 As clsRoles)
    
    R2 = UCase$(Roles2.Roles)
    For I = 1 To Len(R2)
-      Letter = Mid$(R2, I, 1)
+      Letter = mId$(R2, I, 1)
       If InStr(SumRoles.Roles, Letter) = 0 Then
          SumRoles.Roles = SumRoles.Roles & Letter
       End If
@@ -1579,24 +1758,82 @@ Private Sub AddRole(SumRoles As clsRoles, ByVal Roles2 As clsRoles)
 End Sub
 Private Sub OpenDisconnectedRecordset(ByRef Rs As ADODB.Recordset, ByVal SelectFrom As String, ByVal WhereClause As String, ByVal GroupByClause As String, ByVal OrderClause As String)
 
+   Dim T As Double
    Dim SQL As String
+   Dim NumberOfTries As Integer
+   Dim ErrVal As Long
+  
+OpenDisconnectedRecordset_Start:
 
+   On Error GoTo OpenDisconnectedRecordset_err
+   Db_PrepareConnection
+   
    CloseRecordset Rs
-   Set Rs = Nothing
    Set Rs = New ADODB.Recordset
+   Set Rs.ActiveConnection = Db
    Rs.CursorLocation = adUseClient
    Rs.CursorType = adOpenForwardOnly
    Rs.LockType = adLockReadOnly
    SQL = BuildSQL(SelectFrom, WhereClause, GroupByClause, OrderClause)
-   OpenRecordset Rs, SQL
-   'Set Rs.ActiveConnection = Nothing
+   T = Timer
+   Rs.Open SQL
+   Debug.Print SQL, Format$(Timer - T, "0.00")
+   Set Rs.ActiveConnection = Nothing
+   Exit Sub
+   
+OpenDisconnectedRecordset_err:
+   ErrVal = Err.Number
+   If NumberOfTries < 3 Then
+      NumberOfTries = NumberOfTries + 1
+      Db_TryToRepaireConnection
+      Resume OpenDisconnectedRecordset_Start
+   Else
+      Error ErrVal
+   End If
 End Sub
+Private Sub OpenRecordset(ByRef Rs As ADODB.Recordset, ByRef SQL As String)
+
+   Dim T As Double
+   Dim NumberOfTries As Integer
+   Dim ErrVal As Long
+   
+OpenRecordset_Start:
+
+   On Error GoTo OpenRecordset_err
+   Db_PrepareConnection
+   
+   If Rs Is Nothing Then
+      Set Rs = New ADODB.Recordset
+   End If
+   
+   T = Timer
+   Rs.Open SQL, Db, adOpenDynamic, adLockOptimistic
+   Debug.Print SQL, Format$(Timer - T, "0.00")
+   Exit Sub
+   
+OpenRecordset_err:
+   ErrVal = Err.Number
+   If NumberOfTries < 3 Then
+      NumberOfTries = NumberOfTries + 1
+      Db_TryToRepaireConnection
+      Resume OpenRecordset_Start
+   Else
+      Error ErrVal
+   End If
+
+End Sub
+Public Sub CloseRecordset(Rs As ADODB.Recordset)
+
+   On Error Resume Next
+   Rs.Close
+   Set Rs = Nothing
+End Sub
+
 Private Sub OpenStoredProc(SpName As String)
 
    Dim Cmd As ADODB.Command
    
    Set Cmd = New ADODB.Command
-   Cmd.ActiveConnection = Db
    Cmd.CommandText = SpName
    Cmd.CommandType = adCmdStoredProc
    
@@ -1607,7 +1844,6 @@ Private Sub OpenStoredProcWithRsResult(ByRef Rs As ADODB.Recordset, SpName As St
    Dim Cmd As ADODB.Command
    
    Set Cmd = New ADODB.Command
-   Cmd.ActiveConnection = Db
    Cmd.CommandText = SpName
    Cmd.CommandType = adCmdStoredProc
    
@@ -1615,7 +1851,6 @@ Private Sub OpenStoredProcWithRsResult(ByRef Rs As ADODB.Recordset, SpName As St
 End Sub
 Private Sub OpenStoredProcWithRsResultAndCommand(ByRef Rs As ADODB.Recordset, SpName As String, ByRef Cmd As ADODB.Command)
 
-   Cmd.ActiveConnection = Db
    Cmd.CommandText = SpName
    Cmd.CommandType = adCmdStoredProc
    
@@ -1623,7 +1858,6 @@ Private Sub OpenStoredProcWithRsResultAndCommand(ByRef Rs As ADODB.Recordset, Sp
 End Sub
 Private Sub OpenStoredProcWithCommand(SpName As String, ByRef Cmd As ADODB.Command)
 
-   Cmd.ActiveConnection = Db
    Cmd.CommandText = SpName
    Cmd.CommandType = adCmdStoredProc
    
@@ -1632,40 +1866,65 @@ End Sub
 Private Sub ExecuteCommand(ByRef Cmd As ADODB.Command)
 
    Dim T As Double
+   Dim NumberOfTries As Integer
+   Dim ErrVal As Long
+   
+ExecuteCommand_Start:
+
+   On Error GoTo ExecuteCommand_err
+   Db_PrepareConnection
+   
+   Cmd.ActiveConnection = Db
 
    T = Timer
-   'frmMain.Caption = Cmd.CommandText
    Cmd.Execute
    Debug.Print Cmd.CommandText, Format$(Timer - T, "0.00")
+   Exit Sub
+   
+ExecuteCommand_err:
+   ErrVal = Err.Number
+   If NumberOfTries < 3 Then
+      NumberOfTries = NumberOfTries + 1
+      Db_TryToRepaireConnection
+      Resume ExecuteCommand_Start
+   Else
+      Error ErrVal
+   End If
 End Sub
 Private Sub ExecuteCommandWithRsResult(ByRef Rs As ADODB.Recordset, ByRef Cmd As ADODB.Command)
 
    Dim T As Double
+   Dim NumberOfTries As Integer
+   Dim ErrVal As Long
    
+ExecuteCommandWithRsResult_Start:
+
+   On Error GoTo ExecuteCommandWithRsResult_err
+   Db_PrepareConnection
+   
+   Cmd.ActiveConnection = Db
+   Set Rs = Nothing
    Set Rs = New ADODB.Recordset
    'Rs.CursorLocation = adUseClient
    Rs.CursorType = adOpenForwardOnly
    Rs.LockType = adLockOptimistic
 
+   Debug.Print Cmd.ActiveConnection.State
+   'If Cmd.ActiveConnection.State <> adStateOpen Then Stop '!!!
    T = Timer
    Set Rs = Cmd.Execute
    Debug.Print Cmd.CommandText, Format$(Timer - T, "0.00")
-End Sub
-
-Private Sub OpenRecordset(ByRef Rs As ADODB.Recordset, ByRef SQL As String)
-
-   Dim T As Double
+   Exit Sub
    
-   T = Timer
-   Rs.Open SQL, Db, adOpenDynamic, adLockOptimistic
-   Debug.Print SQL, Format$(Timer - T, "0.00")
-
-End Sub
-Public Sub CloseRecordset(Rs As ADODB.Recordset)
-
-   On Error Resume Next
-   Rs.Close
-   Set Rs = Nothing
+ExecuteCommandWithRsResult_err:
+   ErrVal = Err.Number
+   If NumberOfTries < 3 Then
+      NumberOfTries = NumberOfTries + 1
+      Db_TryToRepaireConnection
+      Resume ExecuteCommandWithRsResult_Start
+   Else
+      Error ErrVal
+   End If
 End Sub
 
 Sub CheckSQLInjection(ByVal SQLstatement As String)
@@ -1729,7 +1988,7 @@ Public Function ReadUserData(Ty As String, Ke As String, Def As String, ByRef Ve
       ReadUserData = Rs("Va")
       Version = Rs("Version")
    End If
-   Rs.Close
+   CloseRecordset Rs
 End Function
 Public Sub CreateSysSettingsList(ByVal Ty As String)
 
@@ -1770,7 +2029,7 @@ Public Sub WriteStationData(Ty As String, Ke As String, Va As String)
    Dim Rs As ADODB.Recordset
    Dim SQL As String
    
-   SQL = BuildSQL("Select * from StationData", "Ty='" & Ty & "' and Ke='" & Ke & "' and UserId=" & Client.User.UserId, "", "")
+   SQL = BuildSQL("Select * from StationData", "Ty='" & Ty & "' and Ke='" & Ke & "' and StationId='" & Client.Station.Id & "'", "", "")
    
    Set Rs = New ADODB.Recordset
    Rs.CursorLocation = adUseClient
@@ -1786,15 +2045,14 @@ Public Sub WriteStationData(Ty As String, Ke As String, Va As String)
    Rs("Va") = Va
    Rs("Version") = ApplicationVersion
    Rs.Update
-   Rs.Close
-   Set Rs = Nothing
+   CloseRecordset Rs
 End Sub
 Public Function ReadStationData(Ty As String, Ke As String, Def As String, ByRef Version) As String
 
    Dim Rs As ADODB.Recordset
    Dim SQL As String
    
-   SQL = BuildSQL("Select * from StationData", "Ty='" & Ty & "' and Ke='" & Ke & "' and UserId=" & Client.User.UserId, "", "")
+   SQL = BuildSQL("Select * from StationData", "Ty='" & Ty & "' and Ke='" & Ke & "' and StationId='" & Client.Station.Id & "'", "", "")
    
    Set Rs = New ADODB.Recordset
    Rs.CursorLocation = adUseClient
@@ -1808,8 +2066,7 @@ Public Function ReadStationData(Ty As String, Ke As String, Def As String, ByRef
       ReadStationData = Rs("Va")
       Version = Rs("Version")
    End If
-   Rs.Close
-   Set Rs = Nothing
+   CloseRecordset Rs
 End Function
 
 Private Sub CopyFileToSoundStorage(SourcePath As String, DictId As Long)
@@ -1824,8 +2081,12 @@ Private Sub CopyFileToSoundStorage(SourcePath As String, DictId As Long)
       On Error Resume Next
       SetAttr SoundPath, vbNormal
       On Error GoTo 0
-      FileCopy SourcePath, SoundPath
+      
+      FileCopyWithRetry SourcePath, SoundPath
+      
+      On Error Resume Next
       SetAttr SoundPath, vbReadOnly + vbHidden
+      On Error GoTo 0
    End If
    RaiseEvent UIStatusSetSub("")
 End Sub
@@ -1840,7 +2101,7 @@ Private Sub CopyFileToSoundTable(SourcePath As String, DictId As Long)
    End If
    Rs("SizeInBytes") = FileToBlob(Rs("Sound"), SourcePath, Client.SysSettings.SoundChunkSize)
    Rs.Update
-   Rs.Close
+   CloseRecordset Rs
 End Sub
 Private Sub CopyFileFromSoundStorage(DictId As Long, DestPath As String)
 
@@ -1851,10 +2112,29 @@ Private Sub CopyFileFromSoundStorage(DictId As Long, DestPath As String)
       CopyFileFromSoundTable DictId, DestPath
    Else
       SoundPath = GetSoundfilePath(DictId)
-      FileCopy SoundPath, DestPath
+      FileCopyWithRetry SoundPath, DestPath
    End If
    RaiseEvent UIStatusSetSub("")
 End Sub
+Private Sub FileCopyWithRetry(Source As String, Destination As String)
+
+   Dim Retries As Integer
+   Dim ErrVal As Long
+   
+   Retries = 3
+   On Error GoTo FileCopyWithRetry_Err
+   FileCopy Source, Destination
+   Exit Sub
+   
+FileCopyWithRetry_Err:
+   If Retries > 0 Then
+      Retries = Retries - 1
+      Resume
+   Else
+      Error ErrVal
+   End If
+End Sub
+
 Private Sub CopyFileFromSoundTable(DictId As Long, DestPath As String)
 
    Dim Rs As New Recordset
@@ -1863,7 +2143,7 @@ Private Sub CopyFileFromSoundTable(DictId As Long, DestPath As String)
    If Not Rs.EOF Then
       BlobToFile Rs("Sound"), DestPath, Client.SysSettings.SoundChunkSize
    End If
-   Rs.Close
+   CloseRecordset Rs
 End Sub
 Private Sub CreateSoundSubFolders()
   
@@ -1991,6 +2271,8 @@ Sub BlobToFile(fld As ADODB.Field, Filename As String, Optional ChunkSize As Lon
       KBytePerSecond = 0
    End If
    Debug.Print "BlobToFile (" & CStr(TotalBytes) & "/" & Format(KBytePerSecond, "0.0") & ")", Format$(TotalTime, "0.00")
-
-    
 End Sub
+Public Property Get Connection() As ADODB.Connection
+
+   Set Connection = Db
+End Property

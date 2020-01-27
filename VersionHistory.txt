@@ -1,0 +1,11 @@
+1.10.0.237
+----------
+Bug fix: ReDim Preserve mOrgDictTypeArr(mOrgDictTypeCount + 50) on right array
+Place frmMain at 50,50
+Text "För mänga diktat..." is now text no 1080114
+Use ShutDownRequest to make shure that opened dictations are checked in before closing application
+Remove End statements to make API work smoother
+New event declared in ini-file: OnCtCmdFile. Environment variables can be used in Path and filename
+Search button is default on Search tab. Reset button is cancel button.
+Don't store wrong soundlength of 0 to database.
+

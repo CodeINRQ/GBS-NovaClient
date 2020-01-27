@@ -75,7 +75,7 @@ Begin VB.Form frmEditUser
       MaxLength       =   255
       TabIndex        =   9
       Top             =   1560
-      Width           =   1695
+      Width           =   3855
    End
    Begin VB.TextBox txtLoginName 
       Height          =   285
@@ -103,6 +103,13 @@ Begin VB.Form frmEditUser
       Tag             =   "1050108"
       Top             =   5040
       Width           =   1215
+   End
+   Begin VB.Image imgDice 
+      Height          =   300
+      Left            =   6480
+      Picture         =   "EditUser.frx":0000
+      Top             =   960
+      Width           =   390
    End
    Begin VB.Label Label7 
       Caption         =   "&Tillhör grupper:"
@@ -275,7 +282,7 @@ Private Sub Form_Load()
       If Org.ShowInTree Then
          RightToSetAsHomeOrg = Client.OrgMgr.CheckUserRole(Org.OrgId, "S") And Org.DictContainer
          If RightToSetAsHomeOrg Then
-            If FirstPossibleHomeOrg = 0 Then
+            If FirstPossibleHomeOrg = 0 Or Org.OrgId = Client.User.HomeOrgId Then
                FirstPossibleHomeOrg = Org.OrgId
             End If
             ucOrgTree.AddNode Org.OrgId, Org.ShowParent, Org.OrgText, 1, True
@@ -313,6 +320,53 @@ Private Sub MarkGroups()
          Next Idx
       End If
    Loop
+End Sub
+
+Private Sub imgDice_DblClick()
+
+   GeneratePassword
+End Sub
+
+Private Sub GeneratePassword()
+
+   Dim NewPassword As String
+   Dim PasswordLen As Integer
+   Dim C As String
+   
+   Randomize
+   NewPassword = ""
+   PasswordLen = RndNumber(10, 15)
+   Do While Len(NewPassword) < PasswordLen
+      C = Chr$(RndNumber(48, 122))
+      If C <> "'" And C <> """" Then
+         NewPassword = NewPassword & C
+      End If
+   Loop
+   txtPassword.Text = NewPassword
+   txtConfirmPassword.Text = NewPassword
+End Sub
+
+Private Function RndNumber(Min As Integer, Max As Integer) As Integer
+
+   RndNumber = Int(Rnd * (Max - Min + 1)) + Min
+End Function
+
+Private Sub Label1_Click()
+
+   Clipboard.Clear
+   Clipboard.SetText txtLoginName.Text
+End Sub
+
+Private Sub Label2_Click()
+
+   Clipboard.Clear
+   Clipboard.SetText txtShortName.Text
+End Sub
+
+Private Sub Label5_Click()
+
+   Clipboard.Clear
+   Clipboard.SetText txtLongName.Text
 End Sub
 
 Private Sub lstUserGroup_Click()

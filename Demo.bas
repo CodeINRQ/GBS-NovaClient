@@ -1,9 +1,9 @@
 Attribute VB_Name = "modDemo"
 Option Explicit
 
-Sub FillDemoDictation(NumberOfDictations As Integer)
+Sub FillDemoDictation(NumberOfDictations As Long)
 
-   Dim I As Integer
+   Dim I As Long
    Dim D As clsDict
    
    For I = 1 To NumberOfDictations
@@ -49,8 +49,10 @@ Sub FillHistoryDemo(Days As Integer, MaxNumberPerDay As Integer, MinNumberPerDay
    Dim I As Integer
    Dim R As Integer
    Dim Ex As Integer
+   Dim DataB As ADODB.Connection
    
-   Rs.Open "Select * from History", Client.Server.Db, adOpenDynamic, adLockPessimistic
+   Set DataB = Client.Server.Connection
+   Rs.Open "Select * from History", DataB, adOpenDynamic, adLockPessimistic
    For Cr = 1 To Days
       R = Int(Rnd * MaxNumberPerDay - MinNumberPerDay) + MinNumberPerDay
       For I = 1 To R
@@ -93,7 +95,7 @@ Function RndPatid() As String
       S = "19" & Format$(Int(Rnd * 100), "00")
    End If
    S = S & Format$(Int(Rnd * 12) + 1, "00")
-   S = S & Format$(Int(Rnd = 28) + 1, "00")
+   S = S & Format$(Int(Rnd * 28) + 1, "00")
    S = S & Format$(Int(Rnd * 1000), "000")
    For I = 0 To 9
       If CheckPatId(S & Chr$(Asc("0") + I)) Then
@@ -102,12 +104,22 @@ Function RndPatid() As String
       End If
    Next I
    RndPatid = S & "0"
+   
+'   S = Format$(Int(Rnd * 28) + 1, "00")
+'   S = S & Format$(Int(Rnd * 12) + 1, "00")
+'   If Rnd > 0.9 Then
+'      S = S & Format$(Int(Rnd * 5), "00")
+'   Else
+'      S = S & Format$(Int(Rnd * 100), "00")
+'   End If
+'   S = S & Format$(Int(Rnd * 100000), "00000")
+'   RndPatid = S
 End Function
 Function RndFörnamn() As String
 
    Dim I As Integer
    
-   I = Int(Rnd * 14)
+   I = Int(Rnd * 21)
    
    Select Case I
       Case 0:  RndFörnamn = "Jenny"
@@ -123,14 +135,21 @@ Function RndFörnamn() As String
       Case 10: RndFörnamn = "Ulf"
       Case 11: RndFörnamn = "Ture"
       Case 12: RndFörnamn = "Charlotte"
-      Case 13: RndFörnamn = "Anette"
+      Case 13: RndFörnamn = "Pelle"
+      Case 14: RndFörnamn = "Ludvig"
+      Case 15: RndFörnamn = "Adam"
+      Case 16: RndFörnamn = "Svante"
+      Case 17: RndFörnamn = "Lotta"
+      Case 18: RndFörnamn = "Lena"
+      Case 19: RndFörnamn = "Emma"
+      Case 20: RndFörnamn = "Josephin"
    End Select
 End Function
 Function RndEfternamn() As String
 
    Dim I As Integer
    
-   I = Int(Rnd * 14)
+   I = Int(Rnd * 21)
    
    Select Case I
       Case 0:  RndEfternamn = "Andersson"
@@ -147,6 +166,13 @@ Function RndEfternamn() As String
       Case 11: RndEfternamn = "Hagberg"
       Case 12: RndEfternamn = "Grip"
       Case 13: RndEfternamn = "Storm"
+      Case 14: RndEfternamn = "Johansson"
+      Case 15: RndEfternamn = "Ringqvist"
+      Case 16: RndEfternamn = "Carlsson"
+      Case 17: RndEfternamn = "Stolpe"
+      Case 18: RndEfternamn = "Fransson"
+      Case 19: RndEfternamn = "Nilssson"
+      Case 20: RndEfternamn = "Petersson"
    End Select
 End Function
 Function RndPatNamn() As String
@@ -174,9 +200,11 @@ Function RndUser(OrgId As Long, Priv As String) As Long
    Dim IRnd As Integer
    Dim UserId As Long
    Dim Roles As String
+   Dim DataB As ADODB.Connection
    
+   Set DataB = Client.Server.Connection
    Do While True
-      Rs.Open "spUserRole", Client.Server.Db, adOpenDynamic, adLockReadOnly
+      Rs.Open "spUserRole", DataB, adOpenDynamic, adLockReadOnly
       IRnd = Int(Rnd * 20)
       For I = 0 To IRnd
          If Rs.EOF Then
@@ -215,14 +243,14 @@ Function RndStatus() As Long
    
    I = Int(Rnd * 16)
    Select Case I
-      Case 0: RndStatus = BeingRecorded
+      Case 0: RndStatus = Recorded
       Case 1: RndStatus = Recorded
       Case 2: RndStatus = Recorded
       Case 3: RndStatus = Recorded
       Case 4: RndStatus = Recorded
       Case 5: RndStatus = Recorded
       Case 6: RndStatus = Recorded
-      Case 7: RndStatus = BeingTrancribed
+      Case 7: RndStatus = Transcribed
       Case 8: RndStatus = Transcribed
       Case 9: RndStatus = Transcribed
       Case 10: RndStatus = Transcribed

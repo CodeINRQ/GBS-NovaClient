@@ -21,12 +21,15 @@ Public Sub DeleteOneUserGroup(UserId As Long, GroupId As Long)
 End Sub
 Public Sub SaveUserGroup(UserId As Long, GroupId As Long)
 
+   Dim Eno As Long
+   
    On Error GoTo SaveUserGroup_Err
    Client.Server.SaveUserGroup UserId, GroupId
    Exit Sub
    
 SaveUserGroup_Err:
-   ErrorHandle "12701", Err, 12701, "Rollerna kunde inte sparas", False
+   Eno = Err.Number
+   ErrorHandle "12701", Eno, 12701, "Rollerna kunde inte sparas", False
    Resume Next
 End Sub
 Public Sub Init()
@@ -97,6 +100,8 @@ Public Sub GetGroupFromIndex(ByRef Grp As clsGroup, Index As Integer)
 End Sub
 Public Sub SaveGroup(Grp As clsGroup)
 
+   Dim Eno As Long
+
    On Error GoTo SaveGroup_Err
    
    Client.Server.SaveGroup Grp
@@ -106,6 +111,7 @@ Public Sub SaveGroup(Grp As clsGroup)
    Exit Sub
    
 SaveGroup_Err:
-   ErrorHandle "12702", Err, 12702, "Gruppen kunde inte sparas", False
+   Eno = Err.Number
+   ErrorHandle "12702", Eno, 12702, "Gruppen kunde inte sparas", False
    Resume Next
 End Sub

@@ -29,19 +29,26 @@ End Enum
 
 Public Sub Insert(LoggId As Long, LoggLevel As Integer, DictId As Long, LoggData As String)
 
+   Dim LoggLevelString As String
+   Dim Filter As String
+   
    If Client.SysSettings.LoggEnable Then
-      Dim L As clsLogg
-      
-      Set L = New clsLogg
-      L.LoggId = LoggId
-      L.LoggLevel = LoggLevel
-      L.DictId = DictId
-      L.LoggData = LoggData
-      
-      L.UserId = Client.User.UserId
-      L.StationId = Client.Station.Id
-      Client.Server.LoggInsert L
-      Set L = Nothing
+      LoggLevelString = Format$(LoggLevel, "00")
+      Filter = Client.SysSettings.LoggFilter
+      If Len(Filter) = 0 Or InStr(Filter, LoggLevelString) > 0 Then
+         Dim L As clsLogg
+         
+         Set L = New clsLogg
+         L.LoggId = LoggId
+         L.LoggLevel = LoggLevel
+         L.DictId = DictId
+         L.LoggData = LoggData
+         
+         L.UserId = Client.User.UserId
+         L.StationId = Client.Station.Id
+         Client.Server.LoggInsert L
+         Set L = Nothing
+      End If
    End If
 End Sub
 Public Sub CreateList(StartDate As Date, EndDate As Date, StartLevel As Integer, EndLevel As Integer)

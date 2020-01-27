@@ -26,9 +26,9 @@ Public UserMgr As clsUserMgr
 Public Station As clsStation
 Public StationMgr As clsStationMgr
 
-'Public WithEvents Server As clsServerSQL
-Public WithEvents Server As clsServerJet
+Public WithEvents Server As clsServerSQL
 Attribute Server.VB_VarHelpID = -1
+'Public WithEvents Server As clsServerJet
 
 Public DictTypeMgr As clsDictTypeMgr
 Public GroupMgr As clsGroupMgr
@@ -59,7 +59,7 @@ Public Trace As clsTrace
 Public SysSettings As New clsSysSettings
 Public CultureLanguage As String
 Public NewRecInfo As New clsNewRecInfo
-Public CurrPatient As New clsPat
+Public CurrPatient As New clsCurrPat
 Public PlayDictIdFromAPI As Long
 
 Private Sub Class_Initialize()
@@ -71,8 +71,8 @@ Private Sub Class_Initialize()
    Trace.Initialize Settings
    
    Set Texts = New clsTexts
-   Set Server = New clsServerJet
-   'Set Server = New clsServerSQL
+   'Set Server = New clsServerJet
+   Set Server = New clsServerSQL
    Set SysSettings = New clsSysSettings
    Set User = New clsUser
    Set UserMgr = New clsUserMgr

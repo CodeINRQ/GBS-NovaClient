@@ -13,9 +13,8 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Private mUsersArr(1000) As clsUser
+Private mUsersArr() As clsUser
 Private mUsersCount As Integer
-
 
 Public Sub Init()
 
@@ -23,6 +22,9 @@ Public Sub Init()
    Client.Server.CreateUserList
    Do While Client.Server.UserListGetNext(mUsersArr(mUsersCount))
       mUsersCount = mUsersCount + 1
+      If mUsersCount = UBound(mUsersArr) Then
+         ReDim Preserve mUsersArr(mUsersCount + 50)
+      End If
    Loop
 End Sub
 
@@ -80,6 +82,8 @@ Public Sub GetUserFromLoginName(ByRef Usr As clsUser, LoginName As String)
 End Sub
 Public Sub SaveUser(Usr As clsUser)
 
+   Dim Eno As Long
+   
    On Error GoTo SaveUser_Err
    Client.Server.SaveUser Usr
    Client.LoggMgr.Insert 1320107, LoggLevel_UserAdmin, 0, Usr.LoggData
@@ -88,10 +92,27 @@ Public Sub SaveUser(Usr As clsUser)
    Exit Sub
    
 SaveUser_Err:
-   ErrorHandle "1310101", Err, 1310101, "Användaren kan inte sparas", False
+   Eno = Err.Number
+   ErrorHandle "1310101", Eno, 1310101, "Användaren kan inte sparas", False
+   Resume Next
+End Sub
+Public Sub SaveUserHomeOrg(Usr As clsUser)
+
+   Dim Eno As Long
+   
+   On Error GoTo SaveUser_Err
+   Client.Server.SaveUserHomeOrg Usr
+   Client.LoggMgr.Insert 1320119, LoggLevel_UserAdmin, 0, Usr.LoggData
+   Exit Sub
+   
+SaveUser_Err:
+   Eno = Err.Number
+   ErrorHandle "1310101", Eno, 1310101, "Användaren kan inte sparas", False
    Resume Next
 End Sub
 Public Sub DeleteUser(Usr As clsUser)
+
+   Dim Eno As Long
 
    On Error GoTo DeleteUser_Err
    Client.Server.DeleteUser Usr
@@ -101,33 +122,33 @@ Public Sub DeleteUser(Usr As clsUser)
    Exit Sub
    
 DeleteUser_Err:
-   ErrorHandle "1310102", Err, 1310102, "Användaren kan inte raderas", False
+   Eno = Err.Number
+   ErrorHandle "1310102", Eno, 1310102, "Användaren kan inte raderas", False
    Resume Next
 End Sub
-Private Function Validate(LoginName As String, Password As String, NewPassword As String) As Integer
+Private Function Validate(LoginName As String, Password As String, NewPassword As String, ExtSystem As String, ExtPassword As String) As Integer
 
    Dim LId As String
-   Dim FN As String
+   Dim Fn As String
    Dim Id As Long
 
-   Validate = Client.Server.UserLogin(Client.User, LoginName, Password, NewPassword)
+   Validate = Client.Server.UserLogin(Client.User, LoginName, Password, NewPassword, ExtSystem, ExtPassword)
 End Function
-Public Function LoginUser() As Integer
+Public Function LoginUser(UserLoginName As String, UserPassword As String, ExtSystem As String, ExtPassword As String) As Integer
 
    Dim LoginForm As frmLogin
    
    If Client.Server.NeedLoginInfo() Then
-   
-      If Len(StartUpUserLoginName) = 0 Then
+      If Len(UserLoginName) = 0 Then
          Set LoginForm = New frmLogin
          CenterForm LoginForm, frmMain
          
          LoginForm.Show vbModal
          If LoginForm.OkClicked Then
             If LoginForm.ChangePassword Then
-               LoginUser = Validate(LoginForm.txtUserName, LoginForm.txtPassword, LoginForm.txtNewPassword)
+               LoginUser = Validate(LoginForm.txtUserName, LoginForm.txtPassword, LoginForm.txtNewPassword, "", "")
             Else
-               LoginUser = Validate(LoginForm.txtUserName, LoginForm.txtPassword, "")
+               LoginUser = Validate(LoginForm.txtUserName, LoginForm.txtPassword, "", "", "")
             End If
          Else
             LoginUser = 100
@@ -136,9 +157,14 @@ Public Function LoginUser() As Integer
          Unload LoginForm
          Set LoginForm = Nothing
       Else
-         LoginUser = Validate(StartUpUserLoginName, StartUpPassword, "")
+         LoginUser = Validate(UserLoginName, UserPassword, "", ExtSystem, ExtPassword)
       End If
    Else
-      LoginUser = Validate("", "", "")
+      LoginUser = Validate("", "", "", "", "")
    End If
 End Function
+
+Private Sub Class_Initialize()
+
+   ReDim mUsersArr(500)
+End Sub

@@ -1,6 +1,25 @@
 Attribute VB_Name = "modCareTalkClient"
 Option Explicit
 
+Private Const STATUS_TIMEOUT = &H102&
+Private Const INFINITE = -1& ' Infinite interval
+Private Const QS_KEY = &H1&
+Private Const QS_MOUSEMOVE = &H2&
+Private Const QS_MOUSEBUTTON = &H4&
+Private Const QS_POSTMESSAGE = &H8&
+Private Const QS_TIMER = &H10&
+Private Const QS_PAINT = &H20&
+Private Const QS_SENDMESSAGE = &H40&
+Private Const QS_HOTKEY = &H80&
+Private Const QS_ALLINPUT = (QS_SENDMESSAGE Or QS_PAINT _
+        Or QS_TIMER Or QS_POSTMESSAGE Or QS_MOUSEBUTTON _
+        Or QS_MOUSEMOVE Or QS_HOTKEY Or QS_KEY)
+Private Declare Function MsgWaitForMultipleObjects Lib "user32" _
+        (ByVal nCount As Long, pHandles As Long, _
+        ByVal fWaitAll As Long, ByVal dwMilliseconds _
+        As Long, ByVal dwWakeMask As Long) As Long
+Public Declare Function GetTickCount Lib "kernel32" () As Long
+
 Private Declare Function GetComputerName Lib "kernel32" Alias "GetComputerNameA" (ByVal lpBuffer As String, nSize As Long) As Long
 
 Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" _
@@ -42,7 +61,9 @@ Public StartUpDatabase As String
 Public StartUpUserLoginName As String
 Public StartUpPassword As String
 Public StartUpExtPassword As String
-Public StartUpFormMainIsLoaded As Integer    '0=no, 1=beeing, 2=yes
+Public StartUpExtSystem As String
+Public StartUpLoginResult As Integer
+Public StartUpFormMainIsLoaded As Integer    '0=no, 1=being, 2=yes
 
 Public Const MaxNumberOfDictation = 30000
 
@@ -99,11 +120,15 @@ Function nvl(Value As Variant, InsteadOfNull As Variant) As Variant
 End Function
 Public Function CreateTempFileName(ExtensionExclDot As String) As String
 
+    CreateTempFileName = CreateTempPath() & CStr(CLng(Timer)) & "." & ExtensionExclDot
+End Function
+Public Function CreateTempPath() As String
+
     Dim strBufferString As String
     Dim lngResult As Long
     strBufferString = String(MAX_BUFFER_LENGTH, "X")
     lngResult = GetTempPath(MAX_BUFFER_LENGTH, strBufferString)
-    CreateTempFileName = Mid(strBufferString, 1, lngResult) & CStr(CLng(Timer)) & "." & ExtensionExclDot
+    CreateTempPath = mId(strBufferString, 1, lngResult)
 End Function
 Public Sub KillFileIgnoreError(Filename As String)
 
@@ -116,7 +141,7 @@ Public Function StringReplace(ByVal Str As String, SubStrToReplace As String, In
    
    Pos = InStr(Str, SubStrToReplace)
    Do While Pos > 0
-      Str = Left$(Str, Pos - 1) & InsertInstead & Mid$(Str, Pos + Len(SubStrToReplace))
+      Str = Left$(Str, Pos - 1) & InsertInstead & mId$(Str, Pos + Len(SubStrToReplace))
       'Pos = 0
       On Error Resume Next
       Pos = InStr(Pos + Len(InsertInstead), Str, SubStrToReplace)
@@ -137,6 +162,16 @@ Public Function CheckPatId(ByVal PatId As String) As Boolean
       Exit Function
    End If
    
+   If Client.SysSettings.DictInfoAlfaInPatid Then
+      If Client.SysSettings.DictInfoMandatoryPatId Then
+         CheckPatId = Len(PatId) > 0
+         Exit Function
+      Else
+         CheckPatId = True
+         Exit Function
+      End If
+   End If
+   
    'Remove "-" if there is one
    PatId = StringReplace(PatId, "-", "")
    
@@ -150,7 +185,7 @@ Public Function CheckPatId(ByVal PatId As String) As Boolean
    
    If Len(PatId) = 12 Then
       Century = Left$(PatId, 2)
-      PatId = Mid$(PatId, 3)
+      PatId = mId$(PatId, 3)
       If (Century <> "19" And Century <> "20") Then
          CheckPatId = False
          Exit Function
@@ -169,7 +204,7 @@ Public Function CheckPatId(ByVal PatId As String) As Boolean
    
    'split in strings
    For I = 1 To 9
-      Siffra(I) = CInt(Mid(PatId, I, 1))
+      Siffra(I) = CInt(mId(PatId, I, 1))
    Next
    
    'double number in odd positions
@@ -186,7 +221,7 @@ Public Function CheckPatId(ByVal PatId As String) As Boolean
       End If
    Next
     
-   I = CInt(Mid(PatId, Len(PatId), 1))
+   I = CInt(mId(PatId, Len(PatId), 1))
 
    If (10 - Resultat Mod 10) Mod 10 = I Then
       CheckPatId = True
@@ -217,40 +252,28 @@ Public Function FormatLength(Sec As Long) As String
    End If
    FormatLength = S & Format$(Mins, "00") & ":" & Format$(Secs, "00")
 End Function
-Public Function PersnrFormat(S As String) As String
-
-   If Len(S) = 12 Then
-      PersnrFormat = Left$(S, 2) & " " & Mid$(S, 3, 6) & "-" & Mid$(S, 9, 4)
-   Else
-      If Len(S) = 10 Then
-         PersnrFormat = Mid$(S, 1, 6) & "-" & Mid$(S, 7, 4)
-      Else
-         PersnrFormat = S
-      End If
-   End If
-End Function
 Public Function WriteStringToTempFile(S As String) As String
 
    Dim Pathname As String
-   Dim F As Integer
+   Dim f As Integer
    
    Pathname = CreateTempFileName("tmp")
-   F = FreeFile
-   Open Pathname For Binary Access Write As #F
-   Put #F, , S
-   Close #F
+   f = FreeFile
+   Open Pathname For Binary Access Write As #f
+   Put #f, , S
+   Close #f
    WriteStringToTempFile = Pathname
 End Function
 Public Function ReadStringFromTempFile(Pathname As String) As String
 
-   Dim F As Integer
+   Dim f As Integer
    Dim S As String
    
    S = Space$(FileLen(Pathname))
-   F = FreeFile
-   Open Pathname For Binary Access Read As #F
-   Get #F, , S
-   Close #F
+   f = FreeFile
+   Open Pathname For Binary Access Read As #f
+   Get #f, , S
+   Close #f
    ReadStringFromTempFile = S
 End Function
 
@@ -263,7 +286,7 @@ Private Function CommandString(ByRef CommandLine As String) As String
    Pos = InStr(CommandLine, " ")
    If Pos > 0 Then
       CommandString = Left$(CommandLine, Pos - 1)
-      CommandLine = Mid$(CommandLine, Pos + 1)
+      CommandLine = mId$(CommandLine, Pos + 1)
    Else
       CommandString = CommandLine
       CommandLine = ""
@@ -358,4 +381,78 @@ Public Function GetStationName() As String
    GetStationName = Trim$(S)
 End Function
 
+Public Function MsgWaitObj(Interval As Long, _
+                           Optional hObj As Long = 0&, _
+                           Optional nObj As Long = 0&) As Long
+                           
+   Dim T As Long, T1 As Long
+   
+   If Interval <> INFINITE Then
+       T = GetTickCount()
+       On Error Resume Next
+       T = T + Interval
+       ' Overflow prevention
+       If Err <> 0& Then
+           If T > 0& Then
+               T = ((T + &H80000000) _
+               + Interval) + &H80000000
+           Else
+               T = ((T - &H80000000) _
+               + Interval) - &H80000000
+           End If
+       End If
+       On Error GoTo 0
+       ' T contains now absolute time of the end of interval
+   Else
+       T1 = INFINITE
+   End If
+   Do
+       If Interval <> INFINITE Then
+           T1 = GetTickCount()
+           On Error Resume Next
+        T1 = T - T1
+           ' Overflow prevention
+           If Err <> 0& Then
+               If T > 0& Then
+                   T1 = ((T + &H80000000) _
+                   - (T1 - &H80000000))
+               Else
+                   T1 = ((T - &H80000000) _
+                   - (T1 + &H80000000))
+               End If
+           End If
+           On Error GoTo 0
+           ' T1 contains now the remaining interval part
+           If IIf((T1 Xor Interval) > 0&, _
+               T1 > Interval, T1 < 0&) Then
+               ' Interval expired
+               ' during DoEvents
+               MsgWaitObj = STATUS_TIMEOUT
+               Exit Function
+           End If
+       End If
+       ' Wait for event, interval expiration
+       ' or message appearance in thread queue
+       MsgWaitObj = MsgWaitForMultipleObjects(nObj, _
+               hObj, 0&, T1, QS_ALLINPUT)
+       ' Let's message be processed
+       DoEvents
+       If MsgWaitObj <> nObj Then Exit Function
+       ' It was message - continue to wait
+   Loop
+End Function
+Public Function IsLoaded(FormName As String) As Boolean
+
+   Dim sFormName As String
+   Dim f As Form
+   
+   sFormName = UCase$(FormName)
+   
+   For Each f In Forms
+      If UCase$(f.Name) = sFormName Then
+        IsLoaded = True
+        Exit Function
+      End If
+   Next
+End Function
 

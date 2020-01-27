@@ -13,5 +13,19 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Public Id      As String
+Private mId      As String
 
+Public Property Let Id(Value As String)
+
+   Dim Pos As Integer
+   
+   Pos = InStr(Value, Chr$(0))
+   If Pos > 0 Then
+      Value = Left$(Value, Pos - 1)
+   End If
+   mId = Left$(Value, 50)
+End Property
+Public Property Get Id() As String
+
+   Id = mId
+End Property

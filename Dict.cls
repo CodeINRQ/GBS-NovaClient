@@ -60,7 +60,8 @@ Public InfoDirty        As Boolean
 Public SoundDirty       As Boolean
 Public SoundLength      As Long
 
-Public ReadOnly         As Boolean
+Public SoundReadOnly    As Boolean
+Public TextReadOnly     As Boolean
 Public TimeStamp        As Double
 
 Private Sub Class_Initialize()

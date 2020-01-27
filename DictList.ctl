@@ -186,14 +186,14 @@ Private Sub UserControl_Resize()
 
    lstDict.Move 0, 0, UserControl.ScaleWidth, UserControl.ScaleHeight
 End Sub
-Public Sub RestoreSettings(Settings As String)
+Public Sub RestoreSettings(Settings As String, Ver As String)
 
    Dim TempFilePath As String
    Dim Ok As Boolean
 
    With lstDict
       Ok = False
-      If Len(Settings) > 0 Then
+      If Len(Settings) > 0 And Ver >= "1.01.0000" Then
          TempFilePath = WriteStringToTempFile(Settings)
          If .LoadFromFile(TempFilePath) Then
             Ok = True
@@ -229,6 +229,7 @@ Public Sub RestoreSettings(Settings As String)
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 8
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 8
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 10
+         .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 10
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 8
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 5
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 8
@@ -244,16 +245,17 @@ Public Sub RestoreSettings(Settings As String)
       SetCellValue 0, 2, Client.Texts.Txt(1080102, "Personnr")
       SetCellValue 0, 3, Client.Texts.Txt(1080103, "Namn")
       SetCellValue 0, 4, Client.Texts.Txt(1080104, "Skriv senast")
-      SetCellValue 0, 5, Client.Texts.Txt(1080105, "Organisation")
-      SetCellValue 0, 6, Client.Texts.Txt(1080106, "Typ")
-      SetCellValue 0, 7, Client.Texts.Txt(1080107, "Längd")
-      SetCellValue 0, 8, Client.Texts.Txt(1080108, "Intalare")
-      SetCellValue 0, 9, Client.Texts.Txt(1080109, "Intalat")
-      SetCellValue 0, 10, Client.Texts.Txt(1080110, "Utskrivare")
-      SetCellValue 0, 11, Client.Texts.Txt(1080111, "Status")
-      SetCellValue 0, 12, Client.Texts.Txt(1080112, "Används av")
+      SetCellValue 0, 5, Client.Texts.Txt(1080113, "Prioritet")
+      SetCellValue 0, 6, Client.Texts.Txt(1080105, "Organisation")
+      SetCellValue 0, 7, Client.Texts.Txt(1080106, "Typ")
+      SetCellValue 0, 8, Client.Texts.Txt(1080107, "Längd")
+      SetCellValue 0, 9, Client.Texts.Txt(1080108, "Intalare")
+      SetCellValue 0, 10, Client.Texts.Txt(1080109, "Intalat")
+      SetCellValue 0, 11, Client.Texts.Txt(1080110, "Utskrivare")
+      SetCellValue 0, 12, Client.Texts.Txt(1080111, "Status")
+      SetCellValue 0, 13, Client.Texts.Txt(1080112, "Används av")
    
-      .RowHeadersShow = Client.SysSettings.ShowDictId
+      .RowHeadersShow = Client.SysSettings.DictListShowDictId
    End With
 End Sub
 Public Sub GetData(OrgId As Long)
@@ -267,6 +269,7 @@ Public Sub GetData(OrgId As Long)
    Dim ReSort As Boolean
    Dim PrevTimeStamp As Double
    Dim DictIdForSelectedRow As Long
+   Dim ToMany As Boolean
    
    loadingdata = True
    
@@ -279,7 +282,7 @@ Public Sub GetData(OrgId As Long)
       
       DictIdForSelectedRow = lstDict.GetRowItemData(lstDict.SelModeIndex)
       PrevTimeStamp = CurrentTimeStamp
-      CurrentTimeStamp = Client.DictMgr.CreateList(OrgId, CurrentTimeStamp)
+      CurrentTimeStamp = Client.DictMgr.CreateList(OrgId, CurrentTimeStamp, ToMany)
       Do While Client.DictMgr.ListNextItem(Dict)
          Row = FindRowFromDictId(Dict)
          If Row <= 0 Then
@@ -318,7 +321,7 @@ Public Sub GetData(OrgId As Long)
       CurrentTimeStamp = 0
       
       'SetBusy
-      CurrentTimeStamp = Client.DictMgr.CreateList(OrgId, CurrentTimeStamp)
+      CurrentTimeStamp = Client.DictMgr.CreateList(OrgId, CurrentTimeStamp, ToMany)
       
       lstDict.MaxRows = 0
       lstDict.ClearRange -1, -1, -1, -1, True
@@ -329,7 +332,9 @@ Public Sub GetData(OrgId As Long)
          Row = Row + 1
       Loop
       lstDict.UserColAction = UserColActionSort
-      'SetNotBusy
+      If ToMany Then
+         MsgBox Client.Texts.Txt(1080114, "För många diktat funna. Avgränsa sökvillkor!"), vbOKOnly
+      End If
    End If
    loadingdata = False
    Set Dict = Nothing
@@ -386,6 +391,7 @@ Private Sub UpdateRowInList(Row As Integer, Dict As clsDict)
       C = C + 1: SetCellValue Row, C, Dict.Pat.PatIdFormatted
       C = C + 1: SetCellValue Row, C, Dict.Pat.PatName
       C = C + 1: SetCellValue Row, C, Format$(Dict.ExpiryDate, "ddddd")
+      C = C + 1: SetCellValue Row, C, Dict.PriorityText
       C = C + 1: SetCellValue Row, C, Dict.OrgText
       C = C + 1: SetCellValue Row, C, Dict.DictTypeText
       C = C + 1: SetCellValue Row, C, FormatLength(Dict.SoundLength)

@@ -6,13 +6,13 @@ BEGIN
   DataSourceBehavior  = 0  'vbNone
   MTSTransactionMode  = 0  'NotAnMTSObject
 END
-Attribute VB_Name = "clsExtSystem"
+Attribute VB_Name = "clsOrgDictType"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Public ExtSystem As String
-Public ExtSystemPw As String
-
+Public OrgId As Long
+Public DictTypeId As Integer
+Public Def As Boolean

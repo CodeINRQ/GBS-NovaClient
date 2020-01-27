@@ -20,9 +20,9 @@ Private mPatId2      As String
 Public Property Get PatIdFormatted() As String
 
    If Len(mPatId1) = 12 Then
-      PatIdFormatted = Left$(mPatId1, 8) & "-" & Mid$(mPatId1, 9)
+      PatIdFormatted = Left$(mPatId1, 8) & "-" & mId$(mPatId1, 9)
    ElseIf Len(mPatId1) = 10 Then
-      PatIdFormatted = Left$(mPatId1, 6) & "-" & Mid$(mPatId1, 7)
+      PatIdFormatted = Left$(mPatId1, 6) & "-" & mId$(mPatId1, 7)
    Else
       PatIdFormatted = mPatId1
    End If
@@ -30,9 +30,9 @@ End Property
 Public Property Get PatId2Formatted() As String
 
    If Len(mPatId2) = 12 Then
-      PatId2Formatted = Left$(mPatId2, 8) & "-" & Mid$(mPatId2, 9)
+      PatId2Formatted = Left$(mPatId2, 8) & "-" & mId$(mPatId2, 9)
    ElseIf Len(mPatId2) = 10 Then
-      PatId2Formatted = Left$(mPatId2, 6) & "-" & Mid$(mPatId2, 7)
+      PatId2Formatted = Left$(mPatId2, 6) & "-" & mId$(mPatId2, 7)
    Else
       PatId2Formatted = mPatId2
    End If

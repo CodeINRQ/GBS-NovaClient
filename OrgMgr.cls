@@ -114,6 +114,18 @@ Public Sub GetOrgFromId(ByRef Org As clsOrg, OrgId As Long)
       End If
    Next
 End Sub
+Public Function IndexFromId(OrgId As Long) As Integer
+
+   Dim I As Integer
+   
+   For I = 0 To mOrgCount - 1
+      If mOrgArr(I).OrgId = OrgId Then
+         IndexFromId = I
+         Exit For
+      End If
+   Next
+   IndexFromId = -1
+End Function
 Public Function TextFromId(OrgId As Long) As String
 
    Dim I As Integer

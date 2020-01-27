@@ -1,153 +1,56 @@
 VERSION 5.00
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
 Begin VB.UserControl ucDSSRecGUI 
-   ClientHeight    =   465
+   ClientHeight    =   510
    ClientLeft      =   0
    ClientTop       =   0
    ClientWidth     =   8370
-   ScaleHeight     =   465
+   ScaleHeight     =   510
    ScaleWidth      =   8370
-   Begin VB.PictureBox picFrame 
+   Begin VB.PictureBox picRecording 
       AutoSize        =   -1  'True
-      BackColor       =   &H8000000D&
+      BackColor       =   &H00C0FFC0&
       BorderStyle     =   0  'None
       Height          =   495
-      HelpContextID   =   1090000
-      Left            =   0
+      Left            =   3250
       ScaleHeight     =   495
-      ScaleWidth      =   8415
-      TabIndex        =   0
+      ScaleWidth      =   1440
+      TabIndex        =   17
       Top             =   0
-      Width           =   8415
-      Begin VB.PictureBox picPlayer 
-         Appearance      =   0  'Flat
-         BackColor       =   &H80000005&
-         BorderStyle     =   0  'None
-         ForeColor       =   &H80000008&
-         Height          =   375
-         Left            =   0
-         ScaleHeight     =   375
-         ScaleWidth      =   3135
-         TabIndex        =   9
-         Top             =   10
-         Width           =   3135
-         Begin VB.OptionButton optPlayer 
-            Height          =   375
-            Index           =   0
-            Left            =   0
-            Style           =   1  'Graphical
-            TabIndex        =   17
-            Top             =   0
-            Width           =   375
-         End
-         Begin VB.OptionButton optPlayer 
-            Height          =   375
-            Index           =   1
-            Left            =   375
-            Style           =   1  'Graphical
-            TabIndex        =   16
-            Top             =   0
-            Width           =   375
-         End
-         Begin VB.OptionButton optPlayer 
-            Height          =   375
-            Index           =   2
-            Left            =   750
-            Style           =   1  'Graphical
-            TabIndex        =   15
-            Top             =   0
-            Width           =   375
-         End
-         Begin VB.OptionButton optPlayer 
-            Height          =   375
-            Index           =   3
-            Left            =   1200
-            Style           =   1  'Graphical
-            TabIndex        =   14
-            Top             =   0
-            Width           =   375
-         End
-         Begin VB.OptionButton optPlayer 
-            Height          =   375
-            Index           =   4
-            Left            =   1560
-            Style           =   1  'Graphical
-            TabIndex        =   13
-            Top             =   0
-            Width           =   375
-         End
-         Begin VB.OptionButton optPlayer 
-            Height          =   375
-            Index           =   5
-            Left            =   1920
-            Style           =   1  'Graphical
-            TabIndex        =   12
-            Top             =   0
-            Width           =   375
-         End
-         Begin VB.OptionButton optPlayer 
-            Height          =   375
-            Index           =   6
-            Left            =   2280
-            Style           =   1  'Graphical
-            TabIndex        =   11
-            Top             =   0
-            Width           =   375
-         End
-         Begin VB.OptionButton optPlayer 
-            Height          =   375
-            Index           =   7
-            Left            =   2760
-            Style           =   1  'Graphical
-            TabIndex        =   10
-            Top             =   0
-            Width           =   375
-         End
-      End
-      Begin VB.OptionButton optInsert 
-         Caption         =   "&Infoga"
-         Height          =   195
-         Index           =   0
-         Left            =   3720
-         TabIndex        =   8
-         Tag             =   "1090101"
-         ToolTipText     =   "Infoga diktat vid inspelning"
-         Top             =   10
-         Width           =   975
-      End
-      Begin VB.OptionButton optInsert 
-         Caption         =   "&Ersätt"
-         Height          =   195
-         Index           =   1
-         Left            =   3720
-         TabIndex        =   7
-         Tag             =   "1090102"
-         ToolTipText     =   "Ersätt diktat vid inspelning"
-         Top             =   250
-         Value           =   -1  'True
-         Width           =   975
-      End
+      Width           =   1440
       Begin VB.PictureBox picEdit 
          AutoSize        =   -1  'True
          BackColor       =   &H8000000D&
          BorderStyle     =   0  'None
          Height          =   495
-         Left            =   3240
+         Left            =   0
          ScaleHeight     =   495
          ScaleWidth      =   495
-         TabIndex        =   2
-         Top             =   10
+         TabIndex        =   20
+         Top             =   0
          Width           =   495
          Begin VB.CommandButton cmdEdit 
-            Enabled         =   0   'False
             Height          =   200
-            Index           =   3
+            Index           =   0
             Left            =   0
             Picture         =   "DSSRecGUI.ctx":0000
             Style           =   1  'Graphical
-            TabIndex        =   6
-            Tag             =   "1090107"
-            ToolTipText     =   "Avmarkera"
+            TabIndex        =   24
+            Tag             =   "1090105"
+            ToolTipText     =   "Markera start"
+            Top             =   0
+            Width           =   200
+         End
+         Begin VB.CommandButton cmdEdit 
+            Enabled         =   0   'False
+            Height          =   200
+            Index           =   1
+            Left            =   195
+            Picture         =   "DSSRecGUI.ctx":058A
+            Style           =   1  'Graphical
+            TabIndex        =   23
+            Tag             =   "1090108"
+            ToolTipText     =   "Radera markerad del"
             Top             =   195
             Width           =   200
          End
@@ -155,9 +58,9 @@ Begin VB.UserControl ucDSSRecGUI
             Height          =   200
             Index           =   2
             Left            =   195
-            Picture         =   "DSSRecGUI.ctx":058A
+            Picture         =   "DSSRecGUI.ctx":0B14
             Style           =   1  'Graphical
-            TabIndex        =   5
+            TabIndex        =   22
             Tag             =   "1090106"
             ToolTipText     =   "Markera slut"
             Top             =   0
@@ -166,120 +69,39 @@ Begin VB.UserControl ucDSSRecGUI
          Begin VB.CommandButton cmdEdit 
             Enabled         =   0   'False
             Height          =   200
-            Index           =   1
-            Left            =   195
-            Picture         =   "DSSRecGUI.ctx":0B14
-            Style           =   1  'Graphical
-            TabIndex        =   4
-            Tag             =   "1090108"
-            ToolTipText     =   "Radera markerad del"
-            Top             =   195
-            Width           =   200
-         End
-         Begin VB.CommandButton cmdEdit 
-            Height          =   200
-            Index           =   0
+            Index           =   3
             Left            =   0
             Picture         =   "DSSRecGUI.ctx":109E
             Style           =   1  'Graphical
-            TabIndex        =   3
-            Tag             =   "1090105"
-            ToolTipText     =   "Markera start"
-            Top             =   0
+            TabIndex        =   21
+            Tag             =   "1090107"
+            ToolTipText     =   "Avmarkera"
+            Top             =   195
             Width           =   200
          End
       End
-      Begin CareTalk.ucVUmeter ucVUmeter 
-         Height          =   80
-         Left            =   0
-         TabIndex        =   1
-         Top             =   400
-         Width           =   3135
-         _ExtentX        =   5530
-         _ExtentY        =   132
-      End
-      Begin MSComctlLib.Slider sldPos 
-         Height          =   315
-         Left            =   4665
-         TabIndex        =   18
-         Top             =   190
-         Width           =   1215
-         _ExtentX        =   2143
-         _ExtentY        =   556
-         _Version        =   393216
-         LargeChange     =   10
-         SmallChange     =   5
-         Max             =   100
-         SelectRange     =   -1  'True
-         TickStyle       =   1
-         TickFrequency   =   20
-      End
-      Begin MSComctlLib.Slider sldVol 
-         Height          =   255
-         Left            =   5880
+      Begin VB.OptionButton optInsert 
+         Caption         =   "&Ersätt"
+         Height          =   195
+         Index           =   1
+         Left            =   480
          TabIndex        =   19
-         Top             =   190
-         Width           =   1245
-         _ExtentX        =   2196
-         _ExtentY        =   450
-         _Version        =   393216
-         LargeChange     =   20
-         SmallChange     =   5
-         Max             =   100
-         SelStart        =   50
-         TickStyle       =   1
-         TickFrequency   =   20
-         Value           =   50
+         Tag             =   "1090102"
+         ToolTipText     =   "Ersätt diktat vid inspelning"
+         Top             =   240
+         Value           =   -1  'True
+         Width           =   975
       End
-      Begin MSComctlLib.Slider sldSpeed 
-         Height          =   255
-         Left            =   7125
-         TabIndex        =   20
-         Top             =   190
-         Width           =   1245
-         _ExtentX        =   2196
-         _ExtentY        =   450
-         _Version        =   393216
-         LargeChange     =   17
-         SmallChange     =   5
-         Min             =   15
-         Max             =   100
-         SelStart        =   50
-         TickStyle       =   1
-         TickFrequency   =   20
-         Value           =   50
-      End
-      Begin VB.Label lblLength 
-         Alignment       =   2  'Center
-         BackStyle       =   0  'Transparent
-         Caption         =   "0"
-         Height          =   255
-         Left            =   4545
-         TabIndex        =   23
+      Begin VB.OptionButton optInsert 
+         Caption         =   "&Infoga"
+         Height          =   195
+         Index           =   0
+         Left            =   480
+         TabIndex        =   18
+         Tag             =   "1090101"
+         ToolTipText     =   "Infoga diktat vid inspelning"
          Top             =   0
-         Width           =   1515
-      End
-      Begin VB.Label lblVolume 
-         Alignment       =   2  'Center
-         BackStyle       =   0  'Transparent
-         Caption         =   "&Volym"
-         Height          =   255
-         Left            =   5880
-         TabIndex        =   22
-         Tag             =   "1090103"
-         Top             =   0
-         Width           =   1245
-      End
-      Begin VB.Label lblSpeed 
-         Alignment       =   2  'Center
-         BackStyle       =   0  'Transparent
-         Caption         =   "&Hastighet"
-         Height          =   255
-         Left            =   7125
-         TabIndex        =   21
-         Tag             =   "1090104"
-         Top             =   0
-         Width           =   1245
+         Width           =   975
       End
    End
    Begin VB.Timer tmrBlink 
@@ -388,6 +210,235 @@ Begin VB.UserControl ucDSSRecGUI
          EndProperty
       EndProperty
    End
+   Begin VB.PictureBox picAutoRew 
+      AutoSize        =   -1  'True
+      BackColor       =   &H0000FFFF&
+      BorderStyle     =   0  'None
+      Height          =   495
+      Left            =   3120
+      ScaleHeight     =   495
+      ScaleWidth      =   1575
+      TabIndex        =   25
+      Top             =   0
+      Width           =   1575
+      Begin MSComctlLib.Slider sldAutoRew 
+         Height          =   255
+         Left            =   240
+         TabIndex        =   26
+         Top             =   195
+         Width           =   1245
+         _ExtentX        =   2196
+         _ExtentY        =   450
+         _Version        =   393216
+         LargeChange     =   1000
+         SmallChange     =   500
+         Max             =   3000
+         SelStart        =   1500
+         TickStyle       =   1
+         TickFrequency   =   500
+         Value           =   1500
+      End
+      Begin VB.Label lblAutoRew 
+         Alignment       =   2  'Center
+         BackStyle       =   0  'Transparent
+         Caption         =   "Kort återspoln"
+         Height          =   255
+         Left            =   240
+         TabIndex        =   27
+         Tag             =   "1090109"
+         Top             =   0
+         Width           =   1245
+      End
+   End
+   Begin VB.PictureBox picFrame 
+      AutoSize        =   -1  'True
+      BackColor       =   &H8000000D&
+      BorderStyle     =   0  'None
+      Height          =   495
+      HelpContextID   =   1090000
+      Left            =   0
+      ScaleHeight     =   495
+      ScaleWidth      =   8415
+      TabIndex        =   0
+      Top             =   0
+      Width           =   8415
+      Begin VB.PictureBox picPlayer 
+         Appearance      =   0  'Flat
+         BackColor       =   &H80000005&
+         BorderStyle     =   0  'None
+         ForeColor       =   &H80000008&
+         Height          =   375
+         Left            =   0
+         ScaleHeight     =   375
+         ScaleWidth      =   3135
+         TabIndex        =   2
+         Top             =   10
+         Width           =   3135
+         Begin VB.OptionButton optPlayer 
+            Height          =   375
+            Index           =   0
+            Left            =   0
+            Style           =   1  'Graphical
+            TabIndex        =   10
+            Top             =   0
+            Width           =   375
+         End
+         Begin VB.OptionButton optPlayer 
+            Height          =   375
+            Index           =   1
+            Left            =   375
+            Style           =   1  'Graphical
+            TabIndex        =   9
+            Top             =   0
+            Width           =   375
+         End
+         Begin VB.OptionButton optPlayer 
+            Height          =   375
+            Index           =   2
+            Left            =   750
+            Style           =   1  'Graphical
+            TabIndex        =   8
+            Top             =   0
+            Width           =   375
+         End
+         Begin VB.OptionButton optPlayer 
+            Height          =   375
+            Index           =   3
+            Left            =   1200
+            Style           =   1  'Graphical
+            TabIndex        =   7
+            Top             =   0
+            Width           =   375
+         End
+         Begin VB.OptionButton optPlayer 
+            Height          =   375
+            Index           =   4
+            Left            =   1560
+            Style           =   1  'Graphical
+            TabIndex        =   6
+            Top             =   0
+            Width           =   375
+         End
+         Begin VB.OptionButton optPlayer 
+            Height          =   375
+            Index           =   5
+            Left            =   1920
+            Style           =   1  'Graphical
+            TabIndex        =   5
+            Top             =   0
+            Width           =   375
+         End
+         Begin VB.OptionButton optPlayer 
+            Height          =   375
+            Index           =   6
+            Left            =   2280
+            Style           =   1  'Graphical
+            TabIndex        =   4
+            Top             =   0
+            Width           =   375
+         End
+         Begin VB.OptionButton optPlayer 
+            Height          =   375
+            Index           =   7
+            Left            =   2760
+            Style           =   1  'Graphical
+            TabIndex        =   3
+            Top             =   0
+            Width           =   375
+         End
+      End
+      Begin CareTalk.ucVUmeter ucVUmeter 
+         Height          =   120
+         Left            =   0
+         TabIndex        =   1
+         Top             =   400
+         Width           =   3135
+         _ExtentX        =   5530
+         _ExtentY        =   212
+      End
+      Begin MSComctlLib.Slider sldPos 
+         Height          =   315
+         Left            =   4665
+         TabIndex        =   11
+         Top             =   190
+         Width           =   1215
+         _ExtentX        =   2143
+         _ExtentY        =   556
+         _Version        =   393216
+         LargeChange     =   10
+         SmallChange     =   5
+         Max             =   100
+         SelectRange     =   -1  'True
+         TickStyle       =   1
+         TickFrequency   =   20
+      End
+      Begin MSComctlLib.Slider sldVol 
+         Height          =   255
+         Left            =   5880
+         TabIndex        =   12
+         Top             =   190
+         Width           =   1245
+         _ExtentX        =   2196
+         _ExtentY        =   450
+         _Version        =   393216
+         LargeChange     =   20
+         SmallChange     =   5
+         Max             =   100
+         SelStart        =   50
+         TickStyle       =   1
+         TickFrequency   =   20
+         Value           =   50
+      End
+      Begin MSComctlLib.Slider sldSpeed 
+         Height          =   255
+         Left            =   7125
+         TabIndex        =   13
+         Top             =   190
+         Width           =   1245
+         _ExtentX        =   2196
+         _ExtentY        =   450
+         _Version        =   393216
+         LargeChange     =   20
+         SmallChange     =   5
+         Max             =   100
+         SelStart        =   50
+         TickStyle       =   1
+         TickFrequency   =   20
+         Value           =   50
+      End
+      Begin VB.Label lblLength 
+         Alignment       =   2  'Center
+         BackStyle       =   0  'Transparent
+         Caption         =   "0"
+         Height          =   255
+         Left            =   4545
+         TabIndex        =   16
+         Top             =   0
+         Width           =   1515
+      End
+      Begin VB.Label lblVolume 
+         Alignment       =   2  'Center
+         BackStyle       =   0  'Transparent
+         Caption         =   "&Volym"
+         Height          =   255
+         Left            =   5880
+         TabIndex        =   15
+         Tag             =   "1090103"
+         Top             =   0
+         Width           =   1245
+      End
+      Begin VB.Label lblSpeed 
+         Alignment       =   2  'Center
+         BackStyle       =   0  'Transparent
+         Caption         =   "&Hastighet"
+         Height          =   255
+         Left            =   7125
+         TabIndex        =   14
+         Tag             =   "1090104"
+         Top             =   0
+         Width           =   1245
+      End
+   End
    Begin VB.Image imgCurrentIcon 
       Height          =   375
       Left            =   1440
@@ -409,6 +460,9 @@ Private NowPlayingFilename As String
 Private InPositioning As Boolean
 Private LastState As Gru_State
 Private InGruEventHandler As Boolean
+Private mAutoRewind As Integer    'ms
+Private FileCLosedDueToLostHw As Boolean
+Private LastOkPos As Long
 
 Private mReadOnly As Boolean
 
@@ -441,6 +495,16 @@ Private Const editStart = 0
 Private Const editDelete = 1
 Private Const editEnd = 2
 Private Const editClear = 3
+
+Public Property Let AutoRewind(MilliSecond As Integer)
+
+   mAutoRewind = MilliSecond
+   sldAutoRew.Value = mAutoRewind
+End Property
+Public Property Get AutoRewind() As Integer
+
+   AutoRewind = mAutoRewind
+End Property
 
 Public Sub ExternalButton(B As PlayerButEnum)
 
@@ -624,6 +688,7 @@ End Sub
 Private Sub DSSRec_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long)
 
    Dim S As String
+   Dim Hw As Gru_Harware
    
    InGruEventHandler = True
    Select Case EventType
@@ -631,6 +696,9 @@ Private Sub DSSRec_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long
          If InPositioning Then
             InGruEventHandler = False
             Exit Sub
+         End If
+         If Not FileCLosedDueToLostHw Then
+            LastOkPos = Data
          End If
          UpdatePos Data
       Case GRU_STATECHANGED
@@ -671,6 +739,21 @@ Private Sub DSSRec_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long
          End If
       Case GRU_INPUTCHANGE
          ucVUmeter.Value = Data
+      Case GRU_HWCHANGED
+         If Len(NowPlayingFilename) > 0 Then
+            If FileCLosedDueToLostHw Then
+               FileCLosedDueToLostHw = False
+               ReOpenNowPlayingFile
+            Else
+               FileCLosedDueToLostHw = True
+               StopAndClose
+               DSSRec.GetHardWare Hw
+               If Hw <> GRU_HW_NONE Then
+                  FileCLosedDueToLostHw = False
+                  ReOpenNowPlayingFile
+               End If
+            End If
+         End If
    End Select
    InGruEventHandler = False
 End Sub
@@ -702,6 +785,7 @@ Private Function FormatPos(PosInMilliSec As Long, LenInMilliSec As Long) As Stri
 
    FormatPos = FormatLength(PosInMilliSec / 1000) & " / " & FormatLength(LenInMilliSec / 1000)
 End Function
+
 Private Sub sldPos_Scroll()
 
    Dim L As Long
@@ -715,12 +799,18 @@ End Sub
 
 Private Sub sldSpeed_Scroll()
 
-   DSSRec.SetPlaySpeed (sldSpeed.Value + 50) * 10
+   DSSRec.SetPlaySpeed (sldSpeed.Value + 65) * 10
 End Sub
 
 Private Sub sldVol_Scroll()
 
    DSSRec.SetPlayBackVolume CInt(sldVol.Value * 0.8) + 20
+End Sub
+
+Private Sub sldAutoRew_Scroll()
+
+   mAutoRewind = sldAutoRew.Value
+   DSSRec.SetBackspace (CLng(mAutoRewind))
 End Sub
 
 Public Sub OpenAndPlay(Filename As String)
@@ -743,6 +833,17 @@ Private Sub OpenFile(Filename As String)
    End If
    DSSRec.GetLength L
    ShowPos 0, L
+End Sub
+Private Sub ReOpenNowPlayingFile()
+
+   Dim L As Long
+   
+   If DSSRec.LoadFile(NowPlayingFilename, CInt(mReadOnly), CInt(False)) = 0 Then
+      EnableControls True
+   End If
+   DSSRec.GetLength L
+   DSSRec.MoveTo LastOkPos
+   ShowPos LastOkPos, L
 End Sub
 Public Sub CreateNewFile(Filename As String)
 
@@ -769,7 +870,7 @@ Private Sub InitPlayerBeforeUse()
    optInsert(1).Value = True
    
    DSSRec.SetWindingSpeed 8000
-   DSSRec.SetBackspace 2000
+   DSSRec.SetBackspace mAutoRewind
    
    DSSRec.GetPlaySpeed Speed
    sldSpeed.Value = Speed / 10 - 50
@@ -798,6 +899,8 @@ Private Sub EnableControls(Value As Boolean)
    optInsert(0).Enabled = Not mReadOnly And Client.Hw = GRU_HW_RECORD
    optInsert(1).Enabled = Not mReadOnly And Client.Hw = GRU_HW_RECORD
    picEdit.Enabled = Not mReadOnly And Client.Hw = GRU_HW_RECORD
+   picRecording.Visible = (Not mReadOnly) And Client.Hw = GRU_HW_RECORD
+   picAutoRew.Visible = Not picRecording.Visible
    sldPos.Enabled = Value
    If Not Value Then
       sldPos.Value = 0
@@ -841,8 +944,11 @@ End Sub
 Private Sub UserControl_Initialize()
 
    picFrame.BackColor = BackColor
+   picRecording.BackColor = BackColor
+   picAutoRew.BackColor = BackColor
    Trc "ucDSS Initialize", ""
    ucVUmeter.Value = 0
+   mAutoRewind = 1500
    InitPlayerButtons
    InitEditButtons
 End Sub

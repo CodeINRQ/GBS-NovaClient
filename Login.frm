@@ -252,6 +252,11 @@ Private Sub cmdOK_Click()
    Me.Hide
 End Sub
 
+Private Sub Form_Activate()
+
+   SetWindowTopMostAndForeground Me
+End Sub
+
 Private Sub Form_Load()
 
    CenterAndTranslateForm Me, frmMain

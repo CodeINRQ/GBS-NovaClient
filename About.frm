@@ -167,15 +167,15 @@ Private Sub Form_Load()
    
    CenterAndTranslateForm Me, frmMain
     
-   Me.Caption = Client.Texts.Txt(1020100, "Om") & " " & App.Title
+   Me.Caption = Client.Texts.Txt(1020100, "Om") & " " & Client.Texts.Txt(1000417, "CareTalk")
    Me.Icon = frmMain.Icon
    lblVersion.Caption = Client.Texts.Txt(1020101, "Version") & " " & ApplicationVersion
-   lblTitle.Caption = App.Title
+   lblTitle.Caption = Client.Texts.Txt(1000417, "CareTalk")
    lblDescription.Caption = Client.Texts.Txt(1020102, "CareTalk - Ett modernt system för digital diktering") & vbLf & vbLf & _
                             Client.Texts.Txt(1020103, "Programmet utvecklas av") & vbLf & Client.Texts.Txt(1020104, "Grundig Svenska AB") & vbLf & vbLf & _
-                            "Utrustning: " & DevName & vbLf & _
-                            "Serienr: " & DevSerialno & vbLf & _
-                            "Firmware: " & DevFirmwareVersion
+                            Client.Texts.Txt(1020109, "Utrustning:") & " " & DevName & vbLf & _
+                            Client.Texts.Txt(1020110, "Serienr:") & " " & DevSerialno & vbLf & _
+                            Client.Texts.Txt(1020111, "Firmware:") & " " & DevFirmwareVersion
    picIcon.Picture = frmMain.Icon
 End Sub
 
@@ -235,7 +235,7 @@ Public Function GetKeyValue(KeyRoot As Long, KeyName As String, SubKeyRef As Str
                         
     If (rc <> ERROR_SUCCESS) Then GoTo GetKeyError          ' Handle Errors
     
-    If (Asc(Mid(tmpVal, KeyValSize, 1)) = 0) Then           ' Win95 Adds Null Terminated String...
+    If (Asc(mId(tmpVal, KeyValSize, 1)) = 0) Then           ' Win95 Adds Null Terminated String...
         tmpVal = Left(tmpVal, KeyValSize - 1)               ' Null Found, Extract From String
     Else                                                    ' WinNT Does NOT Null Terminate String...
         tmpVal = Left(tmpVal, KeyValSize)                   ' Null Not Found, Extract String Only
@@ -248,7 +248,7 @@ Public Function GetKeyValue(KeyRoot As Long, KeyName As String, SubKeyRef As Str
         KeyVal = tmpVal                                     ' Copy String Value
     Case REG_DWORD                                          ' Double Word Registry Key Data Type
         For I = Len(tmpVal) To 1 Step -1                    ' Convert Each Bit
-            KeyVal = KeyVal + Hex(Asc(Mid(tmpVal, I, 1)))   ' Build Value Char. By Char.
+            KeyVal = KeyVal + Hex(Asc(mId(tmpVal, I, 1)))   ' Build Value Char. By Char.
         Next
         KeyVal = Format$("&h" + KeyVal)                     ' Convert Double Word To String
     End Select

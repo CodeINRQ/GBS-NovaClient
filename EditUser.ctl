@@ -12,25 +12,25 @@ Begin VB.UserControl ucEditUser
       Height          =   7095
       HelpContextID   =   1130000
       Left            =   0
-      TabIndex        =   0
+      TabIndex        =   1
       Tag             =   "1130101"
       Top             =   0
       Width           =   9135
       Begin VB.CommandButton cmdNew 
-         Caption         =   "Lägg till..."
+         Caption         =   "&Lägg till..."
          Height          =   300
          Left            =   7800
-         TabIndex        =   2
+         TabIndex        =   3
          Tag             =   "1130102"
          Top             =   240
          Width           =   1215
       End
       Begin VB.CommandButton cmdChange 
-         Caption         =   "Ändra..."
+         Caption         =   "&Ändra..."
          Enabled         =   0   'False
          Height          =   300
          Left            =   7800
-         TabIndex        =   1
+         TabIndex        =   2
          Tag             =   "1130103"
          Top             =   600
          Width           =   1215
@@ -39,7 +39,7 @@ Begin VB.UserControl ucEditUser
          Height          =   6255
          HelpContextID   =   1080000
          Left            =   120
-         TabIndex        =   3
+         TabIndex        =   0
          Top             =   240
          Width           =   7575
          _Version        =   458752
@@ -91,10 +91,14 @@ Public Sub Init()
    Dim LstIdx As Integer
    Dim Usr As clsUser
    Dim Row As Integer
-   
+   Static SettingDone As Boolean
+     
    lstUsers.MaxRows = 0
    lstUsers.ClearRange -1, -1, -1, -1, True
-   RestoreSettings
+   If Not SettingDone Then
+      RestoreSettings
+      SettingDone = True
+   End If
    Row = 1
    For I = 0 To Client.UserMgr.Count - 1
       Client.UserMgr.GetUserFromIndex Usr, I
@@ -106,6 +110,7 @@ Public Sub Init()
          End If
       End If
    Next I
+   lstUsers.UserColAction = UserColActionSort
    SetEnabled
 End Sub
 Private Sub RestoreSettings()
@@ -183,8 +188,7 @@ End Sub
 
 Private Sub cmdChange_Click()
 
-   Client.UserMgr.GetUserFromId CurrUser, CLng(lstUsers.GetRowItemData(lstUsers.ActiveRow))
-   EditCurrUser
+   ChangeOneUser
 End Sub
 
 Private Sub cmdNew_Click()
@@ -214,7 +218,6 @@ Private Sub frmEdit_SaveClicked()
    SetEnabled
 End Sub
 
-
 Private Sub lstUsers_AfterUserSort(ByVal Col As Long)
 
    Dim Sortkeys As Variant
@@ -232,8 +235,24 @@ Private Sub lstUsers_AfterUserSort(ByVal Col As Long)
    lstUsers.Sort -1, -1, -1, -1, SortByRow, Sortkeys, SortKeyOrder
 End Sub
 
+Private Sub lstUsers_DblClick(ByVal Col As Long, ByVal Row As Long)
+
+   ChangeOneUser
+End Sub
+
+Private Sub lstUsers_KeyPress(KeyAscii As Integer)
+   
+   ChangeOneUser
+End Sub
+
 Private Sub UserControl_Resize()
 
    fraUsers.Move 0, 0, fraUsers.Width, UserControl.ScaleHeight
    lstUsers.Move 120, 240, lstUsers.Width, UserControl.ScaleHeight - 280
 End Sub
+Private Sub ChangeOneUser()
+
+   Client.UserMgr.GetUserFromId CurrUser, CLng(lstUsers.GetRowItemData(lstUsers.ActiveRow))
+   EditCurrUser
+End Sub
+

@@ -30,3 +30,6 @@ Public CmdDelimit As Integer
 
 Public Obj As String
 
+Public CtCmdFile As String
+Public CtCmdFileDate As Date
+

@@ -82,6 +82,17 @@ Public Function CheckExtSystem(ExtSys As String) As Boolean
    Next I
    CheckExtSystem = False
 End Function
+Public Function GetExtSystemPassword(ExtSys As String) As String
+
+   Dim I As Integer
+   
+   For I = 0 To mExtSystemCount - 1
+      If UCase$(ExtSys) = UCase$(mExtSystemArr(I).ExtSystem) Then
+         GetExtSystemPassword = mExtSystemArr(I).ExtSystemPw
+         Exit Function
+      End If
+   Next I
+End Function
 Public Function GetIntDictTypeId(ExtSys As String, ExtDictType As String) As Long
 
    Dim I As Integer

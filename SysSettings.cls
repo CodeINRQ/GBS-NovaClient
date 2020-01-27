@@ -20,7 +20,12 @@ Private mDeleteSound As Integer
 Private mDeleteDictInfo As Integer
 Private mDeleteHistory As Integer
 Public DeleteLogg As Integer
-Private mShowDictId As Boolean
+
+Public DictListShowDictId As Boolean
+Public DictListUpdateK As Long
+Public DictListUpdateM As Long
+Public DictListCurrStatusStart As Long
+Public DictListCurrStatusEnd As Long
 
 Public VoiceExpressActive As Boolean
 Public VoiceExpressShowTab As Boolean
@@ -31,6 +36,7 @@ Public DictInfoDefaultDictTypeId As Long
 Public DictInfoDefaultPriorityId As Long
 Public DictInfoMandatoryPatId As Boolean
 Public DictInfoMandatoryPatIdCentury As Boolean
+Public DictInfoAlfaInPatid As Boolean
 Public DictInfoMandatoryPatName As Boolean
 Public DictInfoPatIdChecksum As Boolean
 Public DictInfoUseNoPat As Boolean
@@ -42,6 +48,7 @@ Public LoginPasswordMinLength As Long
 Public LoginPasswordCaseSensitive As Boolean
 Public LoginAllowChangePassword As Boolean
 
+Public PlayerForceMicCalib As Boolean
 Public PlayerShowEditButtons As Boolean
 Public PlayerShowOnTop As Boolean
 Public PlayerShowSmallerWindow As Boolean
@@ -63,9 +70,18 @@ Public PlayerKeySpeedDown As Integer
 Public PlayerKeyClose1 As Integer
 Public PlayerKeyClose2 As Integer
 Public PlayerKeyClose3 As Integer
+Public PlayerKeyCloseX As Integer
+Public PlayerKeyClose1Alt As Integer
+Public PlayerKeyClose2Alt As Integer
+Public PlayerKeyClose3Alt As Integer
+Public PlayerKeyCloseXAlt As Integer
+Public PlayerKeyEscape As Integer
+Public PlayerKeyEscapeAlt As Integer
 
 Public DemoAllowGenerate As Boolean
 Public DemoShowTab As Boolean
+
+Public UserAllowChangeHome As Boolean
 
 Public SoundUseImageField As Boolean
 Public SoundChunkSize As Long
@@ -74,11 +90,13 @@ Public CultureDefaultLanguage As String
 Public CultureAllowChange As Boolean
 
 Public LoggEnable As Boolean
+Public LoggFilter As String
 
 Public DictationAuditEnable As Boolean
 
 Public ImportAllowMenu As Boolean
 Public ImportAllowTool As Boolean
+Public ExportAllowMenu As Boolean
 
 Public Property Get Store() As clsStringStore
 
@@ -108,11 +126,17 @@ Public Sub Init(Ty As String)
    Loop
    
    mUseAuthorsSign = mSysSettings.GetBool("WorkFlow", "UseAuthorsSign", False)
+   
    mDeleteSound = mSysSettings.GetLong("Delete", "Sound", -1)
    mDeleteDictInfo = mSysSettings.GetLong("Delete", "DictInfo", -1)
    mDeleteHistory = mSysSettings.GetLong("Delete", "History", -1)
    DeleteLogg = mSysSettings.GetLong("Delete", "Logg", -1)
-   mShowDictId = mSysSettings.GetBool("DictList", "ShowDictId", False)
+   
+   DictListShowDictId = mSysSettings.GetBool("DictList", "ShowDictId", False)
+   DictListUpdateK = mSysSettings.GetLong("DictList", "UpdateK", 10)
+   DictListUpdateM = mSysSettings.GetLong("DictList", "UpdateM", 2000)
+   DictListCurrStatusStart = mSysSettings.GetLong("DictList", "CurrStatusStart", 20)
+   DictListCurrStatusEnd = mSysSettings.GetLong("DictList", "CurrStatusEnd", 60)
    
    VoiceExpressActive = mSysSettings.GetBool("VoiceExpress", "Active", False)
    VoiceExpressShowTab = mSysSettings.GetBool("VoiceExpress", "ShowTab", False)
@@ -123,6 +147,7 @@ Public Sub Init(Ty As String)
    DictInfoDefaultDictTypeId = mSysSettings.GetLong("DictInfo", "DefaultDictTypeId", 3)
    DictInfoMandatoryPatId = mSysSettings.GetBool("DictInfo", "MandatoryPatId", True)
    DictInfoMandatoryPatIdCentury = mSysSettings.GetBool("DictInfo", "MandatoryPatIdCentury", False)
+   DictInfoAlfaInPatid = mSysSettings.GetBool("DictInfo", "AlfaInPatid", False)
    DictInfoMandatoryPatName = mSysSettings.GetBool("DictInfo", "MandatoryPatName", True)
    DictInfoPatIdChecksum = mSysSettings.GetBool("DictInfo", "PatIdChecksum", True)
    DictInfoUseNoPat = mSysSettings.GetBool("DictInfo", "UseNoPat", True)
@@ -134,6 +159,7 @@ Public Sub Init(Ty As String)
    LoginPasswordCaseSensitive = mSysSettings.GetBool("Login", "PasswordCaseSensitive", True)
    LoginAllowChangePassword = mSysSettings.GetBool("Login", "AllowChangePassword", True)
    
+   PlayerForceMicCalib = mSysSettings.GetBool("Player", "ForceMicCalib", True)
    PlayerShowEditButtons = mSysSettings.GetBool("Player", "ShowEditButtons", True)
    PlayerShowOnTop = mSysSettings.GetBool("Player", "ShowOnTop", True)
    PlayerShowSmallerWindow = mSysSettings.GetBool("Player", "ShowSmallerWindow", True)
@@ -154,9 +180,19 @@ Public Sub Init(Ty As String)
    PlayerKeyClose1 = mSysSettings.GetLong("Player", "KeyClose1", vbKeyF10)
    PlayerKeyClose2 = mSysSettings.GetLong("Player", "KeyClose2", vbKeyF11)
    PlayerKeyClose3 = mSysSettings.GetLong("Player", "KeyClose3", vbKeyF12)
+   PlayerKeyCloseX = mSysSettings.GetLong("Player", "KeyCloseX", 0)
+   PlayerKeyEscape = mSysSettings.GetLong("Player", "KeyEscape", 27)
+   PlayerKeyClose1Alt = mSysSettings.GetLong("Player", "KeyClose1Alt", 1073)
+   PlayerKeyClose2Alt = mSysSettings.GetLong("Player", "KeyClose2Alt", 1074)
+   PlayerKeyClose3Alt = mSysSettings.GetLong("Player", "KeyClose3Alt", 1075)
+   PlayerKeyCloseXAlt = mSysSettings.GetLong("Player", "KeyCloseXAlt", 1089)
+   PlayerKeyEscapeAlt = mSysSettings.GetLong("Player", "KeyEscapeAlt", 0)
    
    DemoAllowGenerate = mSysSettings.GetBool("Demo", "AllowGenerate", False)
    DemoShowTab = mSysSettings.GetBool("Demo", "ShowTab", False)
+   
+   UserAllowChangeHome = mSysSettings.GetBool("User", "AllowChangeHome", False)
+   
    
    SoundUseImageField = mSysSettings.GetBool("Sound", "UseImageField", False)
    SoundChunkSize = mSysSettings.GetLong("Sound", "ChunkSize", 8192)
@@ -165,11 +201,14 @@ Public Sub Init(Ty As String)
    CultureAllowChange = mSysSettings.GetBool("Culture", "AllowChange", True)
    
    LoggEnable = mSysSettings.GetBool("Logg", "Enable", True)
+   LoggFilter = mSysSettings.GetString("Logg", "Filter", "")
    
    DictationAuditEnable = mSysSettings.GetBool("DictationAudit", "Enable", True)
    
    ImportAllowMenu = mSysSettings.GetBool("Import", "AllowMenu", True)
    ImportAllowTool = mSysSettings.GetBool("Import", "AllowTool", True)
+
+   ExportAllowMenu = mSysSettings.GetBool("Export", "AllowMenu", True)
 
 End Sub
 Public Sub Save(Ty As String)
@@ -199,8 +238,4 @@ End Property
 Public Property Get DeleteHistory() As Long
 
    DeleteHistory = mDeleteHistory
-End Property
-Public Property Get ShowDictId() As Boolean
-
-   ShowDictId = mShowDictId
 End Property

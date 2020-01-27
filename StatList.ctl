@@ -12,7 +12,7 @@ Begin VB.UserControl ucStatList
       Height          =   255
       HelpContextID   =   1160000
       Left            =   3360
-      TabIndex        =   2
+      TabIndex        =   0
       Tag             =   "1160101"
       Top             =   30
       Width           =   1335
@@ -31,7 +31,7 @@ Begin VB.UserControl ucStatList
       Height          =   4215
       HelpContextID   =   1160000
       Left            =   0
-      TabIndex        =   0
+      TabIndex        =   2
       Top             =   360
       Width           =   9495
       _Version        =   458752
@@ -82,6 +82,10 @@ Dim NextOrgId As Long
 Private RowTotal(SheetMax, MaxRows) As Long
 Private ColTotal(SheetMax, MaxCols) As Long
 Private GrandTotal(SheetMax) As Long
+Public Sub ExportExcelFile(Fn As String)
+
+   lstStat.ExportExcelBookEx Fn, "", ExcelSaveFlagNone
+End Sub
 Public Sub NewLanguage()
 
    Dim I As Integer

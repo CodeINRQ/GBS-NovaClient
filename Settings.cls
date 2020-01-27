@@ -121,15 +121,17 @@ End Sub
 Sub WriteString(Section As String, Entry As String, Value As String)
 
    Dim I As Integer
+   Dim Eno As Long
 
    On Error GoTo WriteString_Err
-   If Len(mIniFilePath) Then
+   If Len(mIniFilePath) > 0 Then
       I = WritePrivateProfileString(Section, Entry, Value, mIniFilePath)
    End If
    Exit Sub
    
 WriteString_Err:
-   ErrorHandle "1300101", Err, 1300101, "Inställningar kan inte sparas", False
+   Eno = Err.Number
+   ErrorHandle "1300101", Eno, 1300101, "Inställningar kan inte sparas", False
    Resume Next
 End Sub
 

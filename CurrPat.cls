@@ -6,13 +6,17 @@ BEGIN
   DataSourceBehavior  = 0  'vbNone
   MTSTransactionMode  = 0  'NotAnMTSObject
 END
-Attribute VB_Name = "clsExtSystem"
+Attribute VB_Name = "clsCurrPat"
 Attribute VB_GlobalNameSpace = False
-Attribute VB_Creatable = False
+Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
-Attribute VB_Exposed = False
+Attribute VB_Exposed = True
 Option Explicit
 
-Public ExtSystem As String
-Public ExtSystemPw As String
+Public PatId As String
+Public PatId2 As String
+Public PatName As String
+Public DictTypeId As Long
+Public OrgId As Long
+Public PriorityId As Long
 

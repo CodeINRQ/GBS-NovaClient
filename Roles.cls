@@ -32,6 +32,14 @@ Public Property Get Supervise() As Boolean
 
    Supervise = GetOneRole("S")
 End Property
+Public Property Let TextEditor(Value As Boolean)
+
+   SetOneRole "X", Value
+End Property
+Public Property Get TextEditor() As Boolean
+
+   TextEditor = GetOneRole("X")
+End Property
 Public Property Let Author(Value As Boolean)
 
    SetOneRole "A", Value
@@ -85,7 +93,7 @@ Private Sub SetOneRole(ByVal R As String, Value As Boolean)
       End If
    Else
       If Pos > 0 Then
-         Roles = Left$(Roles, Pos - 1) & Mid$(Roles, Pos + 1)
+         Roles = Left$(Roles, Pos - 1) & mId$(Roles, Pos + 1)
       End If
    End If
 End Sub

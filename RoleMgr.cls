@@ -19,6 +19,8 @@ Public Function GetRoles(Roles As clsRoles, ByVal GroupId As Long, ByVal OrgId A
 End Function
 Public Sub SaveRoles(Roles As clsRoles)
 
+   Dim Eno As Long
+
    On Error GoTo SaveRoles_Err
    If Len(Roles.Roles) > 0 Then
       Roles.List = True
@@ -28,7 +30,8 @@ Public Sub SaveRoles(Roles As clsRoles)
    Exit Sub
    
 SaveRoles_Err:
-   ErrorHandle "1290101", Err, 1290101, "Rollerna kan inte sparas", False
+   Eno = Err.Number
+   ErrorHandle "1290101", Eno, 1290101, "Rollerna kan inte sparas", False
    Resume Next
 End Sub
 

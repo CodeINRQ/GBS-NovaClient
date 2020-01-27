@@ -22,10 +22,20 @@ Private NumberOfTexts As Integer
 
 Private Sub ChangeHelpFile(LanguageCode As String)
 
-   On Error Resume Next
-   App.HelpFile = App.Path & "\" & App.EXEName & LanguageCode & ".hlp"
-End Sub
+   Dim Fn As String
 
+   Fn = App.Path & "\" & App.EXEName & LanguageCode & ".hlp"
+   If Not FileExist(Fn) Then
+      Fn = App.Path & "\" & App.EXEName & "EN.hlp"
+   End If
+   On Error Resume Next
+   App.HelpFile = Fn
+End Sub
+Private Function FileExist(Pn As String) As Boolean
+
+   On Error Resume Next
+   FileExist = FileLen(Pn) > 0
+End Function
 Public Sub NewLanguage(Språkkod As String)
 
    Dim Fil As Integer
@@ -35,15 +45,18 @@ Public Sub NewLanguage(Språkkod As String)
    Dim Id As String
    Dim S As String
    Dim Filename As String
+   Dim Path As String
+
 
    ChangeHelpFile Språkkod
-   Filename = App.Path & "\Texts." & Språkkod
+   Path = CreateTempPath()
+   Filename = Path & "Texts." & Språkkod
 
    On Error Resume Next
 
    Kill Filename
    
-   frmMain.MhZip.QUnZip = "-s1qa2ws3ed """ & App.Path & "\txts.ctf"" texts." & Språkkod & " """ & App.Path & """"
+   frmMain.MhZip.QUnZip = "-s1qa2ws3ed """ & App.Path & "\txts.ctf"" texts." & Språkkod & " """ & Path & """"
    'frmMain.MhZip.QUnZip = App.Path & "\txts.ctf"" texts." & Språkkod & " """ & App.Path & """"
 
    On Error GoTo 0
@@ -68,9 +81,9 @@ Public Sub NewLanguage(Språkkod As String)
                On Error Resume Next
                IdTable(NumberOfTexts) = CLng(Left$(S, Pos1 - 1))
                If Err = 0 Then
-                  TextTable(NumberOfTexts) = StringReplace(Mid$(S, Pos1 + 1, L), Chr$(133), "...")
+                  TextTable(NumberOfTexts) = StringReplace(mId$(S, Pos1 + 1, L), Chr$(133), "...")
                   If Pos2 > 0 Then
-                     ToolTipTable(NumberOfTexts) = StringReplace(Mid$(S, Pos2 + 1), Chr$(133), "...")
+                     ToolTipTable(NumberOfTexts) = StringReplace(mId$(S, Pos2 + 1), Chr$(133), "...")
                   End If
                   NumberOfTexts = NumberOfTexts + 1
                End If
@@ -119,17 +132,17 @@ Private Sub ApplyToAllForms()
    Next I
 End Sub
 
-Public Sub ApplyToOneForm(F As Form)
+Public Sub ApplyToOneForm(f As Form)
 
    Dim I As Integer
    Dim C As Control
    Dim S As String
 
    On Error Resume Next
-   F.Caption = Txt(CLng(F.Tag), F.Caption)
+   f.Caption = Txt(CLng(f.Tag), f.Caption)
    On Error GoTo ApplyToOneForm_Err
-   For I = 0 To F.Controls.Count - 1
-      Set C = F.Controls(I)
+   For I = 0 To f.Controls.Count - 1
+      Set C = f.Controls(I)
       ApplyToControl C
       If Left$(C.Name, 2) = "uc" Then
          C.NewLanguage

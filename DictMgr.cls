@@ -13,6 +13,13 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
+Public Enum TempDictInfoTypeEnum
+   tdiUpdateInfo = -1
+   tdiEmpty = 0
+   tdiNew = 1
+End Enum
+
+Private Const MaxNumberDictInSearchResult = 500
 Private DictCache(MaxNumberOfDictation) As clsDict
 Private DictCacheNumber As Integer
 Private DictCacheIndex As Integer
@@ -26,6 +33,8 @@ Private DictListTimeStamp As Double
 Private FilterCol As Collection
 Private mSearchFilter As clsFilter
 Private mCurrPatientFilter As clsFilter
+Private LastCurrPatId As String
+Private LastCurrPatId2 As String
 
 Private Function GetDictFromCache(DictId As Long, Dict As clsDict) As Boolean
 
@@ -51,14 +60,16 @@ Public Sub UnlockDict(DictId As Long)
 End Sub
 Public Property Set SearchFilter(Flt As clsFilter)
 
+   DictCacheTimeStampOrg(30050) = -1
    Set mSearchFilter = Flt
 End Property
 Public Property Set CurrPatientFilter(Flt As clsFilter)
 
+   DictCacheTimeStampOrg(30005) = -1
    Set mCurrPatientFilter = Flt
 End Property
 
-Public Function CreateList(ByVal OrgId As Long, TimeStamp As Double) As Double
+Public Function CreateList(ByVal OrgId As Long, TimeStamp As Double, ByRef ToMany As Boolean) As Double
 
    DictListTimeStamp = TimeStamp
    
@@ -68,21 +79,25 @@ Public Function CreateList(ByVal OrgId As Long, TimeStamp As Double) As Double
       Case Is < 30000
          BuildFilterForOrgId OrgId
       Case 30000 'My dictations
-         AddFilter 0, Client.User.UserId, 0, BeingRecorded, BeingRecorded
-         AddFilter 0, Client.User.UserId, 0, Recorded, Recorded
-         AddFilter 0, 0, Client.User.UserId, BeingTrancribed, BeingTrancribed
-         AddFilter 0, Client.User.UserId, 0, BeingTrancribed, BeingTrancribed
-         If Client.SysSettings.UseAuthorsSign Then
-            AddFilter 0, 0, Client.User.UserId, WaitForSign, WaitForSign
-            AddFilter 0, Client.User.UserId, 0, WaitForSign, WaitForSign
-         End If
-         AddFilter 0, 0, Client.User.UserId, Transcribed, Transcribed
-         AddFilter 0, Client.User.UserId, 0, Transcribed, Transcribed
+         AddFilter 0, Client.User.UserId, 0, BeingRecorded, Transcribed
+         AddFilter 0, 0, Client.User.UserId, BeingRecorded, Transcribed
+         'AddFilter 0, Client.User.UserId, 0, BeingRecorded, BeingRecorded
+         'AddFilter 0, Client.User.UserId, 0, Recorded, Recorded
+         'AddFilter 0, 0, Client.User.UserId, BeingTrancribed, BeingTrancribed
+         'AddFilter 0, Client.User.UserId, 0, BeingTrancribed, BeingTrancribed
+         'If Client.SysSettings.UseAuthorsSign Then
+         '   AddFilter 0, 0, Client.User.UserId, WaitForSign, WaitForSign
+         '   AddFilter 0, Client.User.UserId, 0, WaitForSign, WaitForSign
+         'End If
+         'AddFilter 0, 0, Client.User.UserId, Transcribed, Transcribed
+         'AddFilter 0, Client.User.UserId, 0, Transcribed, Transcribed
       Case 30010 'Being recorded
          AddFilter 0, Client.User.UserId, 0, BeingRecorded, BeingRecorded
       Case 30005 'Current patient
          If Not mCurrPatientFilter Is Nothing Then
-            FilterCol.Add mCurrPatientFilter
+            If Len(mCurrPatientFilter.Pat.PatId) > 0 Or Len(mCurrPatientFilter.Pat.PatId2) > 0 Then
+               FilterCol.Add mCurrPatientFilter
+            End If
          End If
       Case 30020 'Recorded
          AddFilter 0, Client.User.UserId, 0, Recorded, Recorded
@@ -104,7 +119,8 @@ Public Function CreateList(ByVal OrgId As Long, TimeStamp As Double) As Double
    End Select
    
    DictCacheIndex = 0
-   CreateList = FillCache(OrgId)
+   CreateList = FillCache(OrgId, ToMany)
+   Debug.Print "DictCacheNumber " & CStr(DictCacheNumber)
 End Function
 
 Public Function ListNextItem(ByRef Dict As clsDict) As Boolean
@@ -125,7 +141,7 @@ Public Function ListNextItem(ByRef Dict As clsDict) As Boolean
    ListNextItem = False
 End Function
 
-Private Function FillCache(ByVal OrgId As Long) As Double
+Private Function FillCache(ByVal OrgId As Long, ByRef ToMany As Boolean) As Double
 
    Dim Dict As clsDict
    Dim MaxTimeStamp As Double
@@ -137,7 +153,7 @@ Private Function FillCache(ByVal OrgId As Long) As Double
    End If
 
    If DictCacheTimeStampOrg(OrgId) < 0 Then
-      DictCacheTimeStampOrg(OrgId) = FillCacheFromFilter(OrgId)
+      DictCacheTimeStampOrg(OrgId) = FillCacheFromFilter(OrgId, ToMany)
       FillCache = DictCacheTimeStampOrg(OrgId)
    Else
       Client.Server.CreateDictList 0, 0, 0, 0, 255, DictCacheTimeStampTot
@@ -156,11 +172,11 @@ Private Function FillCache(ByVal OrgId As Long) As Double
       CleanCounter = CleanCounter + 1
       If CleanCounter > 10 Then
          CleanCounter = 0
-         CleanCacheFromFilter
+         CleanCacheFromFilter OrgId
       End If
    End If
 End Function
-Private Sub CleanCacheFromFilter()
+Private Sub CleanCacheFromFilter(OrgId As Long)
 
    Dim Flt As clsFilter
 
@@ -171,8 +187,10 @@ Private Sub CleanCacheFromFilter()
          CleanCacheFromAuthorId Flt.AuthorId
       ElseIf Flt.TranscriberId <> 0 Then
          CleanCacheFromTranscriberId Flt.TranscriberId
-      Else
-         CleanCacheAll
+      ElseIf OrgId = 30005 Then
+         CleanCacheFromPatId mCurrPatientFilter.Pat.PatId, mCurrPatientFilter.Pat.PatId2
+      'Else
+      '   CleanCacheAll
       End If
    Next Flt
 End Sub
@@ -236,6 +254,28 @@ Private Sub CleanCacheFromTranscriberId(TranscriberId As Long)
       End If
    Next I
 End Sub
+Private Sub CleanCacheFromPatId(PatId As String, PatId2 As String)
+
+   Dim I As Integer
+
+   DictIdListIdx = 0
+   Client.Server.CreateDictIdList 0, 0, 0, PatId, PatId2
+   Do While Client.Server.DictIdGetNext(DictIdList(DictIdListIdx))
+      If DictIdListIdx < UBound(DictIdList) Then
+         DictIdListIdx = DictIdListIdx + 1
+      End If
+   Loop
+   
+   For I = 0 To DictCacheNumber - 1
+      If Len(DictCache(I).Pat.PatId) > 0 Then
+         If (DictCache(I).Pat.PatId = PatId Or DictCache(I).Pat.PatId = PatId2) Then
+            If Not IsDictIdInDictIdList(DictCache(I).DictId) Then
+               DeleteDictFromCache I
+            End If
+         End If
+      End If
+   Next I
+End Sub
 Private Sub CleanCacheAll()
 
    Dim I As Integer
@@ -256,9 +296,9 @@ Private Sub CleanCacheAll()
 End Sub
 Private Function IsDictIdInDictIdList(DictId As Long) As Boolean
 
-   Dim H As Integer
-   Dim L As Integer
-   Dim I As Integer
+   Dim H As Long
+   Dim L As Long
+   Dim I As Long
    
    H = DictIdListIdx - 1
    L = 0
@@ -285,13 +325,16 @@ Private Function IsDictIdInDictIdList(DictId As Long) As Boolean
 
    IsDictIdInDictIdList = False
 End Function
-Private Function FillCacheFromFilter(ByVal OrgId As Long) As Double
+Private Function FillCacheFromFilter(ByVal OrgId As Long, ByRef ToMany As Boolean) As Double
  
    Dim Dict As clsDict
    Dim MaxTimeStamp As Double
    Dim Flt As clsFilter
    Dim FirstUpdate As Boolean
+   Dim SQLSearch As String
+   Dim NumberDictInSearchResult As Integer
 
+   ToMany = False
    For Each Flt In FilterCol
       If Flt.OrgId <> 0 Then
          If DictCacheTimeStampOrg(Flt.OrgId) < 0 Then
@@ -328,11 +371,9 @@ Private Function FillCacheFromFilter(ByVal OrgId As Long) As Double
             UpdateOneDictInCache Dict, FirstUpdate
             FirstUpdate = False
          Loop
-      Else
-         Dim T As Variant
-         T = Timer
+      ElseIf OrgId = 30005 Then
          FirstUpdate = True
-         Client.Server.CreateDictList 0, 0, 0, 0, 255, 0    'Take all, have to be better
+         Client.Server.CreateDictList 0, 0, 0, mCurrPatientFilter.StatusStart, mCurrPatientFilter.StatusEnd, 0, mCurrPatientFilter.Pat.PatId, mCurrPatientFilter.Pat.PatId2
          Do While Client.Server.DictListGetNext(Dict)
             If MaxTimeStamp < Dict.TimeStamp Then
                MaxTimeStamp = Dict.TimeStamp
@@ -340,10 +381,115 @@ Private Function FillCacheFromFilter(ByVal OrgId As Long) As Double
             UpdateOneDictInCache Dict, FirstUpdate
             FirstUpdate = False
          Loop
+      Else
+         Dim T As Variant
+         T = Timer
+         FirstUpdate = True
+         SQLSearch = CreateSQLFromFilter(Flt)
+         Client.Server.CreateDictListFromSQL SQLSearch
+         NumberDictInSearchResult = 0
+         Do While Client.Server.DictListGetNext(Dict)
+            If MaxTimeStamp < Dict.TimeStamp Then
+               MaxTimeStamp = Dict.TimeStamp
+            End If
+            NumberDictInSearchResult = NumberDictInSearchResult + 1
+            UpdateOneDictInCache Dict, FirstUpdate
+            FirstUpdate = False
+         Loop
+         If NumberDictInSearchResult >= MaxNumberDictInSearchResult Then
+            ToMany = True
+         End If
          Debug.Print "Tid: " & Format$(Timer - T, "0.00")
       End If
    Next Flt
    FillCacheFromFilter = MaxTimeStamp
+End Function
+Private Function CreateSQLFromFilter(Flt As clsFilter) As String
+
+   Dim SelectClause As String
+   Dim WhereClause As String
+   Dim OrderClause As String
+   Dim Txt As String
+   Dim TxtWord As String
+   
+   SelectClause = "Select top " & CStr(MaxNumberDictInSearchResult) & " * from v_Dictation_List"
+   
+   If Len(RemoveDelimiters(Flt.Pat.PatId)) > 0 Then
+      Client.Server.AddString WhereClause, "and", "PatId like '%" & RemoveDelimiters(Flt.Pat.PatId) & "%'"
+   End If
+   If Len(RemoveDelimiters(Flt.Pat.PatName)) > 0 Then
+      Client.Server.AddString WhereClause, "and", "PatName like '%" & RemoveDelimiters(Flt.Pat.PatName) & "%'"
+   End If
+   
+   If Flt.RecDateUsed Then
+      Client.Server.AddString WhereClause, "and", "Created>=" & Client.Server.SQLDateDelimiter & Format$(Flt.RecStartDate, Client.Server.SQLDateStringFormat) & Client.Server.SQLDateDelimiter
+      Client.Server.AddString WhereClause, "and", "Created<=" & Client.Server.SQLDateDelimiter & Format$(Flt.RecEndDate, Client.Server.SQLDateStringFormat) & Client.Server.SQLDateDelimiter
+   End If
+   
+   If Flt.TranscribedDateUsed Then
+      Client.Server.AddString WhereClause, "and", "TranscribedDate>=" & Client.Server.SQLDateDelimiter & Format$(Flt.TranscribedStartDate, Client.Server.SQLDateStringFormat) & Client.Server.SQLDateDelimiter
+      Client.Server.AddString WhereClause, "and", "TranscribedDate<=" & Client.Server.SQLDateDelimiter & Format$(Flt.TranscribedEndDate, Client.Server.SQLDateStringFormat) & Client.Server.SQLDateDelimiter
+   End If
+   
+   If Flt.DictTypeId >= 0 Then
+      Client.Server.AddString WhereClause, "and", "DictTypeId=" & CStr(Flt.DictTypeId)
+   End If
+   If Flt.PriorityId >= 0 Then
+      Client.Server.AddString WhereClause, "and", "PriorityId=" & CStr(Flt.PriorityId)
+   End If
+   If Len(RemoveDelimiters(Flt.AuthorName)) > 0 Then
+      Client.Server.AddString WhereClause, "and", "AuthorShortName like '%" & RemoveDelimiters(Flt.AuthorName) & "%'"
+   End If
+   If Len(RemoveDelimiters(Flt.TranscriberName)) > 0 Then
+      Client.Server.AddString WhereClause, "and", "TranscriberShortName like '%" & RemoveDelimiters(Flt.TranscriberName) & "%'"
+   End If
+   Txt = RemoveDelimiters(Flt.Txt)
+   Do
+      TxtWord = GetNextWordFromTxt(Txt)
+      If Len(TxtWord) > 0 Then
+         Client.Server.AddString WhereClause, "and", "Txt like '%" & TxtWord & "%'"
+      End If
+   Loop Until Len(TxtWord) = 0
+   
+   OrderClause = "DictId"
+   
+   CreateSQLFromFilter = Client.Server.BuildSQL(SelectClause, WhereClause, "", OrderClause)
+End Function
+Private Function RemoveDelimiters(S As String) As String
+
+   Dim T As String
+   
+   T = Trim$(S)
+   T = Replace(T, "%", "")
+   T = Replace(T, "'", "")
+   T = Replace(T, "/", "")
+   T = Replace(T, "\", "")
+   T = Replace(T, "-", "")
+   T = Replace(T, "_", "")
+   T = Replace(T, ".", "")
+   T = Replace(T, ",", "")
+   T = Replace(T, "?", "")
+   T = Replace(T, ":", "")
+   T = Replace(T, ";", "")
+   T = Replace(T, "&", "")
+   T = Replace(T, """", "")
+   T = Replace(T, "!", "")
+   RemoveDelimiters = T
+End Function
+
+Private Function GetNextWordFromTxt(ByRef Txt As String) As String
+
+   Dim Pos As Integer
+   
+   Txt = Trim$(Txt)
+   Pos = InStr(Txt, " ")
+   If Pos > 0 Then
+      GetNextWordFromTxt = Trim$(Left$(Txt, Pos - 1))
+      Txt = Trim$(mId$(Txt, Pos + 1))
+   Else
+      GetNextWordFromTxt = Txt
+      Txt = ""
+   End If
 End Function
 Private Sub BuildFilterForOrgId(OrgId As Long)
 
@@ -379,6 +525,8 @@ Private Function FilterDictation(Dict As clsDict) As Boolean
 
    Dim Flt As clsFilter
    Dim FilteredByPatId As Boolean
+   Dim FilteredByRecDate As Boolean
+   Dim FilteredByTranscribedDate As Boolean
 
    If Not Client.OrgMgr.CheckUserRoleHidden(Dict) Then
       
@@ -388,12 +536,25 @@ Private Function FilterDictation(Dict As clsDict) As Boolean
          If Len(Flt.Pat.PatId) = 0 And Len(Flt.Pat.PatId2) = 0 Then
             FilteredByPatId = True
          ElseIf Len(Flt.Pat.PatId2) = 0 Then
-            FilteredByPatId = InStr(Dict.Pat.PatId, Flt.Pat.PatId) > 0
+            FilteredByPatId = InStr(UCase$(Dict.Pat.PatId), UCase$(Flt.Pat.PatId)) > 0
          ElseIf Len(Flt.Pat.PatId) = 0 Then
-            FilteredByPatId = InStr(Dict.Pat.PatId, Flt.Pat.PatId2) > 0
+            FilteredByPatId = InStr(UCase$(Dict.Pat.PatId), UCase$(Flt.Pat.PatId2)) > 0
          Else
-            FilteredByPatId = InStr(Dict.Pat.PatId, Flt.Pat.PatId) > 0 Or InStr(Dict.Pat.PatId, Flt.Pat.PatId2) > 0
+            FilteredByPatId = InStr(UCase$(Dict.Pat.PatId), UCase$(Flt.Pat.PatId)) > 0 Or InStr(UCase$(Dict.Pat.PatId), UCase$(Flt.Pat.PatId2)) > 0
          End If
+         
+         If Flt.RecDateUsed Then
+            FilteredByRecDate = Dict.Created >= Flt.RecStartDate And Dict.Created <= Flt.RecEndDate
+         Else
+            FilteredByRecDate = True
+         End If
+      
+         If Flt.TranscribedDateUsed Then
+            FilteredByTranscribedDate = Dict.TranscribedDate >= Flt.TranscribedStartDate And Dict.TranscribedDate <= Flt.TranscribedEndDate
+         Else
+            FilteredByTranscribedDate = True
+         End If
+      
       
          If (Flt.OrgId = Dict.OrgId Or Flt.OrgId = 0) And _
             (Flt.AuthorId = Dict.AuthorId Or Flt.AuthorId = 0) And _
@@ -403,6 +564,8 @@ Private Function FilterDictation(Dict As clsDict) As Boolean
             (Flt.DictTypeId = Dict.DictTypeId Or Flt.DictTypeId < 0) And _
             (Flt.PriorityId = Dict.PriorityId Or Flt.PriorityId < 0) And _
             FilteredByPatId And _
+            FilteredByRecDate And _
+            FilteredByTranscribedDate And _
             (InStr(UCase$(Dict.Pat.PatName), UCase$(Flt.Pat.PatName)) > 0 Or Len(Flt.Pat.PatName) = 0) And _
             (InStr(UCase$(Dict.AuthorShortName), UCase$(Flt.AuthorName)) > 0) And _
             (InStr(UCase$(Dict.TranscriberShortName), UCase$(Flt.TranscriberName)) > 0 Or Len(Flt.TranscriberName) = 0) And _
@@ -442,7 +605,7 @@ Private Function GetWordFromString(ByRef S As String) As String
    Pos = InStr(S, " ")
    If Pos > 0 Then
       GetWordFromString = Trim$(Left$(S, Pos - 1))
-      S = Trim$(Mid$(S, Pos + 1))
+      S = Trim$(mId$(S, Pos + 1))
    Else
       GetWordFromString = Trim$(S)
       S = ""
@@ -499,6 +662,12 @@ Public Function CheckOut(ByRef Dict As clsDict, ByVal DictId As Long, ByVal With
    Res = Client.Server.CheckOutDict(Dict, DictId, WithSound, TempfileName)
    If Res = 0 Then
       Client.DictAuditMgr.Insert DictId, AuditType_CheckOut, Dict.StatusId
+      Dict.SoundReadOnly = Dict.AuthorId <> Client.User.UserId Or Dict.StatusId > 30
+      If Not Dict.SoundReadOnly Then
+         Dict.TextReadOnly = False
+      Else
+         Dict.TextReadOnly = Not (Client.OrgMgr.CheckUserRole(Dict.OrgId, "X") And Dict.StatusId < SoundDeleted)
+      End If
    Else
       If WithSound Then
          KillFileIgnoreError TempfileName
@@ -523,7 +692,7 @@ Public Function CheckIn(ByRef Dict As clsDict, ByVal DiscardChanges As Boolean) 
    Else
       MsgBox Client.Texts.Txt(1190102, "Diktatet kunde inte sparas")
    End If
-   If Len(Dict.LocalFilename) Then
+   If Len(Dict.LocalFilename) > 0 Then
       KillFileIgnoreError Dict.LocalFilename
       Dict.LocalFilename = ""
    End If
@@ -534,18 +703,23 @@ Public Function CreateNew(ByRef Dict As clsDict) As Integer
    Dim Res As Integer
    Dim Idx As Integer
    Dim TempfileName As String
-   
-   TempfileName = CreateTempFileName("dss")
-   
+      
    Dict.Created = Now
-   Dict.LocalFilename = TempfileName
+   If Len(Dict.LocalFilename) = 0 Then
+      TempfileName = CreateTempFileName("dss")
+      Dict.LocalFilename = TempfileName
+   End If
+   Dict.AuthorId = Client.User.UserId
+   Dict.AuthorLongName = Client.User.LongName
+   Dict.AuthorShortName = Client.User.ShortName
    Dict.PriorityId = Client.SysSettings.DictInfoDefaultPriorityId
    Idx = Client.PriorityMgr.IndexFromId(Dict.PriorityId)
    Dict.PriorityText = Client.PriorityMgr.TextFromIndex(Idx)
    Dict.ExpiryDate = DateAdd("d", Client.PriorityMgr.DaysFromIndex(Idx), Dict.Created)
-   Dict.DictTypeId = Client.SysSettings.DictInfoDefaultDictTypeId
-   Idx = Client.DictTypeMgr.IndexFromId(Dict.DictTypeId)
-   Dict.DictTypeText = Client.DictTypeMgr.TextFromIndex(Idx)
+   Dict.DictTypeId = -1
+   'Dict.DictTypeId = Client.SysSettings.DictInfoDefaultDictTypeId  '!!!
+   'Idx = Client.DictTypeMgr.IndexFromId(Dict.DictTypeId)
+   'Dict.DictTypeText = Client.DictTypeMgr.TextFromIndex(Idx)
    CreateNew = 0
 End Function
 Public Function CheckInNew(ByRef Dict As clsDict) As Integer
@@ -568,6 +742,19 @@ Public Function CheckInNew(ByRef Dict As clsDict) As Integer
    CheckInNew = Res
 End Function
 
+Public Function IsThereDictations(OrgId As Long) As Boolean
+
+   Dim Cnt As Integer
+   Dim D As clsDict
+   Dim ToMany As Boolean
+   
+   CreateList OrgId, 0, ToMany
+   Do While ListNextItem(D)
+      Cnt = Cnt + 1
+   Loop
+   IsThereDictations = (Cnt > 0)
+End Function
+
 Private Sub Class_Initialize()
 
    Dim I As Integer
@@ -576,4 +763,64 @@ Private Sub Class_Initialize()
       DictCacheTimeStampOrg(I) = -1
    Next I
 End Sub
+
+Public Sub SaveTempDictationInfo(D As clsDict, Mode As TempDictInfoTypeEnum)
+
+   Dim Fn As String
+   Dim Settings As New clsSettings
+   Dim Section As String
+   
+   Fn = CreateTempPath() & "CtRecovery.dat"
+   Settings.IniFilePath = Fn
+   
+   Section = CStr(Client.User.UserId)
+   If Mode <> tdiUpdateInfo Then
+      Settings.WriteLong Section, "Mode", CLng(Mode)
+   End If
+   Settings.WriteLong Section, "DictId", D.DictId
+   Settings.WriteLong Section, "Status", D.StatusId
+   Settings.WriteLong Section, "OrgId", D.OrgId
+   Settings.WriteString Section, "PatId", D.Pat.PatId
+   Settings.WriteBool Section, "NoPat", D.NoPatient
+   Settings.WriteString Section, "PatName", D.Pat.PatName
+   Settings.WriteLong Section, "DictType", D.DictTypeId
+   Settings.WriteLong Section, "Priority", D.PriorityId
+   Settings.WriteString Section, "Txt", D.Txt
+   Settings.WriteString Section, "Lfn", D.LocalFilename
+End Sub
+Public Sub EmptyTempDictationInfo()
+
+   Dim EmptyDict As New clsDict
+   
+   SaveTempDictationInfo EmptyDict, tdiEmpty
+End Sub
+Public Function RestoreTempDictationInfo(D As clsDict) As TempDictInfoTypeEnum
+
+   Dim Fn As String
+   Dim Settings As New clsSettings
+   Dim Section As String
+   Dim Mode As TempDictInfoTypeEnum
+   
+   Fn = CreateTempPath() & "CtRecovery.dat"
+   Settings.IniFilePath = Fn
+   
+   Section = CStr(Client.User.UserId)
+   Mode = Settings.GetLong(Section, "Mode", tdiEmpty)
+   RestoreTempDictationInfo = Mode
+   If Mode <> tdiEmpty Then
+      Set D = New clsDict
+      D.DictId = Settings.GetLong(Section, "DictId", 0)
+      D.StatusId = Settings.GetLong(Section, "Status", 0)
+      D.OrgId = Settings.GetLong(Section, "OrgId", 0)
+      D.Pat.PatId = Settings.GetString(Section, "PatId", "")
+      D.NoPatient = Settings.GetBool(Section, "NoPat", False)
+      D.Pat.PatName = Settings.GetString(Section, "PatName", "")
+      D.DictTypeId = Settings.GetLong(Section, "DictType", 0)
+      D.PriorityId = Settings.GetLong(Section, "Priority", 0)
+      D.Txt = Settings.GetString(Section, "Txt", "")
+      D.LocalFilename = Settings.GetString(Section, "Lfn", "")
+      
+      D.AuthorId = Client.User.UserId
+   End If
+End Function
 

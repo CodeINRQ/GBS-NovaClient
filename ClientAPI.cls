@@ -13,6 +13,10 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+Private Declare Function ShowWindow Lib "user32" _
+    (ByVal hwnd As Long, _
+    ByVal nCmdShow As Long) As Long
+
 Public Event OnOpenDictation(DictId As String, _
                              PatId As String, _
                              PatName As String, _
@@ -93,19 +97,30 @@ Public Function Start(Server As String, _
       StartUpUserLoginName = UserLoginName
       StartUpPassword = Password
       StartUpExtPassword = ExtPassword
+      StartUpExtSystem = mExtSystem
+      On Error Resume Next
       Load frmMain
-      Set mfrmMain = frmMain
+      On Error GoTo Start_Err
+      If StartUpLoginResult = 0 Then
+         Set mfrmMain = frmMain
+         frmMain.ShowInForeground
+         Ret = 0
+      Else
+         Ret = StartUpLoginResult + 10
+      End If
    Else
-      If Server = StartUpServer And _
-         Database = StartUpDatabase And _
-         StartUpUserLoginName = UserLoginName Then
+      If (Len(Server) = 0 Or UCase$(Server) = UCase$(Client.Server.Server)) And _
+         (Len(Database) = 0 Or UCase$(Database) = UCase$(Client.Server.Database)) And _
+         UCase$(UserLoginName) = UCase$(Client.User.LoginName) Then
          Ret = 1
       Else
          Ret = 2
       End If
+      frmMain.ShowInForeground
    End If
 Start_Exit:
    'Start = FinishAtEveryFunction(FuncName, Ret)
+   Start = Ret
    Exit Function
    
 Start_Err:
@@ -142,6 +157,7 @@ Public Function CurrPat(PatId1 As String, _
    Const FuncName As String = "CurrPat"
    
    Dim Ret As Long
+   Dim BlankCurrPat As Boolean
 
    On Error GoTo CurrPat_Err
    If Not InitAtEveryFunction(FuncName, PatId1, PatId2) Then Exit Function
@@ -150,6 +166,8 @@ Public Function CurrPat(PatId1 As String, _
    
    Dim CurrPatFilter As New clsFilter
    
+   BlankCurrPat = Len(PatId1) = 0 And Len(PatId2) = 0
+   
    If Len(PatId1) = 0 And Len(PatId2) > 0 Then
       Client.CurrPatient.PatId = PatId2
    Else
@@ -157,12 +175,24 @@ Public Function CurrPat(PatId1 As String, _
       Client.CurrPatient.PatId2 = PatId2
    End If
    Client.CurrPatient.PatName = PatName
+   Client.CurrPatient.DictTypeId = Client.ExtSystemMgr.GetIntDictTypeId(mExtSystem, ExtDictType)
+   Client.CurrPatient.OrgId = Client.ExtSystemMgr.GetIntOrgId(mExtSystem, ExtOrg)
+   Client.CurrPatient.PriorityId = Client.ExtSystemMgr.GetIntPriorityId(mExtSystem, ExtPriority)
    
+   CurrPatFilter.StatusStart = Client.SysSettings.DictListCurrStatusStart
+   CurrPatFilter.StatusEnd = Client.SysSettings.DictListCurrStatusEnd
    CurrPatFilter.Pat.PatId = StringReplace(StringReplace(PatId1, "-", ""), "/", "")
    CurrPatFilter.Pat.PatId2 = StringReplace(StringReplace(PatId2, "-", ""), "/", "")
    
+   frmMain.ShowNewCurrPat
+   
    Set frmMain.ucDictList.CurrPatientFilter = CurrPatFilter
-   frmMain.ucOrgTree.PickOrgId 30005
+   
+   If Not BlankCurrPat Then
+      frmMain.ucOrgTree.PickOrgId 30005
+   Else
+      frmMain.ucOrgTree.PickOrgId Client.User.HomeOrgId
+   End If
    frmMain.Tabs.Tab = 0
    CurrPat = 0
    
@@ -355,12 +385,15 @@ Public Function ClientWindow(Style As Long) As Long
    If Not InitAtEveryFunction(FuncName, CStr(Style)) Then GoTo ClientWindow_Exit
    
    'Body
-   If Style >= 0 And Style <= 2 Then
-      frmMain.WindowState = Style
-   Else
-      Ret = -1
+'   If Style >= 0 And Style <= 2 Then
+'      frmMain.WindowState = Style
+'   Else
+'      Ret = -1
+'   End If
+   If Not IsNull(mfrmMain) Then
+      ShowWindow mfrmMain.hwnd, Style
    End If
-
+   
 ClientWindow_Exit:
    ClientWindow = FinishAtEveryFunction(FuncName, Ret)
    Exit Function
@@ -405,7 +438,7 @@ Public Property Get UserLoginName() As String
    UserLoginName = Client.User.LoginName
    
 UserLoginName_Exit:
-   UserLoginName = FinishAtEveryFunction(FuncName, Ret)
+   FinishAtEveryFunction FuncName, Ret
    Exit Property
    
 UserLoginName_Err:
@@ -425,7 +458,7 @@ Public Property Get UserShortName() As String
    UserShortName = Client.User.ShortName
 
 UserShortname_Exit:
-   UserShortName = FinishAtEveryFunction(FuncName, Ret)
+   FinishAtEveryFunction FuncName, Ret
    Exit Property
    
 UserShortname_Err:
@@ -445,7 +478,7 @@ Public Property Get UserLongName() As String
    UserLongName = Client.User.LongName
 
 UserLongName_Exit:
-   UserLongName = FinishAtEveryFunction(FuncName, Ret)
+   FinishAtEveryFunction FuncName, Ret
    Exit Property
    
 UserLongName_Err:
@@ -465,7 +498,7 @@ Public Property Get CurrPatId() As String
    CurrPatId = Client.CurrPatient.PatId
 
 CurrPatId_Exit:
-   CurrPatId = FinishAtEveryFunction(FuncName, Ret)
+   FinishAtEveryFunction FuncName, Ret
    Exit Property
    
 CurrPatId_Err:
@@ -485,7 +518,7 @@ Public Property Get CurrOrg() As String
    CurrOrg = frmMain.CurrentOrg
    
 CurrOrg_Exit:
-   CurrOrg = FinishAtEveryFunction(FuncName, Ret)
+   FinishAtEveryFunction FuncName, Ret
    Exit Property
    
 CurrOrg_Err:
@@ -502,10 +535,10 @@ Public Property Get Server() As String
    If Not InitAtEveryFunction(FuncName) Then GoTo Server_Exit
    
    'Body
-   '!!!
+   Server = Client.Server.Server
 
 Server_Exit:
-   Server = FinishAtEveryFunction(FuncName, Ret)
+   FinishAtEveryFunction FuncName, Ret
    Exit Property
    
 Server_Err:
@@ -522,10 +555,10 @@ Public Property Get Database() As String
    If Not InitAtEveryFunction(FuncName) Then GoTo Database_Exit
    
    'Body
-   '!!!
+   Database = Client.Server.Database
 
 Database_Exit:
-   Database = FinishAtEveryFunction(FuncName, Ret)
+   FinishAtEveryFunction FuncName, Ret
    Exit Property
    
 Database_Err:
@@ -617,11 +650,11 @@ Private Function InitAtEveryFunction(FuncName As String, Optional ByVal Data1 As
       End If
    End If
    
-   If mfrmMain Is Nothing Then
-      If Not frmMain Is Nothing Then
-         Set mfrmMain = frmMain
-      End If
-   End If
+   'If mfrmMain Is Nothing Then
+   '   If Not frmMain Is Nothing Then
+   '      Set mfrmMain = frmMain
+   '   End If
+   'End If
    
    Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, TraceTitle_Entry, Data1, Data2
    

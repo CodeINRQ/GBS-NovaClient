@@ -1,18 +1,35 @@
 VERSION 5.00
+Object = "{86CF1D34-0C5F-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCT2.OCX"
 Begin VB.UserControl ucSearch 
-   ClientHeight    =   4350
+   ClientHeight    =   6060
    ClientLeft      =   0
    ClientTop       =   0
    ClientWidth     =   4815
-   ScaleHeight     =   4350
+   DefaultCancel   =   -1  'True
+   ScaleHeight     =   6060
    ScaleWidth      =   4815
+   Begin VB.CheckBox chkTranscribedDate 
+      Height          =   255
+      Left            =   120
+      TabIndex        =   9
+      Top             =   2280
+      Width           =   255
+   End
+   Begin VB.CheckBox chkRecDate 
+      Caption         =   "Check1"
+      Height          =   255
+      Left            =   120
+      TabIndex        =   5
+      Top             =   1560
+      Width           =   255
+   End
    Begin VB.TextBox txtTxt 
       Height          =   285
       HelpContextID   =   1150000
       Left            =   120
       MaxLength       =   50
-      TabIndex        =   14
-      Top             =   3960
+      TabIndex        =   21
+      Top             =   5400
       Width           =   3015
    End
    Begin VB.TextBox txtTranscriber 
@@ -20,8 +37,8 @@ Begin VB.UserControl ucSearch
       HelpContextID   =   1150000
       Left            =   120
       MaxLength       =   50
-      TabIndex        =   11
-      Top             =   3360
+      TabIndex        =   19
+      Top             =   4800
       Width           =   3015
    End
    Begin VB.TextBox txtAuthor 
@@ -29,26 +46,28 @@ Begin VB.UserControl ucSearch
       HelpContextID   =   1150000
       Left            =   120
       MaxLength       =   50
-      TabIndex        =   9
-      Top             =   2760
+      TabIndex        =   17
+      Top             =   4200
       Width           =   3015
    End
    Begin VB.CommandButton cmdReset 
-      Caption         =   "&Återställ"
+      Cancel          =   -1  'True
+      Caption         =   "Åt&erställ"
       Height          =   310
       HelpContextID   =   1150000
       Left            =   3360
-      TabIndex        =   13
+      TabIndex        =   23
       Tag             =   "1150108"
       Top             =   480
       Width           =   1335
    End
    Begin VB.CommandButton cmdSearch 
       Caption         =   "&Sök"
+      Default         =   -1  'True
       Height          =   310
       HelpContextID   =   1150000
       Left            =   3360
-      TabIndex        =   12
+      TabIndex        =   22
       Tag             =   "1150107"
       Top             =   120
       Width           =   1335
@@ -57,10 +76,10 @@ Begin VB.UserControl ucSearch
       Height          =   285
       HelpContextID   =   1150000
       Left            =   120
-      MaxLength       =   13
+      MaxLength       =   14
       TabIndex        =   1
       Top             =   360
-      Width           =   1335
+      Width           =   1455
    End
    Begin VB.TextBox txtPatName 
       Height          =   285
@@ -75,26 +94,110 @@ Begin VB.UserControl ucSearch
       Height          =   315
       HelpContextID   =   1150000
       Left            =   120
-      TabIndex        =   5
-      Top             =   1560
+      TabIndex        =   13
+      Top             =   3000
       Width           =   1935
    End
    Begin VB.ComboBox cboPriority 
       Height          =   315
       HelpContextID   =   1150000
       Left            =   120
-      TabIndex        =   7
-      Top             =   2160
+      TabIndex        =   15
+      Top             =   3600
       Width           =   1935
+   End
+   Begin MSComCtl2.DTPicker dtpRecStartDate 
+      Height          =   375
+      HelpContextID   =   1330000
+      Left            =   480
+      TabIndex        =   6
+      Top             =   1560
+      Width           =   1335
+      _ExtentX        =   2355
+      _ExtentY        =   661
+      _Version        =   393216
+      Enabled         =   0   'False
+      Format          =   51838977
+      CurrentDate     =   38595
+      MaxDate         =   401768
+      MinDate         =   38353
+   End
+   Begin MSComCtl2.DTPicker dtpRecEndDate 
+      Height          =   375
+      HelpContextID   =   1330000
+      Left            =   1920
+      TabIndex        =   7
+      Top             =   1560
+      Width           =   1335
+      _ExtentX        =   2355
+      _ExtentY        =   661
+      _Version        =   393216
+      Enabled         =   0   'False
+      Format          =   51838977
+      CurrentDate     =   38595
+      MaxDate         =   401768
+      MinDate         =   38353
+   End
+   Begin MSComCtl2.DTPicker dtpTranscribedStartDate 
+      Height          =   375
+      HelpContextID   =   1330000
+      Left            =   480
+      TabIndex        =   10
+      Top             =   2280
+      Width           =   1335
+      _ExtentX        =   2355
+      _ExtentY        =   661
+      _Version        =   393216
+      Enabled         =   0   'False
+      Format          =   51838977
+      CurrentDate     =   38595
+      MaxDate         =   401768
+      MinDate         =   38353
+   End
+   Begin MSComCtl2.DTPicker dtpTranscribedEndDate 
+      Height          =   375
+      HelpContextID   =   1330000
+      Left            =   1920
+      TabIndex        =   11
+      Top             =   2280
+      Width           =   1335
+      _ExtentX        =   2355
+      _ExtentY        =   661
+      _Version        =   393216
+      Enabled         =   0   'False
+      Format          =   51838977
+      CurrentDate     =   38595
+      MaxDate         =   401768
+      MinDate         =   38353
+   End
+   Begin VB.Label Label4 
+      BackStyle       =   0  'Transparent
+      Caption         =   "U&tskrivet:"
+      Height          =   255
+      Left            =   120
+      TabIndex        =   8
+      Tag             =   "1150111"
+      Top             =   2040
+      Width           =   1815
+   End
+   Begin VB.Label Label3 
+      BackStyle       =   0  'Transparent
+      Caption         =   "Inta&lat:"
+      Height          =   255
+      Left            =   120
+      TabIndex        =   4
+      Tag             =   "1150110"
+      Top             =   1320
+      Width           =   1815
    End
    Begin VB.Label lblTxtTitle 
       BackStyle       =   0  'Transparent
-      Caption         =   "Nyckelord:"
+      Caption         =   "N&yckelord:"
       Height          =   255
       Left            =   120
-      TabIndex        =   15
+      TabIndex        =   20
       Tag             =   "1150109"
-      Top             =   3720
+      Top             =   5160
       Width           =   1815
    End
    Begin VB.Label lblPatIdTitle 
@@ -122,9 +225,9 @@ Begin VB.UserControl ucSearch
       Caption         =   "&Diktattyp:"
       Height          =   255
       Left            =   120
-      TabIndex        =   4
+      TabIndex        =   12
       Tag             =   "1150103"
-      Top             =   1320
+      Top             =   2760
       Width           =   1815
    End
    Begin VB.Label lblPriorityTitle 
@@ -132,9 +235,9 @@ Begin VB.UserControl ucSearch
       Caption         =   "P&rioritet:"
       Height          =   255
       Left            =   120
-      TabIndex        =   6
+      TabIndex        =   14
       Tag             =   "1150104"
-      Top             =   1920
+      Top             =   3360
       Width           =   1815
    End
    Begin VB.Label lblAuthorTitle 
@@ -142,9 +245,9 @@ Begin VB.UserControl ucSearch
       Caption         =   "&Inläsare:"
       Height          =   255
       Left            =   120
-      TabIndex        =   8
+      TabIndex        =   16
       Tag             =   "1150105"
-      Top             =   2520
+      Top             =   3960
       Width           =   1815
    End
    Begin VB.Label lblTranscriberTitle 
@@ -152,9 +255,9 @@ Begin VB.UserControl ucSearch
       Caption         =   "&Utskrivare:"
       Height          =   255
       Left            =   120
-      TabIndex        =   10
+      TabIndex        =   18
       Tag             =   "1150106"
-      Top             =   3120
+      Top             =   4560
       Width           =   1815
    End
 End
@@ -168,6 +271,11 @@ Option Explicit
 Public Event NewSearch(ByRef SearchFilter As clsFilter)
 
 Private mFilter As clsFilter
+Private RecStartDate As Date
+Private RecEndDate As Date
+Private TranscribedStartDate As Date
+Private TranscribedEndDate As Date
+
 Public Sub NewLanguage()
 
    Dim I As Integer
@@ -181,8 +289,21 @@ Public Sub Init()
 
    txtPatId.Text = ""
    txtPatName.Text = ""
-   Client.DictTypeMgr.FillCombo cboDictType
-   cboDictType.ListIndex = -1
+   
+   chkRecDate.Value = Unchecked
+   RecStartDate = DateAdd("m", -1, Int(Now))
+   dtpRecStartDate = Format$(RecStartDate, "ddddd")
+   RecEndDate = DateAdd("d", 1, Int(Now))
+   dtpRecEndDate = Format$(Now, "ddddd")
+
+   chkTranscribedDate.Value = Unchecked
+   TranscribedStartDate = DateAdd("m", -1, Int(Now))
+   dtpTranscribedStartDate = Format$(RecStartDate, "ddddd")
+   TranscribedEndDate = DateAdd("d", 1, Int(Now))
+   dtpTranscribedEndDate = Format$(Now, "ddddd")
+
+   Client.DictTypeMgr.FillCombo cboDictType, -1, -1, False
+   'cboDictType.ListIndex = -1 '!!!
    Client.PriorityMgr.FillCombo cboPriority
    cboPriority.ListIndex = -1
    txtAuthor.Text = ""
@@ -210,6 +331,20 @@ Private Sub cboPriority_Click()
    SetEnabled
 End Sub
 
+Private Sub chkRecDate_Click()
+
+   dtpRecStartDate.Enabled = chkRecDate.Value = Checked
+   dtpRecEndDate.Enabled = chkRecDate.Value = Checked
+   SetEnabled
+End Sub
+
+Private Sub chkTranscribedDate_Click()
+
+   dtpTranscribedStartDate.Enabled = chkTranscribedDate.Value = Checked
+   dtpTranscribedEndDate.Enabled = chkTranscribedDate.Value = Checked
+   SetEnabled
+End Sub
+
 Private Sub cmdReset_Click()
 
    Init
@@ -220,10 +355,23 @@ Private Sub cmdSearch_Click()
    Set mFilter = New clsFilter
    mFilter.Pat.PatId = StringReplace(txtPatId.Text, "-", "")
    mFilter.Pat.PatName = txtPatName.Text
+   
+   mFilter.RecDateUsed = chkRecDate.Value = Checked
+   If mFilter.RecDateUsed Then
+      mFilter.RecStartDate = RecStartDate
+      mFilter.RecEndDate = RecEndDate
+   End If
+   
+   mFilter.TranscribedDateUsed = chkTranscribedDate.Value = Checked
+   If mFilter.TranscribedDateUsed Then
+      mFilter.TranscribedStartDate = TranscribedStartDate
+      mFilter.TranscribedEndDate = TranscribedEndDate
+   End If
+   
    If cboDictType.ListIndex < 0 Then
       mFilter.DictTypeId = -1
    Else
-      mFilter.DictTypeId = Client.DictTypeMgr.IdFromIndex(cboDictType.ListIndex)
+      mFilter.DictTypeId = cboDictType.ItemData(cboDictType.ListIndex)
    End If
    If cboPriority.ListIndex < 0 Then
       mFilter.PriorityId = -1
@@ -242,6 +390,8 @@ Private Sub SetEnabled()
    
    B = Len(txtPatId.Text) > 0
    B = B Or Len(txtPatName.Text) > 0
+   B = B Or chkRecDate.Value = Checked
+   B = B Or chkTranscribedDate.Value = Checked
    B = B Or cboDictType.ListIndex >= 0
    B = B Or cboPriority.ListIndex >= 0
    B = B Or Len(txtAuthor.Text) > 0
@@ -249,6 +399,27 @@ Private Sub SetEnabled()
    B = B Or Len(txtTxt.Text) > 0
    
    cmdSearch.Enabled = B
+End Sub
+
+Private Sub dtpRecEndDate_Change()
+
+   RecEndDate = DateAdd("d", 1, DateSerial(dtpRecEndDate.Year, dtpRecEndDate.Month, dtpRecEndDate.Day))
+End Sub
+
+Private Sub dtpRecStartDate_Change()
+
+   RecStartDate = DateSerial(dtpRecStartDate.Year, dtpRecStartDate.Month, dtpRecStartDate.Day)
+End Sub
+
+Private Sub dtpTranscribedEndDate_Change()
+
+   TranscribedEndDate = DateAdd("d", 1, DateSerial(dtpTranscribedEndDate.Year, dtpTranscribedEndDate.Month, dtpTranscribedEndDate.Day))
+End Sub
+
+
+Private Sub dtpTranscribedStartDate_Change()
+
+   TranscribedStartDate = DateSerial(dtpTranscribedStartDate.Year, dtpTranscribedStartDate.Month, dtpTranscribedStartDate.Day)
 End Sub
 
 Private Sub txtAuthor_Change()
@@ -263,8 +434,10 @@ End Sub
 
 Private Sub txtPatId_KeyPress(KeyAscii As Integer)
 
-   If Not ((KeyAscii >= 48 And KeyAscii <= 57) Or KeyAscii < 32 Or KeyAscii = 45) Then
-      KeyAscii = 0
+   If Not Client.SysSettings.DictInfoAlfaInPatid Then
+      If Not ((KeyAscii >= 48 And KeyAscii <= 57) Or KeyAscii < 32 Or KeyAscii = 45) Then
+         KeyAscii = 0
+      End If
    End If
 End Sub
 
@@ -282,3 +455,4 @@ Private Sub txtTxt_Change()
 
    SetEnabled
 End Sub
+
