@@ -105,6 +105,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Public Event UsersChanged()
+Public Event RightClick(UserId As Long)
 
 Private WithEvents frmEdit As frmEditUser
 Attribute frmEdit.VB_VarHelpID = -1
@@ -372,6 +373,13 @@ Private Sub lstUsers_KeyPress(KeyAscii As Integer)
             ExportListToFile ""
          End If
    End Select
+End Sub
+
+Private Sub lstUsers_RightClick(ByVal ClickType As Integer, ByVal Col As Long, ByVal Row As Long, ByVal MouseX As Long, ByVal MouseY As Long)
+
+   If Row > 0 Then
+      RaiseEvent RightClick(CLng(lstUsers.GetRowItemData(Row)))
+   End If
 End Sub
 
 Private Sub txtSearch_Change()

@@ -29,7 +29,7 @@ Begin VB.Form frmLogin
       MaskColor       =   12632256
       _Version        =   393216
       BeginProperty Images {2C247F25-8591-11D1-B16A-00C0F0283628} 
-         NumListImages   =   7
+         NumListImages   =   8
          BeginProperty ListImage1 {2C247F27-8591-11D1-B16A-00C0F0283628} 
             Picture         =   "Login.frx":030A
             Key             =   ""
@@ -56,6 +56,10 @@ Begin VB.Form frmLogin
          EndProperty
          BeginProperty ListImage7 {2C247F27-8591-11D1-B16A-00C0F0283628} 
             Picture         =   "Login.frx":1CF6
+            Key             =   ""
+         EndProperty
+         BeginProperty ListImage8 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+            Picture         =   "Login.frx":2148
             Key             =   ""
          EndProperty
       EndProperty
@@ -269,6 +273,7 @@ Private Sub Form_Load()
       ImageCombo1.ComboItems.Add 5, "FI", , 5
       ImageCombo1.ComboItems.Add 6, "DE", , 6
       ImageCombo1.ComboItems.Add 7, "FR", , 7
+      ImageCombo1.ComboItems.Add 8, "NL", , 8
       ImageCombo1.SelectedItem = ImageCombo1.ComboItems(Client.SysSettings.CultureDefaultLanguage)
       ImageCombo1.Visible = True
    Else

@@ -133,7 +133,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   49414145
+      Format          =   46137345
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -149,7 +149,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   49414145
+      Format          =   46137345
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -165,7 +165,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   49414145
+      Format          =   46137345
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -181,7 +181,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   49414145
+      Format          =   46137345
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -424,7 +424,7 @@ Private Sub cmdSearch_Click()
    
    mFilter.FilterFromSearch = True
    
-   mFilter.Pat.PatId = StringReplace(txtPatId.Text, "-", "")
+   mFilter.Pat.PatId = Client.Custom.FormatPatIdForStoring(txtPatId.Text)
    mFilter.Pat.PatName = txtPatName.Text
    
    mFilter.RecDateUsed = chkRecDate.Value = Checked

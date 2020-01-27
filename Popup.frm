@@ -44,6 +44,15 @@ Begin VB.Form frmPopup
          Index           =   0
       End
    End
+   Begin VB.Menu mnuPopup 
+      Caption         =   "UserList"
+      Index           =   2
+      Begin VB.Menu mnuUserList 
+         Caption         =   "Lås upp"
+         Index           =   20
+         Tag             =   "1340101"
+      End
+   End
 End
 Attribute VB_Name = "frmPopup"
 Attribute VB_GlobalNameSpace = False
@@ -78,3 +87,7 @@ Private Sub mnuPopup_Click(Index As Integer)
          
 End Sub
 
+Private Sub mnuUserList_Click(Index As Integer)
+
+   RaiseEvent Choise(MenuIndex, Index, Id)
+End Sub

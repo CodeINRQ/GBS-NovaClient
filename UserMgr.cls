@@ -126,6 +126,20 @@ DeleteUser_Err:
    ErrorHandle "1310102", Eno, 1310102, "Användaren kan inte raderas", False
    Resume Next
 End Sub
+Public Sub UnlockUser(UserId As Long)
+
+   Dim Eno As Long
+
+   On Error GoTo UnlockUser_Err
+   Client.Server.UnlockUser UserId
+   Client.LoggMgr.Insert 1320121, LoggLevel_UserAdmin, 0, ""
+   Exit Sub
+   
+UnlockUser_Err:
+   Eno = Err.Number
+   ErrorHandle "1310101", Eno, 1310101, "Användaren kan inte sparas", False
+   Resume Next
+End Sub
 Private Function Validate(LoginName As String, Password As String, NewPassword As String, ExtSystem As String, ExtPassword As String) As Integer
 
    Dim LId As String

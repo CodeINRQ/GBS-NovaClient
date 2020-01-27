@@ -506,7 +506,7 @@ Private Sub DSSRecorder_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As
       If Data = GRU_BUT_INDEX Then
          Debug.Print "GruEvent But_Index+"
          If Client.SysSettings.PlayerIndexButtonAsCloseDict Then
-            If CheckMandatoryData() Then
+            'If CheckMandatoryData(False) Then
                For I = 2 To 0 Step -1
                   If Len(ucCloseChoice.ChoiceText(I)) > 0 Then
                      ucCloseChoice.ChoiceValue = I
@@ -516,7 +516,7 @@ Private Sub DSSRecorder_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As
                      Exit Sub
                   End If
                Next I
-            End If
+            'End If
          End If
       End If
    Else
@@ -710,17 +710,13 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
       KeyCode = 0
       If Len(ucCloseChoice.ChoiceText(CloseIndex)) > 0 Then
          ucCloseChoice.ChoiceValue = CloseIndex
-         If CheckMandatoryData() Or CloseIndex = 0 Then
-            Unload Me
-         End If
+         Unload Me  'check for valid data is done in unload event
       End If
    End If
    If CloseX Then
       KeyCode = 0
       If ucCloseChoice.ChoiceValue > -1 Then
-         If CheckMandatoryData() Or CloseIndex = 0 Then
-            Unload Me
-         End If
+         Unload Me  'check for valid data is done in unload event
       End If
    End If
    If WindowSize Then
@@ -777,7 +773,7 @@ Private Sub Form_Load()
       Client.OrgMgr.GetSortedOrg Org, I
       If Org.ShowInTree Then
          If (Org.Roles.Author Or Org.Roles.TextEditor) And Org.DictContainer Then
-            If Org.OrgId = Client.User.HomeOrgId Then
+            If Org.OrgId = Client.User.HomeOrgId And Client.SysSettings.UserShowHome Then
                ucOrgTree.AddNode Org.OrgId, Org.ShowParent, Org.OrgText, 7, True
             Else
                ucOrgTree.AddNode Org.OrgId, Org.ShowParent, Org.OrgText, 1, True
@@ -905,7 +901,7 @@ Private Sub Form_Unload(Cancel As Integer)
       If ucCloseChoice.ChoiceValue < 0 Then
          Ok = False
       ElseIf ucCloseChoice.ChoiceValue > 0 Then
-         If Not CheckMandatoryData() Then
+         If Not CheckMandatoryData(True) Then
             Ok = False
          End If
       End If
@@ -937,7 +933,6 @@ Private Sub Form_Unload(Cancel As Integer)
          LastfrmDictTop = Me.Top
       End If
    Else
-      MsgBox Client.Texts.Txt(1030101, "Uppgifterna är inte kompletta!"), vbCritical
       Cancel = True
    End If
    Debug.Print "frmDict_Unload-"
@@ -1139,12 +1134,12 @@ Private Sub SetEnabled()
    txtTxt.Enabled = Enbld
    txtNote.Enabled = Enbld
    
-   CheckMandatoryData
+   CheckMandatoryData (False)
    
    Client.DictMgr.SaveTempDictationInfo mDict, tdiUpdateInfo
    ShowFormCaption
 End Sub
-Private Function CheckMandatoryData() As Boolean
+Private Function CheckMandatoryData(BeforeSave As Boolean) As Boolean
 
    Dim Ok As Boolean
 
@@ -1158,13 +1153,13 @@ Private Function CheckMandatoryData() As Boolean
    Ok = True
    
    If chkNoPatient.Value <> vbChecked Then
-      If Not CheckPatId(txtPatId) Then
+      If Not Client.Custom.CheckPatId(txtPatId) Then
          lblPatIdMissing.Visible = True
          Ok = False
       Else
          lblPatIdMissing.Visible = False
       End If
-      If Not CheckPatname(txtPatName) Then
+      If Not Client.Custom.CheckPatname(txtPatName) Then
          lblPatNameMissing.Visible = True
          Ok = False
       Else
@@ -1193,7 +1188,7 @@ Private Function CheckMandatoryData() As Boolean
       lblPriorityMissing.Visible = False
    End If
    
-   CheckMandatoryData = Ok
+   CheckMandatoryData = Client.Custom.CheckDictationForMandatoryData(Ok, mDict, BeforeSave)
 End Function
 Private Sub ShowFormCaption(Optional FormattedPos As String)
 

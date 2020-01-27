@@ -25,23 +25,11 @@ Public Sub Copy(Pat As clsPat)
 End Sub
 Public Property Get PatIdFormatted() As String
 
-   If Len(mPatId1) = 12 Then
-      PatIdFormatted = Left$(mPatId1, 8) & "-" & mId$(mPatId1, 9)
-   ElseIf Len(mPatId1) = 10 Then
-      PatIdFormatted = Left$(mPatId1, 6) & "-" & mId$(mPatId1, 7)
-   Else
-      PatIdFormatted = mPatId1
-   End If
+   PatIdFormatted = Client.Custom.FormatPatId(mPatId1)
 End Property
 Public Property Get PatId2Formatted() As String
 
-   If Len(mPatId2) = 12 Then
-      PatId2Formatted = Left$(mPatId2, 8) & "-" & mId$(mPatId2, 9)
-   ElseIf Len(mPatId2) = 10 Then
-      PatId2Formatted = Left$(mPatId2, 6) & "-" & mId$(mPatId2, 7)
-   Else
-      PatId2Formatted = mPatId2
-   End If
+   PatId2Formatted = Client.Custom.FormatPatId(mPatId2)
 End Property
 Public Property Get PatId() As String
 
@@ -53,21 +41,13 @@ Public Property Get PatId2() As String
 End Property
 Public Property Let PatId(PId As String)
 
-   mPatId1 = FormatPatIdForStoring(PId)
+   mPatId1 = Client.Custom.FormatPatIdForStoring(PId)
 End Property
 Public Property Let PatId2(PId As String)
 
-   mPatId2 = FormatPatIdForStoring(PId)
+   mPatId2 = Client.Custom.FormatPatIdForStoring(PId)
 End Property
 
-Private Function FormatPatIdForStoring(ByVal S As String) As String
 
-   S = StringReplace(S, "-", "")
-   S = StringReplace(S, "/", "")
-   S = StringReplace(S, "\", "")
-   S = StringReplace(S, ".", "")
-   S = StringReplace(S, ",", "")
-   FormatPatIdForStoring = S
-End Function
 
 

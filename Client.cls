@@ -57,6 +57,7 @@ Public Settings As clsSettings
 Public Trace As clsTrace
 
 Public SysSettings As New clsSysSettings
+Public Custom As clsCustom
 Public CultureLanguage As String
 Public NewRecInfo As New clsNewRecInfo
 Public CurrPatient As New clsCurrPat

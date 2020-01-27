@@ -294,6 +294,8 @@ Public Sub SaveUser(Usr As clsUser)
    Else
       Rs("HomeOrgId") = Null
    End If
+   Rs("LoginFailureCount") = 0
+   Rs("UserLockedUntil") = Null
    Rs.Update
    Usr.UserId = Rs("UserId")
    CloseRecordset Rs
@@ -340,6 +342,26 @@ Public Sub DeleteUser(Usr As clsUser)
    
    If Not Rs.EOF Then
       Rs.Delete
+   End If
+   Rs.Update
+   CloseRecordset Rs
+End Sub
+Public Sub UnlockUser(UserId As Long)
+
+   Dim Rs As ADODB.Recordset
+   Dim SQL As String
+   
+   SQL = BuildSQL("Select * from Users", "UserId=" & CStr(UserId), "", "")
+   
+   Set Rs = New ADODB.Recordset
+   Rs.CursorLocation = adUseClient
+   Rs.CursorType = adOpenDynamic
+   Rs.LockType = adLockPessimistic
+   OpenRecordset Rs, SQL
+   
+   If Not Rs.EOF Then
+      Rs("LoginFailureCount") = 0
+      Rs("UserLockedUntil") = Null
    End If
    Rs.Update
    CloseRecordset Rs
@@ -1720,7 +1742,7 @@ Public Function CheckInDict(ByRef Dict As clsDict, DiscardChanges As Boolean)
                   Dict.TranscriberOrgId = Client.User.HomeOrgId
                End If
             End If
-            If Rs("StatusId") < WaitForSign And Dict.StatusId >= WaitForSign Then
+            If Rs("StatusId") < WaitForSign And (Dict.StatusId = WaitForSign Or Dict.StatusId = Transcribed) Then
                Dict.TranscriberId = Client.User.UserId
                If Client.User.HomeOrgId > 0 Then
                   Dict.TranscriberOrgId = Client.User.HomeOrgId
@@ -2277,15 +2299,15 @@ Private Function SaveNullIfZero(Value As Long) As Variant
       SaveNullIfZero = Value
    End If
 End Function
-Private Function SaveNullZeroLength(S As String, MaxLen As Integer) As Variant
+Private Function SaveNullZeroLength(S As String, MAXLEN As Integer) As Variant
 
    If Len(S) = 0 Then
       SaveNullZeroLength = Null
    Else
-      SaveNullZeroLength = Left$(S, MaxLen)
+      SaveNullZeroLength = Left$(S, MAXLEN)
    End If
 End Function
-Function FileToBlob(fld As ADODB.Field, Filename As String, Optional ChunkSize As Long = 8192) As Long
+Function FileToBlob(fld As ADODB.Field, FileName As String, Optional ChunkSize As Long = 8192) As Long
 
    Dim fnum As Integer, BytesLeft As Long, bytes As Long, TotalBytes As Long
    Dim Tmp() As Byte
@@ -2299,7 +2321,7 @@ Function FileToBlob(fld As ADODB.Field, Filename As String, Optional ChunkSize A
    End If
    
    fnum = FreeFile
-   Open Filename For Binary As fnum
+   Open FileName For Binary As fnum
    TotalBytes = LOF(fnum)
    BytesLeft = TotalBytes
    FileToBlob = TotalBytes
@@ -2323,7 +2345,7 @@ Function FileToBlob(fld As ADODB.Field, Filename As String, Optional ChunkSize A
    Debug.Print "FileToBlob (" & CStr(TotalBytes) & "/" & Format(KBytePerSecond, "0.0") & ")", Format$(TotalTime, "0.00")
 
 End Function
-Sub BlobToFile(fld As ADODB.Field, Filename As String, Optional ChunkSize As Long = 8192)
+Sub BlobToFile(fld As ADODB.Field, FileName As String, Optional ChunkSize As Long = 8192)
 
    Dim fnum As Integer, BytesLeft As Long, bytes As Long, TotalBytes As Long
    Dim TotalTime As Double, KBytePerSecond As Double
@@ -2337,10 +2359,10 @@ Sub BlobToFile(fld As ADODB.Field, Filename As String, Optional ChunkSize As Lon
    If (fld.Attributes And adFldLong) = 0 Then
        Err.Raise 1001, , "Field doesn't support GetChunk method."
    End If
-   KillFileIgnoreError Filename
+   KillFileIgnoreError FileName
    
    fnum = FreeFile
-   Open Filename For Binary As fnum
+   Open FileName For Binary As fnum
    ' Läser filen och skriver till disk.
    TotalBytes = fld.ActualSize
    BytesLeft = TotalBytes

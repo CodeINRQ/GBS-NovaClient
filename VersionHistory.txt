@@ -1,3 +1,46 @@
+1.23.0.58
+---------
+Starts from 1.23.0.55
+New SysSetting History/ShowMinutes default False
+Don't show MinuteHistory if not SysSetting.historyShowMinutes
+
+New function FormatPatIdForStoring in clsCustom (moved from clsPat)
+Use FormatPatIdForStoring before search (cmdSearch)
+Use FormatPatIdForStoring in CheckPatId (clsCustom_CheckPatId) (Standard and Dk)
+
+Initial check in clsDictMgr.IsDictIdInDictIdList for DictIdListIdx=0
+
+Diasable frmMain when initializing Client object (DSSRec takes time)
+
+1.23.0.55
+---------
+History type 8 and 9 added for Hilleröd, together with update för stored procedure
+
+
+1.23.0.53
+---------
+Nytt språk NL
+
+
+1.23.0.52
+---------
+Starts from 1.22.0.45
+Make clsCurrPat to a private class
+New SysSettings.UserShowHome and SysSettings.UserHomeAsDefault
+New SysSettings.CustomStyle
+clsCustom new abstract class with implementations clsCusom_Standard and clsCustom_Dk
+Tag for cmdSetHomeUnit
+New function clsServer.UnlockUser
+New function clsUserMgr.UnlockUser
+Rightclick in user list for unlock
+Alway unlock user account when saving user values. (clsServer.SaveUser)
+Always set ShutdownRequest in frmMain.Unload
+New SysSetting.UserAutoLogoffMinutes
+Call frmMain_Resize in load event after changing controls
+Don't check MandatoryData at Index button. We check later at Unload event
+Init DSSRec.AutoRewind to 0 when recording hardware is connected
+Only set TransciberId and create history when new status is WaitForSign or Transcribed
+
 1.22.0.45
 ---------
 Starts from 1.22.0.44

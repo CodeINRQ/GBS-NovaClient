@@ -829,21 +829,21 @@ Private Sub sldAutoRew_Scroll()
    DSSRec.SetBackspace (CLng(mAutoRewind))
 End Sub
 
-Public Sub OpenAndPlay(Filename As String)
+Public Sub OpenAndPlay(FileName As String)
 
    InitPlayerBeforeUse
-   OpenFile Filename
+   OpenFile FileName
    'DSSRec.Play
 End Sub
 
-Private Sub OpenFile(Filename As String)
+Private Sub OpenFile(FileName As String)
 
    Dim L As Long
    
-   If Len(Filename) > 0 And UCase$(Filename) <> UCase$(NowPlayingFilename) Then
+   If Len(FileName) > 0 And UCase$(FileName) <> UCase$(NowPlayingFilename) Then
       DSSRec.CloseFile
-      If DSSRec.LoadFile(Filename, CInt(mReadOnly), CInt(False)) = 0 Then
-         NowPlayingFilename = Filename
+      If DSSRec.LoadFile(FileName, CInt(mReadOnly), CInt(False)) = 0 Then
+         NowPlayingFilename = FileName
          EnableControls True
       End If
    End If
@@ -861,15 +861,15 @@ Private Sub ReOpenNowPlayingFile()
    DSSRec.MoveTo LastOkPos
    ShowPos LastOkPos, L
 End Sub
-Public Sub CreateNewFile(Filename As String)
+Public Sub CreateNewFile(FileName As String)
 
    Trc "ucDSS CreateNewFile", ""
    InitPlayerBeforeUse
-   If Len(Filename) > 0 And UCase$(Filename) <> UCase$(NowPlayingFilename) Then
+   If Len(FileName) > 0 And UCase$(FileName) <> UCase$(NowPlayingFilename) Then
       DSSRec.CloseFile
       mReadOnly = False
-      If DSSRec.LoadFile(Filename, CInt(mReadOnly), CInt(True)) = 0 Then
-         NowPlayingFilename = Filename
+      If DSSRec.LoadFile(FileName, CInt(mReadOnly), CInt(True)) = 0 Then
+         NowPlayingFilename = FileName
          EnableControls True
       End If
       DSSRec.Rec
@@ -888,8 +888,11 @@ Private Sub InitPlayerBeforeUse()
    optInsert(1).Value = True
    
    DSSRec.SetWindingSpeed 8000
-   DSSRec.SetBackspace mAutoRewind
-   
+   If Client.Hw = GRU_HW_RECORD Then
+      DSSRec.SetBackspace 0
+   Else
+      DSSRec.SetBackspace mAutoRewind
+   End If
    DSSRec.GetPlaySpeed Speed
    sldSpeed.Value = Speed / 10 - 50
    
