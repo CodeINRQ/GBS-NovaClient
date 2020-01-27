@@ -83,7 +83,6 @@ Const SheetMax = 2
 Const MaxRows = 1000
 Const MaxCols = 15
 
-Dim loadingdata         As Boolean
 Dim NumberOfFooterRow   As Integer
 Dim HistType            As HistTypeEnum
 Dim HistYear            As Integer
@@ -140,11 +139,6 @@ Private Sub cmdGo_Click()
    HistYear = Year(Now) - cboHistYear.ListIndex
    HistType = cboType.ListIndex
    GetDataNow
-End Sub
-
-Private Sub UserControl_Initialize()
-
-   loadingdata = False
 End Sub
 
 Private Sub UserControl_Resize()
@@ -290,8 +284,6 @@ Private Sub GetDataNow()
    Dim NumberAndLength As Boolean
    Dim AvgDays As Single
    
-   loadingdata = True
-   
    If CurrentOrgId <> NextOrgId Or CurrentHistType <> HistType Or CurrentHistYear <> HistYear Then
       CurrentOrgId = NextOrgId
       CurrentHistType = HistType
@@ -360,7 +352,6 @@ Private Sub GetDataNow()
          NumberOfFooterRow = 0
       End If
    End If
-   loadingdata = False
    Set Hist = Nothing
 End Sub
 Private Sub AddFooterRow()

@@ -45,6 +45,7 @@ Private SQLDatabase As String
 Private RsDictList As ADODB.Recordset
 Private RsDictTypeList As ADODB.Recordset
 Private RsOrgDictTypeList As ADODB.Recordset
+Private RsOrgPriorityList As ADODB.Recordset
 Private RsGroupList As ADODB.Recordset
 Private RsGroupListForUser As ADODB.Recordset
 Private RsPriorityList As ADODB.Recordset
@@ -81,16 +82,6 @@ Public Function IsBatchDoneByClient() As Boolean
    IsBatchDoneByClient = False
 End Function
 
-Public Sub DeleteDictations(DeleteOlderThanDays As Integer)
-
-   Dim Cmd As New ADODB.Command
-   
-   Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , DeleteOlderThanDays)
-   
-   Cmd.CommandTimeout = 500
-   OpenStoredProcWithCommand "s_Dictation_DeleteByTranscribedDate", Cmd
-   
-End Sub
 Public Sub DeleteAllDictations()
 
    Dim Cmd As New ADODB.Command
@@ -106,15 +97,6 @@ Public Sub DeleteHistory(DeleteOlderThanDays As Integer)
    
    Cmd.CommandTimeout = 500
    OpenStoredProcWithCommand "s_History_DeleteByCreatedDate", Cmd
-End Sub
-Public Sub DeleteSoundFiles(DeleteOlderThanDays As Integer)
-
-   Dim Cmd As New ADODB.Command
-   
-   Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , DeleteOlderThanDays)
-   
-   Cmd.CommandTimeout = 500
-   OpenStoredProcWithCommand "s_Dictation_DeleteSoundByTranscribedDate", Cmd
 End Sub
 Public Function GetCurrentTimestamp() As Date
 
@@ -229,6 +211,31 @@ Public Sub SaveOrg(Org As clsOrg)
    Rs("ShowBelow") = Org.ShowBelow
    Rs.Update
    Org.OrgId = Rs("OrgId")
+   CloseRecordset Rs
+End Sub
+Public Sub SaveDictType(DictType As clsDictType)
+
+   Dim Rs As ADODB.Recordset
+   Dim SQL As String
+   
+   SQL = BuildSQL("Select * from DictType", "DictTypeId=" & CStr(DictType.DictTypeId), "", "")
+   
+   Set Rs = New ADODB.Recordset
+   Rs.CursorLocation = adUseClient
+   Rs.CursorType = adOpenDynamic
+   Rs.LockType = adLockPessimistic
+   OpenRecordset Rs, SQL
+   
+   If Rs.EOF Then
+      Rs.AddNew
+   End If
+   Rs("DictTypeId") = DictType.DictTypeId
+   If Len(DictType.DictTypeText) > 0 Then
+      Rs("DictTypeText") = DictType.DictTypeText
+   Else
+      Rs("DictTypeText") = Null
+   End If
+   Rs.Update
    CloseRecordset Rs
 End Sub
 Public Sub SaveGroup(Grp As clsGroup)
@@ -906,7 +913,7 @@ Public Sub CreateOrgList()
 
    OpenDisconnectedRecordset RsOrgList, "SELECT * FROM Org", "", "", ""
    Set RsOrgListClone = RsOrgList.Clone
-   OpenDisconnectedRecordset RsUserRole, "SELECT * FROM spUserRole", "Userid=" & Client.User.UserId, "", ""
+   OpenDisconnectedRecordset RsUserRole, "SELECT * FROM v_UserRole", "Userid=" & Client.User.UserId, "", ""
    
 End Sub
 Public Function OrgListGetNext(ByRef Org As clsOrg) As Boolean
@@ -1058,45 +1065,47 @@ End Function
 Private Sub ConvertDictRsToClass(ByRef Rs As ADODB.Recordset, ByRef Dict As clsDict)
 
    Set Dict = New clsDict
-   With Dict
-      .DictId = Rs("DictId")
-      .ExtDictId = nvl(Rs("ExtDictId"), 0)
-      .ExtSystem = nvl(Rs("ExtSystem"), "")
-      .NoPatient = nvl(Rs("NoPatient"), False)
-      .Pat.PatId = nvl(Rs("PatId"), "")
-      .Pat.PatId2 = nvl(Rs("PatId2"), "")
-      .Pat.PatName = nvl(Rs("PatName"), "")
-      .Created = Rs("Created")
-      .Changed = nvl(Rs("Changed"), 0)
-      .SoundLength = nvl(Rs("SoundLength"), 0)
-      .OrgId = Rs("OrgId")
-      .OrgText = Rs("OrgText")
-      .DictTypeId = Rs("DictTypeId")
-      .DictTypeText = Rs("DictTypeText")
-      .AuthorId = Rs("AuthorId")
-      .AuthorShortName = nvl(Rs("AuthorShortName"), "-")
-      .AuthorLongName = nvl(Rs("AuthorLongName"), "-")
-      .TranscriberId = nvl(Rs("TranscriberId"), 0)
-      .TranscriberOrgId = nvl(Rs("TranscriberOrgId"), 0)
-      .TranscribedDate = nvl(Rs("TranscribedDate"), 0)
-      .TranscriberShortName = nvl(Rs("TranscriberShortName"), "")
-      .TranscriberLongName = nvl(Rs("TranscriberLongName"), "")
-      .StatusId = Rs("StatusId")
-      .StatusText = Rs("StatusText")
-      .PriorityId = Rs("PriorityId")
-      .PriorityText = Rs("PriorityText")
-      .ExpiryDate = Rs("ExpiryDate")
-      .Txt = nvl(Rs("Txt"), "")
-      .LockedByStation = nvl(Rs("LockedByStation"), "")
-      .LockedByUserShortName = nvl(Rs("LockedByUserShortName"), "")
-      .LockedByUserLongName = nvl(Rs("LockedByUserLongName"), "")
-      .LockedTime = nvl(Rs("LockedTime"), 0)
-      .TimeStamp = Rs("Timestamp")
-      .SoundDeleted = nvl(Rs("SoundDeleted"), 0)
       
-      .SoundDirty = False
-      .InfoDirty = False
-   End With
+   Dict.DictId = Rs("DictId")
+   Dict.ExtDictId = nvl(Rs("ExtDictId"), 0)
+   Dict.ExtSystem = nvl(Rs("ExtSystem"), "")
+   Dict.NoPatient = nvl(Rs("NoPatient"), False)
+   Dict.Pat.PatId = nvl(Rs("PatId"), "")
+   Dict.Pat.PatId2 = nvl(Rs("PatId2"), "")
+   Dict.Pat.PatName = nvl(Rs("PatName"), "")
+   Dict.Created = Rs("Created")
+   Dict.Changed = nvl(Rs("Changed"), 0)
+   Dict.SoundLength = nvl(Rs("SoundLength"), 0)
+   Dict.OrgId = Rs("OrgId")
+   Dict.OrgText = Rs("OrgText")
+   Dict.DictTypeId = Rs("DictTypeId")
+   Dict.DictTypeText = Rs("DictTypeText")
+   Dict.AuthorId = Rs("AuthorId")
+   Dict.AuthorShortName = nvl(Rs("AuthorShortName"), "-")
+   Dict.AuthorLongName = nvl(Rs("AuthorLongName"), "-")
+   Dict.TranscriberId = nvl(Rs("TranscriberId"), 0)
+   Dict.TranscriberOrgId = nvl(Rs("TranscriberOrgId"), 0)
+   Dict.TranscribedDate = nvl(Rs("TranscribedDate"), 0)
+   Dict.TranscriberShortName = nvl(Rs("TranscriberShortName"), "")
+   Dict.TranscriberLongName = nvl(Rs("TranscriberLongName"), "")
+   Dict.StatusId = Rs("StatusId")
+   Dict.StatusText = Rs("StatusText")
+   Dict.PriorityId = Rs("PriorityId")
+   Dict.PriorityText = Rs("PriorityText")
+   Dict.ExpiryDate = Rs("ExpiryDate")
+   Dict.Txt = nvl(Rs("Txt"), "")
+   Dict.LockedByStation = nvl(Rs("LockedByStation"), "")
+   Dict.LockedByUserShortName = nvl(Rs("LockedByUserShortName"), "")
+   Dict.LockedByUserLongName = nvl(Rs("LockedByUserLongName"), "")
+   Dict.LockedTime = nvl(Rs("LockedTime"), 0)
+   Dict.TimeStamp = Rs("Timestamp")
+   Dict.SoundDeleted = nvl(Rs("SoundDeleted"), 0)
+   Dict.Note = nvl(Rs("Note"), "")
+   Dict.AuthorPos = nvl(Rs("AuthorPos"), 0)
+   Dict.TranscriberPos = nvl(Rs("TranscriberPos"), 0)
+   
+   Dict.SoundDirty = False
+   Dict.InfoDirty = False
 End Sub
 Public Sub CreateDictTypeList()
 
@@ -1118,10 +1127,8 @@ Private Sub ConvertDictTypeRsToClass(ByRef Rs As ADODB.Recordset, ByRef DictType
 
    Set DictType = New clsDictType
 
-   With DictType
-      .DictTypeId = Rs("DictTypeId")
-      .DictTypeText = Rs("DictTypeText")
-   End With
+   DictType.DictTypeId = Rs("DictTypeId")
+   DictType.DictTypeText = Rs("DictTypeText")
 End Sub
 Public Sub CreateOrgDictTypeList()
 
@@ -1143,11 +1150,9 @@ Private Sub ConvertOrgDictTypeRsToClass(ByRef Rs As ADODB.Recordset, ByRef OrgDi
 
    Set OrgDictType = New clsOrgDictType
 
-   With OrgDictType
-      .OrgId = Rs("OrgId")
-      .DictTypeId = Rs("DictTypeId")
-      .Def = Rs("Def") <> 0
-   End With
+   OrgDictType.OrgId = Rs("OrgId")
+   OrgDictType.DictTypeId = Rs("DictTypeId")
+   OrgDictType.Def = Rs("Def") <> 0
 End Sub
 Public Sub DeleteOrgDictTypeByOrgId(OrgId As Long)
 
@@ -1190,6 +1195,71 @@ Public Sub SaveOrgDictType(OrgId As Long, DictTypeId As Integer, DictTypeDefault
    
    CloseRecordset Rs
 End Sub
+Public Sub CreateOrgPriorityList()
+
+   OpenStoredProcWithRsResult RsOrgPriorityList, "s_OrgPriority_Get"
+End Sub
+Public Function OrgPriorityListGetNext(OrgPriority As clsOrgPriority) As Boolean
+
+   If RsOrgPriorityList.EOF Then
+      OrgPriorityListGetNext = False
+      RsOrgPriorityList.Close
+      Set RsOrgPriorityList = Nothing
+   Else
+      ConvertOrgPriorityRsToClass RsOrgPriorityList, OrgPriority
+      RsOrgPriorityList.MoveNext
+      OrgPriorityListGetNext = True
+   End If
+End Function
+Private Sub ConvertOrgPriorityRsToClass(ByRef Rs As ADODB.Recordset, ByRef OrgPriority As clsOrgPriority)
+
+   Set OrgPriority = New clsOrgPriority
+
+   OrgPriority.OrgId = Rs("OrgId")
+   OrgPriority.PriorityId = Rs("PriorityId")
+   OrgPriority.Def = Rs("Def") <> 0
+End Sub
+Public Sub DeleteOrgPriorityByOrgId(OrgId As Long)
+
+   Dim Rs As ADODB.Recordset
+   Dim SQL As String
+   
+   SQL = BuildSQL("Select * from OrgPriority", "OrgId=" & CStr(OrgId), "", "")
+   
+   Set Rs = New ADODB.Recordset
+   Rs.CursorLocation = adUseClient
+   Rs.CursorType = adOpenDynamic
+   Rs.LockType = adLockPessimistic
+   OpenRecordset Rs, SQL
+   
+   Do While Not Rs.EOF
+      Rs.Delete
+      Rs.MoveNext
+   Loop
+   
+   CloseRecordset Rs
+End Sub
+Public Sub SaveOrgPriority(OrgId As Long, PriorityId As Integer, PriorityDefault As Boolean)
+
+   Dim Rs As ADODB.Recordset
+   Dim SQL As String
+   
+   SQL = BuildSQL("Select * from OrgPriority", "", "", "")
+   
+   Set Rs = New ADODB.Recordset
+   Rs.CursorLocation = adUseClient
+   Rs.CursorType = adOpenDynamic
+   Rs.LockType = adLockPessimistic
+   OpenRecordset Rs, SQL
+   
+   Rs.AddNew
+   Rs("OrgId") = OrgId
+   Rs("PriorityId") = PriorityId
+   Rs("Def") = SaveBool(PriorityDefault)
+   Rs.Update
+   
+   CloseRecordset Rs
+End Sub
 Public Sub CreateGroupList()
 
    OpenStoredProcWithRsResult RsGroupList, "s_Group_Get"
@@ -1210,12 +1280,10 @@ Private Sub ConvertGroupRsToClass(ByRef Rs As ADODB.Recordset, ByRef Grp As clsG
 
    Set Grp = New clsGroup
 
-   With Grp
-      .GroupId = Rs("GroupId")
-      .GroupText = Rs("GroupText")
-      .GroupDesc = nvl(Rs("GroupDesc"), "")
-      .AdmOrgId = nvl(Rs("AdmOrgId"), 0)
-   End With
+   Grp.GroupId = Rs("GroupId")
+   Grp.GroupText = Rs("GroupText")
+   Grp.GroupDesc = nvl(Rs("GroupDesc"), "")
+   Grp.AdmOrgId = nvl(Rs("AdmOrgId"), 0)
 End Sub
 Public Sub CreateGroupListForUser(UserId As Long)
 
@@ -1252,14 +1320,12 @@ Private Sub ConvertUsersRsToClass(ByRef Rs As ADODB.Recordset, ByRef Usr As clsU
 
    Set Usr = New clsUser
 
-   With Usr
-      .UserId = Rs("UserId")
-      .LoginName = Rs("LoginName")
-      .Password = Rs("Password")
-      .ShortName = Rs("ShortName")
-      .LongName = Rs("LongName")
-      .HomeOrgId = nvl(Rs("HomeOrgId"), 0)
-   End With
+   Usr.UserId = Rs("UserId")
+   Usr.LoginName = Rs("LoginName")
+   Usr.Password = Rs("Password")
+   Usr.ShortName = Rs("ShortName")
+   Usr.LongName = Rs("LongName")
+   Usr.HomeOrgId = nvl(Rs("HomeOrgId"), 0)
 End Sub
 Public Sub CreatePriorityList()
 
@@ -1279,11 +1345,13 @@ Public Function PriorityListGetNext(Priority As clsPriority) As Boolean
 End Function
 Private Sub ConvertPriorityRsToClass(ByRef Rs As ADODB.Recordset, ByRef Priority As clsPriority)
 
-   With Priority
-      .PriorityId = Rs("PriorityId")
-      .PriortyText = Rs("PriorityText")
-      .Days = Rs("Days")
-   End With
+   Set Priority = New clsPriority
+   
+   Priority.PriorityId = Rs("PriorityId")
+   Priority.PriortyText = Rs("PriorityText")
+   Priority.Days = Rs("Days")
+   Priority.Warning = nvl(Rs("Warning"), 0) <> 0
+   Priority.Colour = nvl(Rs("Colour"), 0)
 End Sub
 
 Private Sub Class_Initialize()
@@ -1512,6 +1580,15 @@ Public Function CheckOutDict(ByRef Dict As clsDict, ByVal DictId As Long, ByVal 
       End If
       
       ConvertDictRsToClass Rs, Dict
+      
+      If Dict.AuthorId = Client.User.UserId Then
+         Dict.CurrentPos = Dict.AuthorPos
+      Else
+         If Dict.TranscriberId = Client.User.UserId Then
+            Dict.CurrentPos = Dict.TranscriberPos
+         End If
+      End If
+      
       If WithSound And Len(LocalTempFileName) > 0 And Dict.StatusId < SoundDeleted Then
          Dict.LocalFilename = LocalTempFileName
          CopyFileFromSoundStorage DictId, LocalTempFileName
@@ -1616,6 +1693,9 @@ Public Function CheckInDict(ByRef Dict As clsDict, DiscardChanges As Boolean)
                If nvl(Rs("Txt"), "") <> Dict.Txt Then
                   Dirty = True
                End If
+               If nvl(Rs("Note"), "") <> Dict.Note Then
+                  Dirty = True
+               End If
                
                If Len(Dict.LocalFilename) > 0 Then
                   If Dict.SoundDirty Then
@@ -1650,6 +1730,15 @@ Public Function CheckInDict(ByRef Dict As clsDict, DiscardChanges As Boolean)
                AddHistory Dict
                Client.Trace.AddRow Trace_Level_Full, "CID", "CIDK", "", CStr(Dict.DictId), CStr(Dict.StatusId)
             End If
+            
+            If Dict.AuthorId = Client.User.UserId Then
+               Dict.AuthorPos = Dict.CurrentPos
+            Else
+               If Dict.TranscriberId = Client.User.UserId Then
+                  Dict.TranscriberPos = Dict.CurrentPos
+               End If
+            End If
+            
             Client.Trace.AddRow Trace_Level_Full, "CID", "CIDL", "", CStr(Dict.DictId), CStr(Dict.StatusId)
             CheckInDict = CheckInDictInternal(Dict)
             Client.Trace.AddRow Trace_Level_Full, "CID", "CIDM", "", CStr(Dict.DictId), CStr(Dict.StatusId)
@@ -1674,8 +1763,8 @@ Private Function CheckInDictInternal(ByRef Dict As clsDict) As Integer
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 20, SaveNullZeroLength(Dict.ExtDictId, 20))
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 10, SaveNullZeroLength(Dict.ExtSystem, 10))
    Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , SaveBool(Dict.NoPatient))
-   Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 12, SaveNullZeroLength(Dict.Pat.PatId, 12))
-   Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 12, SaveNullZeroLength(Dict.Pat.PatId2, 12))
+   Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 20, SaveNullZeroLength(Dict.Pat.PatId, 20))
+   Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 20, SaveNullZeroLength(Dict.Pat.PatId2, 20))
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 50, SaveNullZeroLength(Dict.Pat.PatName, 50))
    Cmd.Parameters.Append Cmd.CreateParameter(, adDBTimeStamp, adParamInput, , SaveDate(Dict.Changed))
    Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , Dict.OrgId)
@@ -1690,9 +1779,12 @@ Private Function CheckInDictInternal(ByRef Dict As clsDict) As Integer
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 50, SaveNullZeroLength(Dict.Txt, 50))
    Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , Dict.SoundLength)
    Cmd.Parameters.Append Cmd.CreateParameter(, adDBTimeStamp, adParamInput, , SaveDate(Dict.SoundDeleted))
+   Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 100, SaveNullZeroLength(Dict.Note, 100))
+   Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , Dict.AuthorPos)
+   Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , Dict.TranscriberPos)
 
    Client.Trace.AddRow Trace_Level_Full, "CIDI", "CIDIB", "", CStr(Dict.DictId), CStr(Dict.StatusId)
-   OpenStoredProcWithCommand "s_Dictation_CheckIn", Cmd
+   OpenStoredProcWithCommand "s_Dictation_CheckIn2", Cmd
    Client.Trace.AddRow Trace_Level_Full, "CIDI", "CIDIC", "", CStr(Dict.DictId), CStr(Dict.StatusId)
    Dict.DictId = Cmd(0)
    Client.Trace.AddRow Trace_Level_Full, "CIDI", "CIDID", "", CStr(Dict.DictId), CStr(Dict.StatusId)
@@ -1701,7 +1793,7 @@ Public Function CheckInNewDict(ByRef Dict As clsDict) As Integer
 
    RaiseEvent UIStatusSet(Client.Texts.Txt(1260102, "Diktatet sparas"), True)
       Dict.AuthorId = Client.User.UserId
-   
+      Dict.AuthorPos = Dict.CurrentPos
       CheckInDictInternal Dict
       
       If Len(Dict.LocalFilename) > 0 Then

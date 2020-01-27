@@ -2,7 +2,7 @@ VERSION 5.00
 Begin VB.Form frmDict 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "Diktat"
-   ClientHeight    =   4575
+   ClientHeight    =   5175
    ClientLeft      =   2760
    ClientTop       =   3750
    ClientWidth     =   8760
@@ -12,17 +12,25 @@ Begin VB.Form frmDict
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   4575
+   ScaleHeight     =   5175
    ScaleWidth      =   8760
    StartUpPosition =   1  'CenterOwner
    Tag             =   "1030100"
    WhatsThisHelp   =   -1  'True
+   Begin VB.TextBox txtNote 
+      Height          =   285
+      Left            =   2400
+      MaxLength       =   100
+      TabIndex        =   11
+      Top             =   4200
+      Width           =   6255
+   End
    Begin VB.CheckBox chkChangeDict 
       Height          =   270
       Left            =   5160
       Picture         =   "Dict.frx":058A
       Style           =   1  'Graphical
-      TabIndex        =   32
+      TabIndex        =   34
       Top             =   840
       Width           =   270
    End
@@ -30,8 +38,8 @@ Begin VB.Form frmDict
       Height          =   285
       Left            =   2400
       MaxLength       =   50
-      TabIndex        =   11
-      Top             =   4200
+      TabIndex        =   13
+      Top             =   4800
       Width           =   6255
    End
    Begin VB.ComboBox cboPriority 
@@ -75,40 +83,65 @@ Begin VB.Form frmDict
    End
    Begin CareTalk.ucCloseChoice ucCloseChoice 
       Height          =   1695
-      HelpContextID   =   1030000
       Left            =   6120
-      TabIndex        =   12
+      TabIndex        =   14
       Top             =   600
       Width           =   2655
-      _ExtentX        =   4683
-      _ExtentY        =   2990
+      _extentx        =   4683
+      _extenty        =   2990
    End
    Begin CareTalk.ucDSSRecGUI ucDSSRecGUI 
       Height          =   495
-      HelpContextID   =   1030000
       Left            =   120
-      TabIndex        =   15
+      TabIndex        =   17
       Top             =   60
       Width           =   8295
-      _ExtentX        =   14631
-      _ExtentY        =   873
+      _extentx        =   14631
+      _extenty        =   873
    End
    Begin CareTalk.ucOrgTree ucOrgTree 
-      Height          =   3855
-      HelpContextID   =   1030000
+      Height          =   4455
       Left            =   120
-      TabIndex        =   13
+      TabIndex        =   15
       Top             =   600
       Width           =   2175
-      _ExtentX        =   3836
-      _ExtentY        =   5953
+      _extentx        =   3836
+      _extenty        =   5953
+   End
+   Begin VB.Label lblNoteTitle 
+      BackStyle       =   0  'Transparent
+      Caption         =   "&Notering:"
+      Height          =   255
+      Left            =   2400
+      TabIndex        =   10
+      Tag             =   "1030121"
+      Top             =   3960
+      Width           =   3135
+   End
+   Begin VB.Label lblPriorityMissing 
+      Caption         =   "*"
+      ForeColor       =   &H000000FF&
+      Height          =   255
+      Left            =   4440
+      TabIndex        =   37
+      Top             =   2640
+      Width           =   135
+   End
+   Begin VB.Label lblDictTypeMissing 
+      Caption         =   "*"
+      ForeColor       =   &H000000FF&
+      Height          =   255
+      Left            =   4440
+      TabIndex        =   36
+      Top             =   2040
+      Width           =   135
    End
    Begin VB.Label lblChangeDict 
       BackStyle       =   0  'Transparent
       Caption         =   "Ändra:"
       Height          =   255
       Left            =   5160
-      TabIndex        =   33
+      TabIndex        =   35
       Tag             =   "1030117"
       Top             =   600
       Width           =   975
@@ -118,17 +151,17 @@ Begin VB.Form frmDict
       Caption         =   "Nyckelord:"
       Height          =   255
       Left            =   2400
-      TabIndex        =   10
+      TabIndex        =   12
       Tag             =   "1030116"
-      Top             =   3960
-      Width           =   1815
+      Top             =   4560
+      Width           =   3255
    End
    Begin VB.Label lblOrgMissing 
       Caption         =   "*"
       ForeColor       =   &H000000FF&
       Height          =   255
       Left            =   2280
-      TabIndex        =   31
+      TabIndex        =   33
       Top             =   600
       Width           =   135
    End
@@ -137,7 +170,7 @@ Begin VB.Form frmDict
       ForeColor       =   &H000000FF&
       Height          =   255
       Left            =   6000
-      TabIndex        =   30
+      TabIndex        =   32
       Top             =   1440
       Width           =   135
    End
@@ -146,7 +179,7 @@ Begin VB.Form frmDict
       ForeColor       =   &H000000FF&
       Height          =   255
       Left            =   3840
-      TabIndex        =   29
+      TabIndex        =   31
       Top             =   840
       Width           =   135
    End
@@ -189,7 +222,7 @@ Begin VB.Form frmDict
       Caption         =   "Utskrivet:"
       Height          =   255
       Left            =   6120
-      TabIndex        =   28
+      TabIndex        =   30
       Tag             =   "1030113"
       Top             =   3480
       Width           =   2175
@@ -199,7 +232,7 @@ Begin VB.Form frmDict
       BorderStyle     =   1  'Fixed Single
       Height          =   255
       Left            =   6120
-      TabIndex        =   27
+      TabIndex        =   29
       Top             =   3720
       UseMnemonic     =   0   'False
       Width           =   2535
@@ -209,7 +242,7 @@ Begin VB.Form frmDict
       BorderStyle     =   1  'Fixed Single
       Height          =   255
       Left            =   4560
-      TabIndex        =   26
+      TabIndex        =   28
       Top             =   2040
       Width           =   1455
    End
@@ -218,7 +251,7 @@ Begin VB.Form frmDict
       Caption         =   "Status:"
       Height          =   255
       Left            =   4560
-      TabIndex        =   25
+      TabIndex        =   27
       Tag             =   "1030106"
       Top             =   1800
       Width           =   1815
@@ -228,7 +261,7 @@ Begin VB.Form frmDict
       BorderStyle     =   1  'Fixed Single
       Height          =   255
       Left            =   4560
-      TabIndex        =   24
+      TabIndex        =   26
       Top             =   2640
       UseMnemonic     =   0   'False
       Width           =   1455
@@ -238,7 +271,7 @@ Begin VB.Form frmDict
       Caption         =   "Utskrift senast:"
       Height          =   255
       Left            =   4560
-      TabIndex        =   23
+      TabIndex        =   25
       Tag             =   "1030108"
       Top             =   2400
       Width           =   1575
@@ -248,7 +281,7 @@ Begin VB.Form frmDict
       BorderStyle     =   1  'Fixed Single
       Height          =   255
       Left            =   2400
-      TabIndex        =   22
+      TabIndex        =   24
       Top             =   3720
       UseMnemonic     =   0   'False
       Width           =   3615
@@ -258,7 +291,7 @@ Begin VB.Form frmDict
       Caption         =   "Utskrivare:"
       Height          =   255
       Left            =   2400
-      TabIndex        =   21
+      TabIndex        =   23
       Tag             =   "1030112"
       Top             =   3480
       Width           =   1815
@@ -268,7 +301,7 @@ Begin VB.Form frmDict
       BorderStyle     =   1  'Fixed Single
       Height          =   255
       Left            =   2400
-      TabIndex        =   20
+      TabIndex        =   22
       Top             =   3240
       UseMnemonic     =   0   'False
       Width           =   3615
@@ -278,7 +311,7 @@ Begin VB.Form frmDict
       Caption         =   "Intalare:"
       Height          =   255
       Left            =   2400
-      TabIndex        =   19
+      TabIndex        =   21
       Tag             =   "1030110"
       Top             =   3000
       Width           =   1815
@@ -293,7 +326,7 @@ Begin VB.Form frmDict
       Top             =   2400
       Width           =   1815
    End
-   Begin VB.Label Label2 
+   Begin VB.Label lblDictTypeTitle 
       BackStyle       =   0  'Transparent
       Caption         =   "Diktattyp:"
       Height          =   255
@@ -308,7 +341,7 @@ Begin VB.Form frmDict
       BorderStyle     =   1  'Fixed Single
       Height          =   255
       Left            =   6120
-      TabIndex        =   18
+      TabIndex        =   20
       Top             =   3240
       UseMnemonic     =   0   'False
       Width           =   2535
@@ -318,7 +351,7 @@ Begin VB.Form frmDict
       Caption         =   "Ändrat:"
       Height          =   255
       Left            =   6120
-      TabIndex        =   17
+      TabIndex        =   19
       Tag             =   "1030111"
       Top             =   3000
       Width           =   2175
@@ -328,7 +361,7 @@ Begin VB.Form frmDict
       BorderStyle     =   1  'Fixed Single
       Height          =   255
       Left            =   6120
-      TabIndex        =   16
+      TabIndex        =   18
       Top             =   2640
       UseMnemonic     =   0   'False
       Width           =   2535
@@ -338,7 +371,7 @@ Begin VB.Form frmDict
       Caption         =   "Inläst:"
       Height          =   255
       Left            =   6120
-      TabIndex        =   14
+      TabIndex        =   16
       Tag             =   "1030109"
       Top             =   2400
       Width           =   2175
@@ -404,6 +437,17 @@ Private mAutoRewind As Integer
 Private mCloseText(2) As String
 Private mCloseTip(2) As String
 Private mIsInChangeMode As Boolean
+Private mPos As Long
+
+Private UseAutomaticTranscribersStatusChange As Boolean
+Private WeHaveBeenInMidlePartOfDictation As Boolean
+Private WeHaveBeenInLastPartOfDictation As Boolean
+Private InitiallyLengthMilliSec As Long
+
+Public Property Let AutomaticTranscribersStatusChange(Activate As Boolean)
+
+   UseAutomaticTranscribersStatusChange = Activate
+End Property
 Public Sub ForceUnload()
 
    mForceUnload = True
@@ -438,6 +482,7 @@ End Sub
 Private Sub DSSRecorder_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long)
 
    Dim I As Integer
+   Dim Pos As Long
    
    If EventType = GRU_BUTTONPRESS Then
       If Data = GRU_BUT_INDEX Then
@@ -451,6 +496,24 @@ Private Sub DSSRecorder_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As
                      Exit Sub
                   End If
                Next I
+            End If
+         End If
+      End If
+   Else
+      If EventType = GRU_POSCHANGE Then
+         If UseAutomaticTranscribersStatusChange Then
+            If Data > 3000 Then
+               If Not WeHaveBeenInMidlePartOfDictation Then
+                  WeHaveBeenInMidlePartOfDictation = True
+                  ucCloseChoice.ChoiceValue = 1
+               End If
+            End If
+            If Data > InitiallyLengthMilliSec - 5000 Then
+               If Not WeHaveBeenInLastPartOfDictation Then
+                  WeHaveBeenInMidlePartOfDictation = True
+                  WeHaveBeenInLastPartOfDictation = True
+                  ucCloseChoice.ChoiceValue = 2
+               End If
             End If
          End If
       End If
@@ -470,17 +533,24 @@ Private Sub Form_Activate()
    If mFloating Then
       WindowFloating Me
    End If
+   ShowFormCaption
 End Sub
 
 Public Property Let CloseText(Index As Integer, Text As String)
 
    mCloseText(Index) = Text
    ucCloseChoice.ChoiceText(Index) = Text
+   If UseAutomaticTranscribersStatusChange Then
+      ucCloseChoice.ChoiceValue = 0
+   End If
 End Property
 Public Property Let CloseTip(Index As Integer, Text As String)
 
    mCloseTip(Index) = Text
    ucCloseChoice.ChoiceTip(Index) = Text
+   If UseAutomaticTranscribersStatusChange Then
+      ucCloseChoice.ChoiceValue = 0
+   End If
 End Property
 Public Property Get CloseChoice() As Integer
 
@@ -501,22 +571,32 @@ End Property
 
 Private Sub cboDictType_Click()
 
+   Dim DT As clsDictType
+
    If Screen.ActiveControl Is cboDictType Then
-      mDict.DictTypeId = cboDictType.ItemData(cboDictType.ListIndex)
-      mDict.DictTypeText = cboDictType.List(cboDictType.ListIndex)
+      Client.DictTypeMgr.GetFromId DT, cboDictType.ItemData(cboDictType.ListIndex)
+     
+      mDict.DictTypeId = DT.DictTypeId
+      mDict.DictTypeText = DT.DictTypeText
       mDict.InfoDirty = True
    End If
+   SetEnabled
 End Sub
 
 Private Sub cboPriority_Click()
 
+   Dim Prio As clsPriority
+
    If Screen.ActiveControl Is cboPriority Then
-      mDict.PriorityId = Client.PriorityMgr.IdFromIndex(cboPriority.ListIndex)
-      mDict.PriorityText = Client.PriorityMgr.TextFromIndex(cboPriority.ListIndex)
-      mDict.ExpiryDate = DateAdd("d", Client.PriorityMgr.DaysFromIndex(cboPriority.ListIndex), mDict.Created)
+      Client.PriorityMgr.GetFromId Prio, cboPriority.ItemData(cboPriority.ListIndex)
+      
+      mDict.PriorityId = Prio.PriorityId
+      mDict.PriorityText = Prio.PriortyText
+      mDict.ExpiryDate = DateAdd("d", Prio.Days, mDict.Created)
       lblExpiryDate.Caption = Format$(mDict.ExpiryDate, "ddddd")
       mDict.InfoDirty = True
    End If
+   SetEnabled
 End Sub
 
 Private Sub chkNoPatient_Click()
@@ -548,7 +628,7 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
    CloseX = False
    Sh = Shift And 7
    K = Sh * 256 + (KeyCode And 255)
-   Debug.Print KeyCode, Shift, Sh, K
+   Debug.Print KeyCode, Shift, Sh, K,
    Select Case K
       Case Client.SysSettings.PlayerKeyPlay
          B = butPlay
@@ -635,11 +715,11 @@ Private Sub Form_Load()
    If Client.SysSettings.DictInfoUseKeyWords Then
       lblTxtTitle.Visible = True
       txtTxt.Visible = True
-      FormFullHeight = 5055
+      FormFullHeight = 5655
    Else
       lblTxtTitle.Visible = False
       txtTxt.Visible = False
-      FormFullHeight = 4515
+      FormFullHeight = 5115
    End If
    FormLowHeihgt = 1100
    Me.Height = FormFullHeight
@@ -695,9 +775,6 @@ Public Sub EditDictation(ByRef Dictation As clsDict, ByVal NewDict As Boolean)
    End If
    mSoundReadOnly = Dictation.SoundReadOnly
    
-   SetEnabled
-   
-   Me.Caption = mDict.DictTypeText & ": " & mDict.Pat.PatIdFormatted
    If Len(mDict.LocalFilename) > 0 Then
       ucDSSRecGUI.Visible = True
       ucDSSRecGUI.AutoRewind = mAutoRewind
@@ -711,6 +788,8 @@ Public Sub EditDictation(ByRef Dictation As clsDict, ByVal NewDict As Boolean)
    Else
       ucDSSRecGUI.Visible = False
    End If
+   ucDSSRecGUI.Position = mDict.CurrentPos
+   InitiallyLengthMilliSec = ucDSSRecGUI.SoundLengthInSec * 1000
    ShowDictation
    mDict.InfoDirty = False
 End Sub
@@ -729,12 +808,25 @@ Private Sub ShowDictation()
    txtPatName.Text = mDict.Pat.PatName
    
    Client.DictTypeMgr.FillCombo cboDictType, mDict.OrgId, mDict.DictTypeId, True
-   mDict.DictTypeId = cboDictType.ItemData(cboDictType.ListIndex)
-   mDict.DictTypeText = cboDictType.List(cboDictType.ListIndex)
-   'cboDictType.ListIndex = Client.DictTypeMgr.IndexFromId(mDict.DictTypeId)  '!!!
+   If cboDictType.ListIndex >= 0 Then
+      Dim DictType As clsDictType
+      Client.DictTypeMgr.GetFromId DictType, cboDictType.ItemData(cboDictType.ListIndex)
+      mDict.DictTypeId = DictType.DictTypeId
+      mDict.DictTypeText = DictType.DictTypeText
+      Set DictType = Nothing
+   End If
    
-   Client.PriorityMgr.FillCombo cboPriority
-   cboPriority.ListIndex = Client.PriorityMgr.IndexFromId(mDict.PriorityId)
+   Client.PriorityMgr.FillCombo cboPriority, mDict.OrgId, mDict.PriorityId, True
+   If cboPriority.ListIndex >= 0 Then
+      Dim Priority As clsPriority
+      Client.PriorityMgr.GetFromId Priority, cboPriority.ItemData(cboPriority.ListIndex)
+      mDict.PriorityId = Priority.PriorityId
+      mDict.PriorityText = Priority.PriortyText
+      mDict.ExpiryDate = DateAdd("d", Priority.Days, mDict.Created)
+      Set Priority = Nothing
+   Else
+      mDict.ExpiryDate = mDict.Created
+   End If
    
    lblStatus.Caption = mDict.StatusText
    lblExpiryDate.Caption = Format$(mDict.ExpiryDate, "ddddd")
@@ -753,11 +845,10 @@ Private Sub ShowDictation()
    End If
    
    txtTxt.Text = mDict.Txt
-End Sub
-
-Private Sub Form_Terminate()
-
-   Trc "frmDict Terminate", ""
+   txtNote.Text = mDict.Note
+   
+   ShowFormCaption
+   SetEnabled
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
@@ -778,14 +869,21 @@ Private Sub Form_Unload(Cancel As Integer)
       If ucCloseChoice.ChoiceValue < 0 Then
          ucCloseChoice.ChoiceValue = 0
       End If
+      If mDict.StatusId < Recorded Then
+         If Len(ucCloseChoice.ChoiceText(1)) > 0 Then
+            ucCloseChoice.ChoiceValue = 1
+         End If
+      End If
    End If
    
    If Ok Then
       mDict.SoundDirty = mDict.SoundDirty Or ucDSSRecGUI.Dirty
+      mDict.CurrentPos = mPos
       SoundL = ucDSSRecGUI.SoundLengthInSec
       If SoundL > 0 Then   'If we lost device, length can wrong 0. Don't save it
          mDict.SoundLength = ucDSSRecGUI.SoundLengthInSec
       End If
+      
       mAutoRewind = ucDSSRecGUI.AutoRewind
       ucDSSRecGUI.StopAndClose
       Set ucDSSRecGUI.DSSRecorder = Nothing
@@ -833,6 +931,13 @@ Private Sub imgPinin_Click()
    SetFoatingWindows False
 End Sub
 
+
+Private Sub lblNoteTitle_Click()
+
+   Clipboard.Clear
+   Clipboard.SetText txtNote.Text
+End Sub
+
 Private Sub lblPatIdTitle_Click()
 
    Clipboard.Clear
@@ -851,6 +956,20 @@ Private Sub lblTxtTitle_Click()
    Clipboard.SetText txtTxt.Text
 End Sub
 
+Private Sub txtNote_Change()
+
+   If Screen.ActiveControl Is txtNote Then
+      mDict.Note = txtNote.Text
+      mDict.InfoDirty = True
+   End If
+   SetEnabled
+End Sub
+
+Private Sub txtNote_GotFocus()
+
+   SelectAllText ActiveControl
+End Sub
+
 Private Sub txtPatId_Change()
 
    If Screen.ActiveControl Is txtPatId Then
@@ -858,6 +977,11 @@ Private Sub txtPatId_Change()
       mDict.InfoDirty = True
    End If
    SetEnabled
+End Sub
+
+Private Sub txtPatId_GotFocus()
+
+   SelectAllText ActiveControl
 End Sub
 
 Private Sub txtPatId_KeyPress(KeyAscii As Integer)
@@ -878,6 +1002,11 @@ Private Sub txtPatName_Change()
    SetEnabled
 End Sub
 
+Private Sub txtPatName_GotFocus()
+
+   SelectAllText ActiveControl
+End Sub
+
 Private Sub txtTxt_Change()
 
    If Screen.ActiveControl Is txtTxt Then
@@ -885,6 +1014,11 @@ Private Sub txtTxt_Change()
       mDict.InfoDirty = True
    End If
    SetEnabled
+End Sub
+
+Private Sub txtTxt_GotFocus()
+
+   SelectAllText ActiveControl
 End Sub
 
 Private Sub ucCloseChoice_CloseClicked()
@@ -912,7 +1046,8 @@ End Sub
 
 Private Sub ucDSSRecGUI_PosChange(PosInMilliSec As Long, LengthInMilliSec As Long, Formated As String)
 
-   Me.Caption = Formated
+   ShowFormCaption
+   mPos = PosInMilliSec
 End Sub
 
 Private Sub ucOrgTree_NewSelect(OrgId As Long, Txt As String)
@@ -921,9 +1056,32 @@ Private Sub ucOrgTree_NewSelect(OrgId As Long, Txt As String)
       mDict.OrgId = OrgId
       mDict.OrgText = Txt
       mDict.InfoDirty = True
+      
       Client.DictTypeMgr.FillCombo cboDictType, mDict.OrgId, mDict.DictTypeId, True
-      mDict.DictTypeId = cboDictType.ItemData(cboDictType.ListIndex)
-      mDict.DictTypeText = cboDictType.List(cboDictType.ListIndex)
+      If cboDictType.ListIndex >= 0 Then
+         Dim DictType As clsDictType
+         Client.DictTypeMgr.GetFromId DictType, cboDictType.ItemData(cboDictType.ListIndex)
+         mDict.DictTypeId = DictType.DictTypeId
+         mDict.DictTypeText = DictType.DictTypeText
+         Set DictType = Nothing
+      Else
+         mDict.DictTypeId = -1
+      End If
+      
+      Client.PriorityMgr.FillCombo cboPriority, mDict.OrgId, mDict.PriorityId, True
+      If cboPriority.ListIndex >= 0 Then
+         Dim Priority As clsPriority
+         Client.PriorityMgr.GetFromId Priority, cboPriority.ItemData(cboPriority.ListIndex)
+         mDict.PriorityId = Priority.PriorityId
+         mDict.PriorityText = Priority.PriortyText
+         mDict.ExpiryDate = DateAdd("d", Priority.Days, mDict.Created)
+         Set Priority = Nothing
+         lblExpiryDate.Caption = Format$(mDict.ExpiryDate, "ddddd")
+      Else
+         mDict.PriorityId = -1
+         lblExpiryDate.Caption = ""
+      End If
+      
    End If
    SetEnabled
 End Sub
@@ -939,10 +1097,12 @@ Private Sub SetEnabled()
    cboDictType.Enabled = Enbld
    cboPriority.Enabled = Enbld
    txtTxt.Enabled = Enbld
+   txtNote.Enabled = Enbld
    
    CheckMandatoryData
    
    Client.DictMgr.SaveTempDictationInfo mDict, tdiUpdateInfo
+   ShowFormCaption
 End Sub
 Private Function CheckMandatoryData() As Boolean
 
@@ -972,5 +1132,22 @@ Private Function CheckMandatoryData() As Boolean
    Else
       lblOrgMissing.Visible = False
    End If
+   If mDict.DictTypeId < 0 Then
+      lblDictTypeMissing.Visible = True
+      Ok = False
+   Else
+      lblDictTypeMissing.Visible = False
+   End If
+   If mDict.PriorityId < 0 Then
+      lblPriorityMissing.Visible = True
+      Ok = False
+   Else
+      lblPriorityMissing.Visible = False
+   End If
+   
    CheckMandatoryData = Ok
 End Function
+Private Sub ShowFormCaption(Optional FormattedPos As String)
+
+   Me.Caption = mDict.Pat.PatIdFormatted & " / " & mDict.Pat.PatName
+End Sub

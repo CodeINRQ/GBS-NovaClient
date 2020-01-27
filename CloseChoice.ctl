@@ -5,6 +5,7 @@ Begin VB.UserControl ucCloseChoice
    ClientLeft      =   0
    ClientTop       =   0
    ClientWidth     =   2625
+   ForwardFocus    =   -1  'True
    ScaleHeight     =   1710
    ScaleWidth      =   2625
    Begin VB.Frame fraChoice 
@@ -162,7 +163,6 @@ Public Property Let ChoiceText(Index As Integer, Text As String)
          optChoice(Index).Value = False
       End If
    End If
-   'cmdClose.Default = Client.SysSettings.PlayerCloseDefault
 End Property
 Public Property Get ChoiceText(Index As Integer) As String
 

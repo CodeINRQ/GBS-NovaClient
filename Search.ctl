@@ -117,7 +117,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   51838977
+      Format          =   16580609
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -133,7 +133,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   51838977
+      Format          =   16580609
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -149,7 +149,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   51838977
+      Format          =   16580609
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -165,7 +165,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   51838977
+      Format          =   16580609
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -303,12 +303,12 @@ Public Sub Init()
    dtpTranscribedEndDate = Format$(Now, "ddddd")
 
    Client.DictTypeMgr.FillCombo cboDictType, -1, -1, False
-   'cboDictType.ListIndex = -1 '!!!
-   Client.PriorityMgr.FillCombo cboPriority
-   cboPriority.ListIndex = -1
+   Client.PriorityMgr.FillCombo cboPriority, -1, -1, False
+   
    txtAuthor.Text = ""
    txtTranscriber.Text = ""
    txtTxt.Text = ""
+   
    If Client.SysSettings.DictInfoUseKeyWords Then
       txtTxt.Visible = True
       lblTxtTitle.Visible = True
@@ -376,7 +376,7 @@ Private Sub cmdSearch_Click()
    If cboPriority.ListIndex < 0 Then
       mFilter.PriorityId = -1
    Else
-      mFilter.PriorityId = Client.PriorityMgr.IdFromIndex(cboPriority.ListIndex)
+      mFilter.PriorityId = cboPriority.ItemData(cboPriority.ListIndex)
    End If
    mFilter.AuthorName = txtAuthor.Text
    mFilter.TranscriberName = txtTranscriber.Text
@@ -427,9 +427,19 @@ Private Sub txtAuthor_Change()
    SetEnabled
 End Sub
 
+Private Sub txtAuthor_GotFocus()
+
+   SelectAllText ActiveControl
+End Sub
+
 Private Sub txtPatId_Change()
 
    SetEnabled
+End Sub
+
+Private Sub txtPatId_GotFocus()
+
+   SelectAllText ActiveControl
 End Sub
 
 Private Sub txtPatId_KeyPress(KeyAscii As Integer)
@@ -446,9 +456,19 @@ Private Sub txtPatName_Change()
    SetEnabled
 End Sub
 
+Private Sub txtPatName_GotFocus()
+
+   SelectAllText ActiveControl
+End Sub
+
 Private Sub txtTranscriber_Change()
 
    SetEnabled
+End Sub
+
+Private Sub txtTranscriber_GotFocus()
+
+   SelectAllText ActiveControl
 End Sub
 
 Private Sub txtTxt_Change()
@@ -456,3 +476,7 @@ Private Sub txtTxt_Change()
    SetEnabled
 End Sub
 
+Private Sub txtTxt_GotFocus()
+
+   SelectAllText ActiveControl
+End Sub

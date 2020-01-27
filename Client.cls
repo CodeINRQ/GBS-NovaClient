@@ -31,8 +31,8 @@ Attribute Server.VB_VarHelpID = -1
 'Public WithEvents Server As clsServerJet
 
 Public DictTypeMgr As clsDictTypeMgr
-Public GroupMgr As clsGroupMgr
 Public PriorityMgr As clsPriorityMgr
+Public GroupMgr As clsGroupMgr
 Public ExtSystemMgr As clsExtSystemMgr
 Public EventMgr As clsEventMgr
 
@@ -134,20 +134,4 @@ End Sub
 Private Sub Server_UIStatusSetSub(SubText As String)
 
    RaiseEvent UIStatusSetSub(SubText)
-End Sub
-Public Sub DoBatchUpdates()
-
-   If Client.Server.IsBatchDoneByClient Then
-      RaiseEvent UIStatusSet(Client.Texts.Txt(1180101, "Uppdateringar utförs"), True)
-      If Client.SysSettings.DeleteHistory >= 0 Then
-         Client.Server.DeleteHistory Client.SysSettings.DeleteHistory
-      End If
-      If Client.SysSettings.DeleteSound >= 0 Then
-         Client.Server.DeleteSoundFiles Client.SysSettings.DeleteSound
-      End If
-      If Client.SysSettings.DeleteDictInfo >= 0 Then
-         Client.Server.DeleteDictations Client.SysSettings.DeleteDictInfo
-      End If
-      RaiseEvent UIStatusClear
-   End If
 End Sub

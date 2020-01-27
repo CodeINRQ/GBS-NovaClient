@@ -33,15 +33,15 @@ Begin VB.Form frmMain
       Appearance      =   0  'Flat
       BorderStyle     =   0  'None
       ForeColor       =   &H80000008&
-      Height          =   285
+      Height          =   280
       Left            =   9240
       Picture         =   "main.frx":030A
       ScaleHeight     =   285
-      ScaleWidth      =   1935
-      TabIndex        =   15
+      ScaleWidth      =   1215
+      TabIndex        =   16
       TabStop         =   0   'False
-      Top             =   108
-      Width           =   1935
+      Top             =   70
+      Width           =   1215
    End
    Begin MSComDlg.CommonDialog CDialog 
       Left            =   600
@@ -53,7 +53,7 @@ Begin VB.Form frmMain
    Begin MSComctlLib.ProgressBar ProgressBar 
       Height          =   255
       Left            =   3480
-      TabIndex        =   14
+      TabIndex        =   15
       Top             =   8280
       Width           =   1575
       _ExtentX        =   2778
@@ -65,7 +65,7 @@ Begin VB.Form frmMain
       Align           =   2  'Align Bottom
       Height          =   255
       Left            =   0
-      TabIndex        =   13
+      TabIndex        =   14
       Top             =   9945
       Width           =   13410
       _ExtentX        =   23654
@@ -88,18 +88,17 @@ Begin VB.Form frmMain
    End
    Begin CareTalk.ucOrgTree ucOrgTree 
       Height          =   9135
-      HelpContextID   =   1000000
       Left            =   120
-      TabIndex        =   0
+      TabIndex        =   3
       Top             =   480
       Width           =   2175
-      _extentx        =   3836
-      _extenty        =   16113
+      _ExtentX        =   3836
+      _ExtentY        =   16113
    End
    Begin TabDlg.SSTab Tabs 
       Height          =   9375
       Left            =   2400
-      TabIndex        =   1
+      TabIndex        =   4
       Top             =   480
       Width           =   10815
       Visible         =   0   'False
@@ -107,184 +106,205 @@ Begin VB.Form frmMain
       _ExtentY        =   16536
       _Version        =   393216
       Style           =   1
-      Tabs            =   9
-      Tab             =   3
-      TabsPerRow      =   9
+      Tabs            =   10
+      TabsPerRow      =   10
       TabHeight       =   520
       TabCaption(0)   =   "Diktat"
-      TabPicture(0)   =   "main.frx":080D
-      Tab(0).ControlEnabled=   0   'False
+      TabPicture(0)   =   "main.frx":06E0
+      Tab(0).ControlEnabled=   -1  'True
       Tab(0).Control(0)=   "ucDictList"
       Tab(0).Control(0).Enabled=   0   'False
       Tab(0).ControlCount=   1
       TabCaption(1)   =   "Statistik"
-      TabPicture(1)   =   "main.frx":0829
+      TabPicture(1)   =   "main.frx":06FC
       Tab(1).ControlEnabled=   0   'False
       Tab(1).Control(0)=   "ucStatList"
       Tab(1).ControlCount=   1
       TabCaption(2)   =   "Historik"
-      TabPicture(2)   =   "main.frx":0845
+      TabPicture(2)   =   "main.frx":0718
       Tab(2).ControlEnabled=   0   'False
       Tab(2).Control(0)=   "ucHistList"
       Tab(2).ControlCount=   1
       TabCaption(3)   =   "Sök"
-      TabPicture(3)   =   "main.frx":0861
-      Tab(3).ControlEnabled=   -1  'True
+      TabPicture(3)   =   "main.frx":0734
+      Tab(3).ControlEnabled=   0   'False
       Tab(3).Control(0)=   "ucSearch"
-      Tab(3).Control(0).Enabled=   0   'False
       Tab(3).ControlCount=   1
       TabCaption(4)   =   "Administration"
-      TabPicture(4)   =   "main.frx":087D
+      TabPicture(4)   =   "main.frx":0750
       Tab(4).ControlEnabled=   0   'False
       Tab(4).Control(0)=   "ucEditUser"
+      Tab(4).Control(0).Enabled=   0   'False
       Tab(4).ControlCount=   1
-      TabCaption(5)   =   "Systeminställningar"
-      TabPicture(5)   =   "main.frx":0899
+      TabCaption(5)   =   "Organisation"
+      TabPicture(5)   =   "main.frx":076C
       Tab(5).ControlEnabled=   0   'False
       Tab(5).Control(0)=   "ucOrgDictType"
-      Tab(5).Control(1)=   "ucEditSysSettings"
-      Tab(5).Control(2)=   "ucEditGroup"
-      Tab(5).Control(3)=   "ucEditOrg"
-      Tab(5).ControlCount=   4
-      TabCaption(6)   =   "Tab 6"
-      TabPicture(6)   =   "main.frx":08B5
+      Tab(5).Control(0).Enabled=   0   'False
+      Tab(5).Control(1)=   "ucOrgPriority"
+      Tab(5).Control(1).Enabled=   0   'False
+      Tab(5).Control(2)=   "ucEditOrg"
+      Tab(5).Control(2).Enabled=   0   'False
+      Tab(5).ControlCount=   3
+      TabCaption(6)   =   "Systeminställningar"
+      TabPicture(6)   =   "main.frx":0788
       Tab(6).ControlEnabled=   0   'False
-      Tab(6).Control(0)=   "ucVoiceXpress"
-      Tab(6).ControlCount=   1
-      TabCaption(7)   =   "Demo"
-      TabPicture(7)   =   "main.frx":0E17
+      Tab(6).Control(0)=   "ucEditGroup"
+      Tab(6).Control(0).Enabled=   0   'False
+      Tab(6).Control(1)=   "ucEditSysSettings"
+      Tab(6).Control(1).Enabled=   0   'False
+      Tab(6).ControlCount=   2
+      TabCaption(7)   =   "Tab 6"
+      TabPicture(7)   =   "main.frx":07A4
       Tab(7).ControlEnabled=   0   'False
-      Tab(7).Control(0)=   "ucDemo1"
+      Tab(7).Control(0)=   "ucVoiceXpress"
+      Tab(7).Control(0).Enabled=   0   'False
       Tab(7).ControlCount=   1
-      TabCaption(8)   =   "Logg"
-      TabPicture(8)   =   "main.frx":0E33
+      TabCaption(8)   =   "Demo"
+      TabPicture(8)   =   "main.frx":0D06
       Tab(8).ControlEnabled=   0   'False
-      Tab(8).Control(0)=   "ucLoggList"
+      Tab(8).Control(0)=   "ucDemo1"
+      Tab(8).Control(0).Enabled=   0   'False
       Tab(8).ControlCount=   1
-      Begin CareTalk.ucOrgDictType ucOrgDictType 
-         Height          =   2175
-         Left            =   -74880
-         TabIndex        =   9
-         Top             =   4800
-         Width           =   8295
-         _extentx        =   14631
-         _extenty        =   4048
-      End
+      TabCaption(9)   =   "Logg"
+      TabPicture(9)   =   "main.frx":0D22
+      Tab(9).ControlEnabled=   0   'False
+      Tab(9).Control(0)=   "ucLoggList"
+      Tab(9).Control(0).Enabled=   0   'False
+      Tab(9).ControlCount=   1
       Begin CareTalk.ucDemo ucDemo1 
          Height          =   3975
          Left            =   -74880
-         TabIndex        =   12
-         Top             =   480
+         TabIndex        =   13
+         Top             =   360
          Width           =   8535
-         _extentx        =   15055
-         _extenty        =   7011
+         _ExtentX        =   15055
+         _ExtentY        =   7011
       End
       Begin CareTalk.ucVoiceXpress ucVoiceXpress 
          Height          =   4095
          HelpContextID   =   1170000
          Left            =   -74880
-         TabIndex        =   11
+         TabIndex        =   12
          Top             =   480
          Width           =   8535
-         _extentx        =   15055
-         _extenty        =   7223
+         _ExtentX        =   15055
+         _ExtentY        =   7223
       End
       Begin CareTalk.ucEditSysSettings ucEditSysSettings 
-         Height          =   2295
+         Height          =   4935
          HelpContextID   =   1100000
          Left            =   -74880
-         TabIndex        =   10
-         Top             =   6960
+         TabIndex        =   11
+         Top             =   4320
          Width           =   8175
-         _extentx        =   14420
-         _extenty        =   4048
+         _ExtentX        =   14420
+         _ExtentY        =   8705
       End
       Begin CareTalk.ucEditUser ucEditUser 
          Height          =   6735
          HelpContextID   =   1040000
          Left            =   -74880
-         TabIndex        =   8
+         TabIndex        =   10
          Top             =   480
          Width           =   10575
-         _extentx        =   15055
-         _extenty        =   4048
+         _ExtentX        =   15055
+         _ExtentY        =   4048
       End
       Begin CareTalk.ucEditGroup ucEditGroup 
-         Height          =   2535
+         Height          =   3855
          HelpContextID   =   1100000
          Left            =   -74880
-         TabIndex        =   7
-         Top             =   2280
-         Width           =   8175
-         _extentx        =   14420
-         _extenty        =   4471
-      End
-      Begin CareTalk.ucEditOrg ucEditOrg 
-         Height          =   1815
-         HelpContextID   =   1100000
-         Left            =   -74880
-         TabIndex        =   6
+         TabIndex        =   9
          Top             =   480
-         Width           =   8535
-         _extentx        =   15055
-         _extenty        =   2566
+         Width           =   8175
+         _ExtentX        =   14420
+         _ExtentY        =   6800
       End
       Begin CareTalk.ucStatList ucStatList 
          Height          =   6735
          HelpContextID   =   1160000
          Left            =   -74880
-         TabIndex        =   4
-         Top             =   360
+         TabIndex        =   7
+         Top             =   480
          Width           =   7815
-         _extentx        =   13785
-         _extenty        =   11880
+         _ExtentX        =   13785
+         _ExtentY        =   11880
       End
       Begin CareTalk.ucDictList ucDictList 
          Height          =   6735
          HelpContextID   =   1080000
-         Left            =   -74880
-         TabIndex        =   3
-         Top             =   360
+         Left            =   120
+         TabIndex        =   6
+         Top             =   480
          Width           =   7815
-         _extentx        =   13785
-         _extenty        =   11880
+         _ExtentX        =   13785
+         _ExtentY        =   11880
       End
       Begin CareTalk.ucSearch ucSearch 
          Height          =   6015
          HelpContextID   =   1150000
-         Left            =   120
-         TabIndex        =   5
+         Left            =   -74880
+         TabIndex        =   8
          Top             =   480
          Width           =   4935
-         _extentx        =   8705
-         _extenty        =   10610
+         _ExtentX        =   8705
+         _ExtentY        =   10610
       End
       Begin CareTalk.ucHistList ucHistList 
          Height          =   6735
          HelpContextID   =   1140000
          Left            =   -74880
-         TabIndex        =   16
-         Top             =   360
+         TabIndex        =   17
+         Top             =   480
          Width           =   7815
-         _extentx        =   13785
-         _extenty        =   11880
+         _ExtentX        =   13785
+         _ExtentY        =   11880
+      End
+      Begin CareTalk.ucEditOrg ucEditOrg 
+         Height          =   1815
+         HelpContextID   =   1100000
+         Left            =   -74880
+         TabIndex        =   0
+         Top             =   480
+         Width           =   8535
+         _ExtentX        =   15055
+         _ExtentY        =   2566
+      End
+      Begin CareTalk.ucOrgPriority ucOrgPriority 
+         Height          =   3015
+         Left            =   -74880
+         TabIndex        =   2
+         Top             =   5280
+         Width           =   8295
+         _ExtentX        =   14631
+         _ExtentY        =   4048
+      End
+      Begin CareTalk.ucOrgDictType ucOrgDictType 
+         Height          =   3015
+         Left            =   -74880
+         TabIndex        =   1
+         Top             =   2280
+         Width           =   8295
+         _ExtentX        =   14631
+         _ExtentY        =   5318
       End
       Begin CareTalk.ucLoggList ucLoggList 
          Height          =   6735
          HelpContextID   =   1330000
          Left            =   -74880
-         TabIndex        =   17
+         TabIndex        =   19
          Top             =   360
          Width           =   7815
-         _extentx        =   13785
-         _extenty        =   11880
+         _ExtentX        =   13785
+         _ExtentY        =   11880
       End
    End
    Begin MSComctlLib.Toolbar Toolbar1 
       Align           =   1  'Align Top
       Height          =   420
       Left            =   0
-      TabIndex        =   2
+      TabIndex        =   5
       Top             =   0
       Width           =   13410
       _ExtentX        =   23654
@@ -334,31 +354,31 @@ Begin VB.Form frmMain
          BeginProperty Images {2C247F25-8591-11D1-B16A-00C0F0283628} 
             NumListImages   =   7
             BeginProperty ListImage1 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":0E4F
+               Picture         =   "main.frx":0D3E
                Key             =   ""
             EndProperty
             BeginProperty ListImage2 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":1351
+               Picture         =   "main.frx":1240
                Key             =   ""
             EndProperty
             BeginProperty ListImage3 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":3B03
+               Picture         =   "main.frx":39F2
                Key             =   ""
             EndProperty
             BeginProperty ListImage4 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":3C15
+               Picture         =   "main.frx":3B04
                Key             =   ""
             EndProperty
             BeginProperty ListImage5 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":3D27
+               Picture         =   "main.frx":3C16
                Key             =   ""
             EndProperty
             BeginProperty ListImage6 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":3E39
+               Picture         =   "main.frx":3D28
                Key             =   ""
             EndProperty
             BeginProperty ListImage7 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":3F4B
+               Picture         =   "main.frx":3E3A
                Key             =   ""
             EndProperty
          EndProperty
@@ -466,10 +486,11 @@ Private Const tabStatList = 1
 Private Const tabHistList = 2
 Private Const tabSearch = 3
 Private Const tabAdmin = 4
-Private Const tabSysSettings = 5
-Private Const tabVoiceXpress = 6
-Private Const tabDemo = 7
-Private Const tabLoggList = 8
+Private Const tabOrg = 5
+Private Const tabSysSettings = 6
+Private Const tabVoiceXpress = 7
+Private Const tabDemo = 8
+Private Const tabLoggList = 9
 
 Private Declare Function ShowWindow Lib "user32" _
     (ByVal hwnd As Long, _
@@ -516,7 +537,7 @@ Private Sub cmdSetHomeOrg_Click()
 
    Client.User.HomeOrgId = CurrentOrg
    Client.UserMgr.SaveUserHomeOrg Client.User
-   ShowOrgTree False, True, False
+   ShowOrgTree False, True
    ucOrgTree.PickOrgId CurrentOrg
 End Sub
 
@@ -532,7 +553,7 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
       Case Client.SysSettings.PlayerKeyRec
          If Me.Toolbar1.Buttons(1).Visible Then
             Set Dict = New clsDict
-            RecordNewDictation Dict, True ' CurrentOrg = 30005
+            RecordNewDictation Dict, True
          End If
    End Select
 End Sub
@@ -631,9 +652,8 @@ Private Sub Form_Load()
    DictFormSettings.Serialized = Client.Server.ReadUserData("CT", "DF", "", Ver)
 
    Client.DictTypeMgr.Init
-   Client.GroupMgr.Init
-   'Client.UserMgr.Init
    Client.PriorityMgr.Init
+   Client.GroupMgr.Init
    Client.EventMgr.Init
    
    Client.EventMgr.OnAppEvent "OnLogin"
@@ -644,8 +664,8 @@ Private Sub Form_Load()
         
    Set mPopupForm = New frmPopup
    
-   ShowOrgTree False, True, False
-   If Client.OrgMgr.CheckUserRole(0, "A") Then
+   ShowOrgTree False, True, RTList
+   If Client.OrgMgr.CheckUserRole(0, RTAuthor) Then
       ucOrgTree.PickOrgId 30010
    Else
       If Client.DictMgr.IsThereDictations(30025) Then
@@ -663,8 +683,6 @@ Private Sub Form_Load()
    CheckHardware
    mDSSRec.CheckLicens RecordingAllowed
 
-   Client.DoBatchUpdates
-   
    LastOrgidForNewDictation = Client.User.HomeOrgId
    
    SetVisibleTabs
@@ -700,7 +718,7 @@ Private Sub CheckHardware()
    If Client.Hw <> NewValue Or Not NotFirst Then
       Client.Hw = NewValue
       NotFirst = True
-      RecordingAllowed = (Client.Hw = GRU_HW_RECORD) And Client.OrgMgr.CheckUserRole(0, "A")
+      RecordingAllowed = (Client.Hw = GRU_HW_RECORD) And Client.OrgMgr.CheckUserRole(0, RTAuthor)
       
       If Client.Hw = GRU_HW_RECORD Then
          StatusBar.Panels(6).Text = Client.Texts.Txt(1000425, "Inspelning")
@@ -713,8 +731,8 @@ Private Sub CheckHardware()
       
       Me.Toolbar1.Buttons(1).Visible = RecordingAllowed
       Me.mnuHelp(5).Enabled = RecordingAllowed
-      Me.Toolbar1.Buttons(5).Visible = Client.OrgMgr.CheckUserRole(0, "A") And Client.SysSettings.ImportAllowTool
-      Me.mnuFile(5).Visible = Client.OrgMgr.CheckUserRole(0, "A") And Client.SysSettings.ImportAllowMenu
+      Me.Toolbar1.Buttons(5).Visible = Client.OrgMgr.CheckUserRole(0, RTAuthor) And Client.SysSettings.ImportAllowTool
+      Me.mnuFile(5).Visible = Client.OrgMgr.CheckUserRole(0, RTAuthor) And Client.SysSettings.ImportAllowMenu
    
       VoiceXpressAllowed = Client.SysSettings.VoiceExpressActive And Client.Hw = GRU_HW_RECORD And mVx.VxInstalled
    
@@ -735,6 +753,7 @@ Private Sub SetVisibleTabs()
    frmMain.Tabs.TabCaption(tabHistList) = Client.Texts.Txt(1000405, "Historik")
    frmMain.Tabs.TabCaption(tabSearch) = Client.Texts.Txt(1000406, "Sök")
    frmMain.Tabs.TabCaption(tabAdmin) = Client.Texts.Txt(1000407, "Administration")
+   frmMain.Tabs.TabCaption(tabOrg) = Client.Texts.Txt(1000428, "Organisation")
    frmMain.Tabs.TabCaption(tabSysSettings) = Client.Texts.Txt(1000408, "Systeminställningar")
    frmMain.Tabs.TabCaption(tabVoiceXpress) = ""
    frmMain.Tabs.TabCaption(tabDemo) = Client.Texts.Txt(1000409, "Demo")
@@ -742,25 +761,31 @@ Private Sub SetVisibleTabs()
    
    
    SetTabEnabled tabSearch, False, True
-   If Client.OrgMgr.CheckUserRole(0, "S") Then
+   If Client.OrgMgr.CheckUserRole(0, RTUserAdmin) Then
+      SetTabEnabled tabAdmin, False, True
+   Else
+      SetTabEnabled tabAdmin, False, False
+   End If
+   If Client.OrgMgr.CheckUserRole(0, RTStatistics) Then
       SetTabEnabled tabStatList, False, True
       ucStatList.Init
       ucStatList.RestoreSettings Client.Server.ReadUserData("CT", "SL", "", Ver)
-         
+   Else
+      SetTabEnabled tabStatList, False, False
+   End If
+   If Client.OrgMgr.CheckUserRole(0, RTHistory) Then
       SetTabEnabled tabHistList, False, True
       ucHistList.Init
       ucHistList.RestoreSettings Client.Server.ReadUserData("CT", "HL", "", Ver)
-   
-      SetTabEnabled tabAdmin, False, True
    Else
-      SetTabEnabled tabStatList, False, False
       SetTabEnabled tabHistList, False, False
-      SetTabEnabled tabAdmin, False, False
    End If
-   If Client.OrgMgr.CheckUserRole(0, "I") Then
+   If Client.OrgMgr.CheckUserRole(0, RTSysAdmin) Then
+      SetTabEnabled tabOrg, False, True
       SetTabEnabled tabSysSettings, False, True
       ucEditGroup.Init
       ucOrgDictType.Init
+      ucOrgPriority.Init
       Set ucEditSysSettings.Settings = Client.SysSettings.Store
       
       SetTabEnabled tabLoggList, False, True
@@ -773,6 +798,7 @@ Private Sub SetVisibleTabs()
          SetTabEnabled tabDemo, False, False
       End If
    Else
+      SetTabEnabled tabOrg, False, False
       SetTabEnabled tabSysSettings, False, False
       SetTabEnabled tabLoggList, False, False
       SetTabEnabled tabDemo, False, False
@@ -800,10 +826,12 @@ Private Sub SetTabEnabled(TabNo As Integer, Enbld As Boolean, Vsbl As Boolean)
          frmMain.ucSearch.Visible = Enbld
       Case tabAdmin
          frmMain.ucEditUser.Visible = Enbld
-      Case tabSysSettings
+      Case tabOrg
          frmMain.ucEditOrg.Visible = Enbld
-         frmMain.ucEditGroup.Visible = Enbld
          frmMain.ucOrgDictType.Visible = Enbld
+         frmMain.ucOrgPriority.Visible = Enbld
+      Case tabSysSettings
+         frmMain.ucEditGroup.Visible = Enbld
          frmMain.ucEditSysSettings.Visible = Enbld
       Case tabDemo
          frmMain.ucDemo1.Visible = Enbld
@@ -815,21 +843,30 @@ Private Sub SetTabEnabled(TabNo As Integer, Enbld As Boolean, Vsbl As Boolean)
          
 End Sub
 
-Private Sub ShowOrgTree(ShowAll As Boolean, ShowVirtual As Boolean, JustSupervisorRights As Boolean)
+Private Sub ShowOrgTree(ShowAll As Boolean, ShowVirtual As Boolean, Optional UsedUserRights As RoleTypeEnum = RTNotUsed)
 
    Dim I As Integer
    Dim Org As clsOrg
    Dim StartOrgId As Long
-   Dim EnabledDueToSupervisory As Boolean
+   Dim EnabledDueToRights As Boolean
+   Static LastUserUserRights As RoleTypeEnum
+   Dim UserRights As RoleTypeEnum
 
+   If UsedUserRights = RTNotUsed Then
+      UserRights = LastUserUserRights
+   Else
+      UserRights = UsedUserRights
+   End If
+   LastUserUserRights = UserRights
+   
    Client.OrgMgr.Init ShowAll
    ucOrgTree.Clear
    For I = 0 To Client.OrgMgr.Count - 1
       Client.OrgMgr.GetSortedOrg Org, I
       If Org.ShowInTree Or ShowAll Then
          If Org.ShowBelow Or Org.DictContainer Or ShowAll Then
-            EnabledDueToSupervisory = Client.OrgMgr.CheckUserRole(Org.OrgId, "S") Or Not JustSupervisorRights
-            If EnabledDueToSupervisory Then
+            EnabledDueToRights = Client.OrgMgr.CheckUserRole(Org.OrgId, UserRights)
+            If EnabledDueToRights Then
                If Org.OrgId = Client.User.HomeOrgId Then
                   ucOrgTree.AddNode Org.OrgId, Org.ShowParent, Org.OrgText, 7, True
                Else
@@ -849,7 +886,7 @@ Private Sub ShowOrgTree(ShowAll As Boolean, ShowVirtual As Boolean, JustSupervis
       ucOrgTree.AddNode 30050, 0, Client.Texts.Txt(1000416, "Sökresultat"), 3, True
       ucOrgTree.AddNode 30005, 0, Client.Texts.Txt(1000419, "Aktuell patient"), 3, True
       
-      If Client.OrgMgr.CheckUserRole(0, "A") Then
+      If Client.OrgMgr.CheckUserRole(0, RTAuthor) Then
          ucOrgTree.AddNode 30010, 30000, Client.Texts.Txt(1000411, "Under inspelning"), 3, True
          ucOrgTree.AddNode 30020, 30000, Client.Texts.Txt(1000412, "Inspelade"), 3, True
       End If
@@ -1211,16 +1248,36 @@ End Sub
 
 Private Sub ucDictList_RightClick(DictId As Long)
 
-   If Client.OrgMgr.CheckUserRole(0, "I") Then
+   Dim ShowPopupAudit As Boolean
+   Dim ShowPopupUnlock As Boolean
+   Dim Dict As clsDict
+
+   If Client.OrgMgr.CheckUserRole(0, RTSysAdmin) Then
+      ShowPopupAudit = True
+      ShowPopupUnlock = True
+   Else
+      If Client.DictMgr.GetDictFromCache(DictId, Dict) Then
+         If Client.OrgMgr.CheckUserRole(Dict.OrgId, RTAuditing) Then
+            ShowPopupAudit = True
+         End If
+         If Client.OrgMgr.CheckUserRole(Dict.OrgId, RTUnlocking) Then
+            ShowPopupUnlock = True
+         End If
+      End If
+   End If
+   If ShowPopupAudit Or ShowPopupUnlock Then
       On Error Resume Next
+      Debug.Print DictId
       mPopupForm.Id = DictId
+      mPopupForm.mnuDictList(10).Visible = ShowPopupUnlock
+      mPopupForm.mnuDictList(20).Visible = ShowPopupAudit
       PopupMenu mPopupForm.mnuPopup(0)
    End If
 End Sub
 
 Private Sub ucEditOrg_OrgSaved(Org As clsOrg)
 
-   ShowOrgTree True, False, True
+   ShowOrgTree True, False, RTSysAdmin
    CurrentOrg = Org.OrgId
    ucOrgTree.PickOrgId CurrentOrg
 End Sub
@@ -1241,20 +1298,26 @@ End Sub
 Private Sub UpdateCurrentView()
 
    Static PreviousTab As Integer
-   Static CurrOrgIdWhenShowAll As Long
-   Static CurrOrgIdWhenNotShowAll As Long
    Static PreviousOrg As Long
+   Static AlreadyInThisUpdate As Boolean
    Dim Org As clsOrg
+   
+   If AlreadyInThisUpdate Then Exit Sub
+   AlreadyInThisUpdate = True
    
    UIBusy = True
    
    If PreviousOrg <> CurrentOrg Then
       If CurrentOrg < 30000 Then
-         If Client.OrgMgr.CheckUserRole(0, "A") Then
+         If Client.OrgMgr.CheckUserRole(0, RTAuthor) Then
             Client.OrgMgr.GetOrgFromId Org, CurrentOrg
-            Me.cmdSetHomeOrg.Enabled = Client.OrgMgr.CheckUserRole(CurrentOrg, "A") And Org.DictContainer
+            If Not Org Is Nothing Then
+               Me.cmdSetHomeOrg.Enabled = Client.OrgMgr.CheckUserRole(CurrentOrg, RTAuthor) And Org.DictContainer
+            Else
+               Me.cmdSetHomeOrg.Enabled = False
+            End If
          Else
-            Me.cmdSetHomeOrg.Enabled = Client.OrgMgr.CheckUserRole(CurrentOrg, "L")
+            Me.cmdSetHomeOrg.Enabled = Client.OrgMgr.CheckUserRole(CurrentOrg, RTList)
          End If
       Else
          Me.cmdSetHomeOrg.Enabled = False
@@ -1263,70 +1326,75 @@ Private Sub UpdateCurrentView()
       RaiseEvent OnOrgChanged
       PreviousOrg = CurrentOrg
    End If
-   
       UIStatusSet Client.Texts.Txt(1000418, "Mappen uppdateras"), False
       If PreviousTab <> Tabs.Tab Then
          Select Case PreviousTab
-            Case tabSysSettings, tabStatList, tabHistList, tabAdmin
+            Case tabOrg, tabSysSettings, tabStatList, tabHistList, tabAdmin
                frmMain.mnuFile(6).Visible = False
-               CurrOrgIdWhenNotShowAll = CurrentOrg
-            Case Else
-               CurrOrgIdWhenShowAll = CurrentOrg
          End Select
-'         If PreviousTab = tabSysSettings Then
-'            PreviousTab = Tabs.Tab                 'must be here
-'            CurrOrgIdWhenShowAll = CurrentOrg
-'            ShowOrgTree False, True, False
-'            ucOrgTree.PickOrgId CurrOrgIdWhenNotShowAll
-'         End If
-         PreviousTab = Tabs.Tab                    'must be here also
+         PreviousTab = Tabs.Tab                    'must be here
          Select Case Tabs.Tab
-            Case tabSysSettings
-               ShowOrgTree True, False, True
-               ucOrgTree.PickOrgId CurrOrgIdWhenNotShowAll
+            Case tabOrg, tabSysSettings
+               If Not Client.OrgMgr.CheckUserRole(CurrentOrg, RTSysAdmin) Then CurrentOrg = 0
+               ShowOrgTree True, False, RTSysAdmin
+               ucOrgTree.PickOrgId CurrentOrg
             Case tabAdmin
-               ShowOrgTree True, False, True
-               ucOrgTree.PickOrgId CurrOrgIdWhenNotShowAll
+               If Not Client.OrgMgr.CheckUserRole(CurrentOrg, RTUserAdmin) Then CurrentOrg = 0
+               ShowOrgTree True, False, RTUserAdmin
+               ucOrgTree.PickOrgId CurrentOrg
                Client.UserMgr.Init
-               ucEditUser.Init
-            Case tabStatList, tabHistList
+               ucEditUser.GetData CurrentOrg
+            Case tabStatList
+               If Not Client.OrgMgr.CheckUserRole(CurrentOrg, RTStatistics) Then CurrentOrg = 0
                frmMain.mnuFile(6).Visible = True And Client.SysSettings.ExportAllowMenu
-               ShowOrgTree True, False, True
+               ShowOrgTree True, False, RTStatistics
                Client.UserMgr.Init
-               ucOrgTree.PickOrgId CurrOrgIdWhenNotShowAll
-            Case Else
-               ShowOrgTree False, True, False
-               ucOrgTree.PickOrgId CurrOrgIdWhenShowAll
+               ucOrgTree.PickOrgId CurrentOrg
+            Case tabHistList
+               If Not Client.OrgMgr.CheckUserRole(CurrentOrg, RTHistory) Then CurrentOrg = 0
+               frmMain.mnuFile(6).Visible = True And Client.SysSettings.ExportAllowMenu
+               ShowOrgTree True, False, RTHistory
+               Client.UserMgr.Init
+               ucOrgTree.PickOrgId CurrentOrg
+            Case tabDictList
+               If CurrentOrg < 30000 Then
+                  If Not Client.OrgMgr.CheckUserRole(CurrentOrg, RTList) Then CurrentOrg = 0
+               End If
+               ShowOrgTree False, True, RTList
+               ucOrgTree.PickOrgId CurrentOrg
          End Select
-'         If Tabs.Tab = tabSysSettings Then
-'            CurrOrgIdWhenNotShowAll = CurrentOrg
-'            ShowOrgTree True, False, True
-'            ucOrgTree.PickOrgId CurrOrgIdWhenShowAll
-'         End If
       End If
       Select Case Tabs.Tab
-         Case 0
+         Case tabDictList
             If CurrentOrg > 0 Then
                Me.ucDictList.GetData CurrentOrg
             End If
-         Case 1
+         Case tabStatList
             If CurrentOrg > 0 Then
                Me.ucStatList.GetData CurrentOrg
             End If
-         Case 2
+         Case tabHistList
             If CurrentOrg > 0 Then
                Me.ucHistList.GetData CurrentOrg
             End If
-         Case 5
+         Case tabAdmin
+            If CurrentOrg > 0 Then
+               Me.ucEditUser.GetData CurrentOrg
+            End If
+         
+         Case tabOrg, tabSysSettings
             If CurrentOrg > 0 Then
                Me.ucEditOrg.OrgSelected CurrentOrg
                Me.ucEditGroup.NewOrg CurrentOrg
                Me.ucOrgDictType.NewOrg CurrentOrg
+               Me.ucOrgPriority.NewOrg CurrentOrg
             End If
       End Select
       UIStatusClear
       
    UIBusy = False
+   
+   AlreadyInThisUpdate = False
 End Sub
 Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
 
@@ -1360,7 +1428,7 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
          Dict.DictTypeId = Client.NewRecInfo.DictTypeId
       End If
       If Client.NewRecInfo.OrgId > 0 Then
-         If Client.OrgMgr.CheckUserRole(Client.NewRecInfo.OrgId, "A") Then
+         If Client.OrgMgr.CheckUserRole(Client.NewRecInfo.OrgId, RTAuthor) Then
             Dict.OrgId = Client.NewRecInfo.OrgId
          Else
             Dict.OrgId = LastOrgidForNewDictation
@@ -1378,7 +1446,7 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
          Dict.DictTypeId = Client.CurrPatient.DictTypeId
       End If
       If Client.CurrPatient.OrgId > 0 Then
-         If Client.OrgMgr.CheckUserRole(Client.CurrPatient.OrgId, "A") Then
+         If Client.OrgMgr.CheckUserRole(Client.CurrPatient.OrgId, RTAuthor) Then
             Dict.OrgId = Client.CurrPatient.OrgId
          End If
       End If
@@ -1496,6 +1564,8 @@ Private Sub ImportNewDictation()
          KillFileIgnoreError ImportFileName
          Dict.OrgId = LastOrgidForNewDictation
          Dict.AuthorId = Client.User.UserId
+         Dict.DictTypeId = -1
+         Dict.PriorityId = -1
          Set mDictForm = New frmDict
          Load mDictForm
          mDictForm.RestoreSettings DictFormSettings
@@ -1567,8 +1637,8 @@ Public Sub EditExistingDictation(DictId As Long)
          Client.EventMgr.OnDictEvent "OnOpen", Dict
          RaiseEvent OnOpenDictation(Dict)
       
-         IsUserAuthor = Client.OrgMgr.CheckUserRole(Dict.OrgId, "A") Or Dict.AuthorId = Client.User.UserId
-         IsUserTranscriber = Client.OrgMgr.CheckUserRole(Dict.OrgId, "T")
+         IsUserAuthor = Client.OrgMgr.CheckUserRole(Dict.OrgId, RTAuthor) Or Dict.AuthorId = Client.User.UserId
+         IsUserTranscriber = Client.OrgMgr.CheckUserRole(Dict.OrgId, RTTranscribe)
          
          Set mDictForm = New frmDict
          Load mDictForm
@@ -1630,6 +1700,7 @@ Public Sub EditExistingDictation(DictId As Long)
             End If
          ElseIf IsUserTranscriber And (Dict.TranscriberId = Client.User.UserId Or Dict.TranscriberId = 0) Then
             If Dict.StatusId >= Recorded And Dict.StatusId < WaitForSign Then
+               mDictForm.AutomaticTranscribersStatusChange = True
                If Client.SysSettings.UseAuthorsSign Then
                   Discard = ShowAndSetNewStatus(Dict, Client.Texts.Txt(1000610, "Ångra"), _
                                                       Client.Texts.ToolTip(1000610, "Lämna dikatet oförändrat"), _

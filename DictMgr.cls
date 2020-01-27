@@ -36,7 +36,7 @@ Private mCurrPatientFilter As clsFilter
 Private LastCurrPatId As String
 Private LastCurrPatId2 As String
 
-Private Function GetDictFromCache(DictId As Long, Dict As clsDict) As Boolean
+Public Function GetDictFromCache(DictId As Long, Dict As clsDict) As Boolean
 
    Dim L As Long
    
@@ -69,7 +69,7 @@ Public Property Set CurrPatientFilter(Flt As clsFilter)
    Set mCurrPatientFilter = Flt
 End Property
 
-Public Function CreateList(ByVal OrgId As Long, TimeStamp As Double, ByRef ToMany As Boolean) As Double
+Public Function CreateList(ByVal OrgId As Long, TimeStamp As Double, ByRef TooMany As Boolean) As Double
 
    DictListTimeStamp = TimeStamp
    
@@ -119,7 +119,7 @@ Public Function CreateList(ByVal OrgId As Long, TimeStamp As Double, ByRef ToMan
    End Select
    
    DictCacheIndex = 0
-   CreateList = FillCache(OrgId, ToMany)
+   CreateList = FillCache(OrgId, TooMany)
    Debug.Print "DictCacheNumber " & CStr(DictCacheNumber)
 End Function
 
@@ -141,7 +141,7 @@ Public Function ListNextItem(ByRef Dict As clsDict) As Boolean
    ListNextItem = False
 End Function
 
-Private Function FillCache(ByVal OrgId As Long, ByRef ToMany As Boolean) As Double
+Private Function FillCache(ByVal OrgId As Long, ByRef TooMany As Boolean) As Double
 
    Dim Dict As clsDict
    Dim MaxTimeStamp As Double
@@ -153,7 +153,7 @@ Private Function FillCache(ByVal OrgId As Long, ByRef ToMany As Boolean) As Doub
    End If
 
    If DictCacheTimeStampOrg(OrgId) < 0 Then
-      DictCacheTimeStampOrg(OrgId) = FillCacheFromFilter(OrgId, ToMany)
+      DictCacheTimeStampOrg(OrgId) = FillCacheFromFilter(OrgId, TooMany)
       FillCache = DictCacheTimeStampOrg(OrgId)
    Else
       Client.Server.CreateDictList 0, 0, 0, 0, 255, DictCacheTimeStampTot
@@ -325,7 +325,7 @@ Private Function IsDictIdInDictIdList(DictId As Long) As Boolean
 
    IsDictIdInDictIdList = False
 End Function
-Private Function FillCacheFromFilter(ByVal OrgId As Long, ByRef ToMany As Boolean) As Double
+Private Function FillCacheFromFilter(ByVal OrgId As Long, ByRef TooMany As Boolean) As Double
  
    Dim Dict As clsDict
    Dim MaxTimeStamp As Double
@@ -334,7 +334,7 @@ Private Function FillCacheFromFilter(ByVal OrgId As Long, ByRef ToMany As Boolea
    Dim SQLSearch As String
    Dim NumberDictInSearchResult As Integer
 
-   ToMany = False
+   TooMany = False
    For Each Flt In FilterCol
       If Flt.OrgId <> 0 Then
          If DictCacheTimeStampOrg(Flt.OrgId) < 0 Then
@@ -397,7 +397,7 @@ Private Function FillCacheFromFilter(ByVal OrgId As Long, ByRef ToMany As Boolea
             FirstUpdate = False
          Loop
          If NumberDictInSearchResult >= MaxNumberDictInSearchResult Then
-            ToMany = True
+            TooMany = True
          End If
          Debug.Print "Tid: " & Format$(Timer - T, "0.00")
       End If
@@ -621,12 +621,12 @@ Private Sub UpdateOneDictInCache(ByVal Dict As clsDict, FirstUpdate As Boolean)
    Do While Idx < DictCacheNumber
       If DictCache(Idx).DictId = Dict.DictId Then
          Set DictCache(Idx) = Dict
-         If Not Client.OrgMgr.CheckUserRole(Dict.OrgId, "L") Then
+         If Not Client.OrgMgr.CheckUserRole(Dict.OrgId, RTList) Then
             DeleteDictFromCache Idx
          End If
          Exit Sub
       ElseIf DictCache(Idx).DictId > Dict.DictId Then
-         If Client.OrgMgr.CheckUserRole(Dict.OrgId, "L") Then
+         If Client.OrgMgr.CheckUserRole(Dict.OrgId, RTList) Then
             For I = DictCacheNumber To Idx + 1 Step -1
                Set DictCache(I) = DictCache(I - 1)
             Next I
@@ -637,7 +637,7 @@ Private Sub UpdateOneDictInCache(ByVal Dict As clsDict, FirstUpdate As Boolean)
       End If
       Idx = Idx + 1
    Loop
-   If Client.OrgMgr.CheckUserRole(Dict.OrgId, "L") Then
+   If Client.OrgMgr.CheckUserRole(Dict.OrgId, RTList) Then
       Set DictCache(DictCacheNumber) = Dict
       DictCacheNumber = DictCacheNumber + 1
    End If
@@ -666,7 +666,7 @@ Public Function CheckOut(ByRef Dict As clsDict, ByVal DictId As Long, ByVal With
       If Not Dict.SoundReadOnly Then
          Dict.TextReadOnly = False
       Else
-         Dict.TextReadOnly = Not (Client.OrgMgr.CheckUserRole(Dict.OrgId, "X") And Dict.StatusId < SoundDeleted)
+         Dict.TextReadOnly = Not (Client.OrgMgr.CheckUserRole(Dict.OrgId, RTTextEdit) And Dict.StatusId < SoundDeleted)
       End If
    Else
       If WithSound Then
@@ -712,14 +712,9 @@ Public Function CreateNew(ByRef Dict As clsDict) As Integer
    Dict.AuthorId = Client.User.UserId
    Dict.AuthorLongName = Client.User.LongName
    Dict.AuthorShortName = Client.User.ShortName
-   Dict.PriorityId = Client.SysSettings.DictInfoDefaultPriorityId
-   Idx = Client.PriorityMgr.IndexFromId(Dict.PriorityId)
-   Dict.PriorityText = Client.PriorityMgr.TextFromIndex(Idx)
-   Dict.ExpiryDate = DateAdd("d", Client.PriorityMgr.DaysFromIndex(Idx), Dict.Created)
+   
+   Dict.PriorityId = -1
    Dict.DictTypeId = -1
-   'Dict.DictTypeId = Client.SysSettings.DictInfoDefaultDictTypeId  '!!!
-   'Idx = Client.DictTypeMgr.IndexFromId(Dict.DictTypeId)
-   'Dict.DictTypeText = Client.DictTypeMgr.TextFromIndex(Idx)
    CreateNew = 0
 End Function
 Public Function CheckInNew(ByRef Dict As clsDict) As Integer
@@ -746,9 +741,9 @@ Public Function IsThereDictations(OrgId As Long) As Boolean
 
    Dim Cnt As Integer
    Dim D As clsDict
-   Dim ToMany As Boolean
+   Dim TooMany As Boolean
    
-   CreateList OrgId, 0, ToMany
+   CreateList OrgId, 0, TooMany
    Do While ListNextItem(D)
       Cnt = Cnt + 1
    Loop

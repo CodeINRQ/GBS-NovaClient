@@ -159,9 +159,19 @@ Private Sub txtDaysInHistory_Change()
    SetEnabled
 End Sub
 
+Private Sub txtDaysInHistory_GotFocus()
+
+   SelectAllText ActiveControl
+End Sub
+
 Private Sub txtMaxPerDay_Change()
 
    SetEnabled
+End Sub
+
+Private Sub txtMaxPerDay_GotFocus()
+
+   SelectAllText ActiveControl
 End Sub
 
 Private Sub txtMinPerDay_Change()
@@ -169,9 +179,19 @@ Private Sub txtMinPerDay_Change()
    SetEnabled
 End Sub
 
+Private Sub txtMinPerDay_GotFocus()
+
+   SelectAllText ActiveControl
+End Sub
+
 Private Sub txtNumberOfDemoDictations_Change()
 
    SetEnabled
+End Sub
+
+Private Sub txtNumberOfDemoDictations_GotFocus()
+
+   SelectAllText ActiveControl
 End Sub
 
 Private Sub txtNumberOfDemoDictations_KeyPress(KeyAscii As Integer)

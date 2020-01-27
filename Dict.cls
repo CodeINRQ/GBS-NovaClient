@@ -64,6 +64,12 @@ Public SoundReadOnly    As Boolean
 Public TextReadOnly     As Boolean
 Public TimeStamp        As Double
 
+Public CurrentPos     As Long
+Public AuthorPos        As Long
+Public TranscriberPos   As Long
+Public Note             As String
+
+
 Private Sub Class_Initialize()
 
    Set Pat = New clsPat

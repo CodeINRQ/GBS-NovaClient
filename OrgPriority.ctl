@@ -1,18 +1,18 @@
 VERSION 5.00
 Object = "{F856EC8B-F03C-4515-BDC6-64CBD617566A}#7.0#0"; "FPSPR70.ocx"
-Begin VB.UserControl ucOrgDictType 
+Begin VB.UserControl ucOrgPriority 
    ClientHeight    =   3000
    ClientLeft      =   0
    ClientTop       =   0
    ClientWidth     =   8220
    ScaleHeight     =   3000
    ScaleWidth      =   8220
-   Begin VB.Frame fraOrgDictType 
-      Caption         =   "Diktattyper"
+   Begin VB.Frame fraOrgPriority 
+      Caption         =   "Prioriteter"
       Height          =   2895
       Left            =   0
       TabIndex        =   0
-      Tag             =   "1410101"
+      Tag             =   "1420101"
       Top             =   0
       Width           =   8175
       Begin VB.CommandButton cmdSave 
@@ -20,11 +20,11 @@ Begin VB.UserControl ucOrgDictType
          Height          =   300
          Left            =   6000
          TabIndex        =   1
-         Tag             =   "1410102"
+         Tag             =   "1420102"
          Top             =   240
          Width           =   2055
       End
-      Begin FPSpreadADO.fpSpread lstOrgDictType 
+      Begin FPSpreadADO.fpSpread lstOrgPriority 
          Height          =   2535
          Left            =   120
          TabIndex        =   2
@@ -46,11 +46,11 @@ Begin VB.UserControl ucOrgDictType
          EndProperty
          MaxCols         =   4
          RowHeaderDisplay=   0
-         SpreadDesigner  =   "OrgDictType.ctx":0000
+         SpreadDesigner  =   "OrgPriority.ctx":0000
       End
    End
 End
-Attribute VB_Name = "ucOrgDictType"
+Attribute VB_Name = "ucOrgPriority"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
@@ -70,19 +70,14 @@ End Sub
 
 Public Sub Init()
 
-   Dim I As Integer
-   Dim LstIdx As Integer
-   Dim ODt As clsOrgDictType
-   Dim Row As Integer
-   
-   lstOrgDictType.MaxRows = 1
-   lstOrgDictType.ClearRange -1, -1, -1, -1, True
+   lstOrgPriority.MaxRows = 1
+   lstOrgPriority.ClearRange -1, -1, -1, -1, True
    RestoreSettings
    
 End Sub
 Sub SetCellValue(Row As Integer, Col As Integer, Txt As String)
 
-   With lstOrgDictType
+   With lstOrgPriority
       .Row = Row
       .Col = .GetColFromID(CStr(Col))
       .Value = Txt
@@ -90,21 +85,19 @@ Sub SetCellValue(Row As Integer, Col As Integer, Txt As String)
 End Sub
 Sub SetCellBool(Row As Integer, Col As Integer, BoolVaue As Boolean)
 
-   'If PicNr >= 0 Then
-      With lstOrgDictType
-         .Row = Row
-         .Col = .GetColFromID(CStr(Col))
-         .CellType = CellTypeCheckBox
-         .TypeCheckType = TypeCheckTypeNormal
-         .TypeVAlign = TypeVAlignCenter
-         .TypeHAlign = TypeHAlignCenter
-         .Value = BoolVaue
-      End With
-   'End If
+   With lstOrgPriority
+      .Row = Row
+      .Col = .GetColFromID(CStr(Col))
+      .CellType = CellTypeCheckBox
+      .TypeCheckType = TypeCheckTypeNormal
+      .TypeVAlign = TypeVAlignCenter
+      .TypeHAlign = TypeHAlignCenter
+      .Value = BoolVaue
+   End With
 End Sub
 Private Sub RestoreSettings()
 
-   With lstOrgDictType
+   With lstOrgPriority
       .ReDraw = False
       .Reset
        
@@ -134,69 +127,69 @@ Private Sub RestoreSettings()
       .MaxCols = .Col
       
       SetCellValue 0, 0, "Id"
-      SetCellValue 0, 1, Client.Texts.Txt(1410103, "Diktattyp")
-      SetCellValue 0, 2, Client.Texts.Txt(1410104, "Används")
-      SetCellValue 0, 3, Client.Texts.Txt(1410105, "Förinst")
+      SetCellValue 0, 1, Client.Texts.Txt(1420103, "Prioritet")
+      SetCellValue 0, 2, Client.Texts.Txt(1420104, "Används")
+      SetCellValue 0, 3, Client.Texts.Txt(1420105, "Förinst")
    
       .RowHeadersShow = False
    End With
 End Sub
-Private Sub ShowDictTypeForOrg()
+Private Sub ShowPriorityForOrg()
 
    Static LastOrgId As Long
    Dim OId As Long
    Dim Row As Integer
-   Dim DictType As clsDictType
-   Dim OrgDictType As clsOrgDictType
-   Dim DTIdx As Integer
-   Dim DictTypeEnabled As Boolean
-   Dim DictTypeDefault As Boolean
+   Dim Priority As clsPriority
+   Dim OrgPriority As clsOrgPriority
+   Dim PIdx As Integer
+   Dim PriorityEnabled As Boolean
+   Dim PriorityDefault As Boolean
    
    Dim Org As clsOrg
    
    cmdSave.Enabled = False
    Set Org = Nothing
    Client.OrgMgr.GetOrgFromId Org, CurrOrgId
-   lstOrgDictType.ClearRange -1, -1, -1, -1, True
+   lstOrgPriority.ClearRange -1, -1, -1, -1, True
    
    If CurrOrgId < 30000 Then
       If Not Org Is Nothing Then
-         fraOrgDictType.Caption = Client.Texts.Txt(fraOrgDictType.Tag, "Diktattyper") & " " & Org.OrgText
+         fraOrgPriority.Caption = Client.Texts.Txt(fraOrgPriority.Tag, "Prioriteter") & " " & Org.OrgText
+
+         Client.PriorityMgr.Init
          
-         Client.DictTypeMgr.Init
-         
-         lstOrgDictType.MaxRows = 0
+         lstOrgPriority.MaxRows = 0
          Row = 1
          
-         For DTIdx = 0 To Client.DictTypeMgr.Count - 1
-            Client.DictTypeMgr.GetFromIndex DictType, DTIdx
-            Client.DictTypeMgr.GetOrgDictTypeFromId OrgDictType, CurrOrgId, DictType.DictTypeId
-            If Not OrgDictType Is Nothing Then
-               DictTypeEnabled = True
-               DictTypeDefault = OrgDictType.Def
+         For PIdx = 0 To Client.PriorityMgr.Count - 1
+            Client.PriorityMgr.GetFromIndex Priority, PIdx
+            Client.PriorityMgr.GetOrgPriorityFromId OrgPriority, CurrOrgId, Priority.PriorityId
+            If Not OrgPriority Is Nothing Then
+               PriorityEnabled = True
+               PriorityDefault = OrgPriority.Def
             Else
-               DictTypeEnabled = False
-               DictTypeDefault = False
+               PriorityEnabled = False
+               PriorityDefault = False
             End If
-            lstOrgDictType.MaxRows = Row
-            UpdateRowInList Row, DictType.DictTypeId, DictType.DictTypeText, DictTypeEnabled, DictTypeDefault
+            lstOrgPriority.MaxRows = Row
+            UpdateRowInList Row, Priority.PriorityId, Priority.PriortyText, PriorityEnabled, PriorityDefault
             Row = Row + 1
-         Next DTIdx
+         Next PIdx
       End If
    End If
 End Sub
-Private Sub UpdateRowInList(Row As Integer, DictTypeId As Integer, DictTypeTxt As String, DictTypeEnabled As Boolean, DictTypeDefault As Boolean)
+Private Sub UpdateRowInList(Row As Integer, PriorityId As Integer, PriorityTxt As String, PriorityEnabled As Boolean, PriorityDefault As Boolean)
 
    Dim C As Integer
 
-   With lstOrgDictType
-      .SetRowItemData Row, CStr(DictTypeId)
+   With lstOrgPriority
+      .SetRowItemData Row, CStr(PriorityId)
       .Row = Row
 
-      C = 0:     SetCellValue Row, C, CStr(DictTypeId)
-      C = C + 1: SetCellValue Row, C, DictTypeTxt
-      C = C + 1: SetCellBool Row, C, DictTypeEnabled
-      C = C + 1: SetCellBool Row, C, DictTypeDefault
+      C = 0:     SetCellValue Row, C, CStr(PriorityId)
+      C = C + 1: SetCellValue Row, C, PriorityTxt
+      C = C + 1: SetCellBool Row, C, PriorityEnabled
+      C = C + 1: SetCellBool Row, C, PriorityDefault
    End With
 End Sub
 
@@ -204,7 +197,7 @@ Public Sub NewOrg(OrgId As Long)
 
    If CurrOrgId <> OrgId Then
       CurrOrgId = OrgId
-      ShowDictTypeForOrg
+      ShowPriorityForOrg
    End If
 End Sub
 
@@ -215,8 +208,8 @@ Private Sub cmdSave_Click()
    Dim D As Boolean
 
    cmdSave.Enabled = False
-   With lstOrgDictType
-      Client.DictTypeMgr.DeleteOrgDictTypeByOrgId CurrOrgId
+   With lstOrgPriority
+      Client.PriorityMgr.DeleteOrgPriorityByOrgId CurrOrgId
       
       For R = 1 To .MaxRows
          .Row = R
@@ -225,20 +218,20 @@ Private Sub cmdSave_Click()
          .Col = 3: D = .Value
       
          If E Then
-            Client.DictTypeMgr.SaveOrgDictType CurrOrgId, CInt(.GetRowItemData(R)), D
+            Client.PriorityMgr.SaveOrgPriority CurrOrgId, CInt(.GetRowItemData(R)), D
          End If
       Next R
    End With
-   Client.DictTypeMgr.Init
-   ShowDictTypeForOrg
+   Client.PriorityMgr.Init
+   ShowPriorityForOrg
 End Sub
 
-Private Sub lstOrgDictType_EditChange(ByVal Col As Long, ByVal Row As Long)
+Private Sub lstOrgPriority_EditChange(ByVal Col As Long, ByVal Row As Long)
 
    cmdSave.Enabled = True
 End Sub
 
-Private Sub lstOrgDictType_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub lstOrgPriority_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
 
    cmdSave.Enabled = True
 End Sub

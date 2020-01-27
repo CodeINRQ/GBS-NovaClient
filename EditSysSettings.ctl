@@ -1,15 +1,15 @@
 VERSION 5.00
 Object = "{F856EC8B-F03C-4515-BDC6-64CBD617566A}#7.0#0"; "FPSPR70.ocx"
 Begin VB.UserControl ucEditSysSettings 
-   ClientHeight    =   2370
+   ClientHeight    =   6255
    ClientLeft      =   0
    ClientTop       =   0
    ClientWidth     =   8265
-   ScaleHeight     =   2370
+   ScaleHeight     =   6255
    ScaleWidth      =   8265
    Begin VB.Frame fraSettings 
       Caption         =   "Inställningar"
-      Height          =   2295
+      Height          =   4455
       HelpContextID   =   1120000
       Left            =   0
       TabIndex        =   0
@@ -35,14 +35,14 @@ Begin VB.UserControl ucEditSysSettings
          Width           =   2055
       End
       Begin FPSpreadADO.fpSpread lstSettings 
-         Height          =   1920
+         Height          =   4080
          Left            =   120
          TabIndex        =   1
          Top             =   240
          Width           =   5775
          _Version        =   458752
          _ExtentX        =   10186
-         _ExtentY        =   3387
+         _ExtentY        =   7197
          _StockProps     =   64
          BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
             Name            =   "MS Sans Serif"

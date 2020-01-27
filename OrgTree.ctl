@@ -119,7 +119,7 @@ Private Sub tvOrgTree_NodeClick(ByVal Node As MSComctlLib.Node)
          End If
          Set LastNodeClicked = Node
          Node.Bold = True
-         RaiseEvent NewSelect(CLng(Mid$(Node.Key, 2)), Node.Text)
+         RaiseEvent NewSelect(CLng(mId$(Node.Key, 2)), Node.Text)
       End If
    Else
       If Not LastNodeClicked Is Nothing Then
@@ -149,11 +149,9 @@ Public Sub PickOrgId(OrgId As Long)
    Dim Nod As Node
    
    For Each Nod In tvOrgTree.Nodes
-      If CLng(Mid$(Nod.Key, 2)) = OrgId Then
-         'If Len(Nod.Tag) > 0 Then
-            Nod.Selected = True
-            tvOrgTree_NodeClick Nod
-         'End If
+      If CLng(mId$(Nod.Key, 2)) = OrgId Then
+         Nod.Selected = True
+         tvOrgTree_NodeClick Nod
          Exit For
       End If
    Next Nod
@@ -167,9 +165,6 @@ Public Sub CloaseAll()
          Nod.Selected = False
       End If
    Next Nod
-End Sub
-Public Sub ShowAll()
-
 End Sub
 Public Sub Clear()
 

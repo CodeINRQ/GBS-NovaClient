@@ -52,6 +52,7 @@ Public Enum StatusEnum
    SoundDeleted = 80
 End Enum
 
+
 Public ApplicationVersion As String
 Public GlobalCommandLine As String
 Public ReadyForApiCalls As Boolean
@@ -255,25 +256,25 @@ End Function
 Public Function WriteStringToTempFile(S As String) As String
 
    Dim Pathname As String
-   Dim f As Integer
+   Dim F As Integer
    
    Pathname = CreateTempFileName("tmp")
-   f = FreeFile
-   Open Pathname For Binary Access Write As #f
-   Put #f, , S
-   Close #f
+   F = FreeFile
+   Open Pathname For Binary Access Write As #F
+   Put #F, , S
+   Close #F
    WriteStringToTempFile = Pathname
 End Function
 Public Function ReadStringFromTempFile(Pathname As String) As String
 
-   Dim f As Integer
+   Dim F As Integer
    Dim S As String
    
    S = Space$(FileLen(Pathname))
-   f = FreeFile
-   Open Pathname For Binary Access Read As #f
-   Get #f, , S
-   Close #f
+   F = FreeFile
+   Open Pathname For Binary Access Read As #F
+   Get #F, , S
+   Close #F
    ReadStringFromTempFile = S
 End Function
 
@@ -444,15 +445,20 @@ End Function
 Public Function IsLoaded(FormName As String) As Boolean
 
    Dim sFormName As String
-   Dim f As Form
+   Dim F As Form
    
    sFormName = UCase$(FormName)
    
-   For Each f In Forms
-      If UCase$(f.Name) = sFormName Then
+   For Each F In Forms
+      If UCase$(F.Name) = sFormName Then
         IsLoaded = True
         Exit Function
       End If
    Next
 End Function
+Sub SelectAllText(C As Control)
 
+   On Error Resume Next
+   C.Selstart = 0
+   C.SelLength = Len(C.Text)
+End Sub

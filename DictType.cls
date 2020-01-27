@@ -16,3 +16,8 @@ Option Explicit
 Public DictTypeId     As Long
 Public DictTypeText   As String
 
+Public Property Get LoggData() As String
+
+   LoggData = DictTypeText & "/" & CStr(DictTypeId)
+End Property
+

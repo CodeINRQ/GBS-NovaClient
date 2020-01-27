@@ -38,8 +38,8 @@ Begin VB.Form frmEditUser
       TabIndex        =   1
       Top             =   360
       Width           =   3135
-      _ExtentX        =   5530
-      _ExtentY        =   7435
+      _extentx        =   5530
+      _extenty        =   7435
    End
    Begin VB.TextBox txtLongName 
       Height          =   285
@@ -236,12 +236,23 @@ End Sub
 
 Private Sub Form_Activate()
 
+   Dim Org As clsOrg
+
    txtLoginName.Text = UserToEdit.LoginName
    txtPassword.Text = UserToEdit.Password
    txtConfirmPassword.Text = UserToEdit.Password
    txtShortName.Text = UserToEdit.ShortName
    txtLongName.Text = UserToEdit.LongName
-   CurrHomeOrgId = UserToEdit.HomeOrgId
+   Client.OrgMgr.GetOrgFromId Org, UserToEdit.HomeOrgId
+   If Not Org Is Nothing Then
+      If Org.DictContainer Then
+         CurrHomeOrgId = Org.OrgId
+      Else
+         CurrHomeOrgId = FirstPossibleHomeOrg
+      End If
+   Else
+      CurrHomeOrgId = 0
+   End If
    If CurrHomeOrgId > 0 Then
       ucOrgTree.PickOrgId CurrHomeOrgId
    Else
@@ -280,7 +291,7 @@ Private Sub Form_Load()
    For I = 0 To Client.OrgMgr.Count - 1
       Client.OrgMgr.GetSortedOrg Org, I
       If Org.ShowInTree Then
-         RightToSetAsHomeOrg = Client.OrgMgr.CheckUserRole(Org.OrgId, "S") And Org.DictContainer
+         RightToSetAsHomeOrg = Client.OrgMgr.CheckUserRole(Org.OrgId, RTUserAdmin) And Org.DictContainer
          If RightToSetAsHomeOrg Then
             If FirstPossibleHomeOrg = 0 Or Org.OrgId = Client.User.HomeOrgId Then
                FirstPossibleHomeOrg = Org.OrgId
@@ -297,7 +308,7 @@ Private Sub Form_Load()
    GrpLstIdx = 0
    For I = 0 To Client.GroupMgr.Count - 1
       Client.GroupMgr.GetGroupFromIndex Grp, I
-      If Client.OrgMgr.CheckUserRole(Grp.AdmOrgId, "S") Then
+      If Client.OrgMgr.CheckUserRole(Grp.AdmOrgId, RTUserAdmin) Then
          lstUserGroup.AddItem Grp.GroupText, GrpLstIdx
          lstUserGroup.ItemData(GrpLstIdx) = Grp.GroupId
          GrpLstIdx = GrpLstIdx + 1
@@ -384,10 +395,20 @@ Private Sub txtConfirmPassword_Change()
    SetEnabled
 End Sub
 
+Private Sub txtConfirmPassword_GotFocus()
+
+   SelectAllText ActiveControl
+End Sub
+
 Private Sub txtLoginName_Change()
 
    Dirty = True
    SetEnabled
+End Sub
+
+Private Sub txtLoginName_GotFocus()
+
+   SelectAllText ActiveControl
 End Sub
 
 Private Sub txtLongName_Change()
@@ -396,16 +417,31 @@ Private Sub txtLongName_Change()
    SetEnabled
 End Sub
 
+Private Sub txtLongName_GotFocus()
+
+   SelectAllText ActiveControl
+End Sub
+
 Private Sub txtPassword_Change()
 
    Dirty = True
    SetEnabled
 End Sub
 
+Private Sub txtPassword_GotFocus()
+
+   SelectAllText ActiveControl
+End Sub
+
 Private Sub txtShortName_Change()
 
    Dirty = True
    SetEnabled
+End Sub
+
+Private Sub txtShortName_GotFocus()
+
+   SelectAllText ActiveControl
 End Sub
 
 Private Sub ucOrgTree_NewSelect(OrgId As Long, Txt As String)

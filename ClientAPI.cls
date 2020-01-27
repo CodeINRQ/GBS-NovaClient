@@ -233,18 +233,18 @@ Public Function RecNew(PatId As String, _
       If Len(Client.DictTypeMgr.TextFromId(.DictTypeId)) = 0 Then
          .DictTypeId = 0
       End If
+      .PrioId = Client.ExtSystemMgr.GetIntPriorityId(mExtSystem, ExtPriority)
+      If Len(Client.PriorityMgr.TextFromId(.PrioId)) = 0 Then
+         .PrioId = 0
+      End If
       .OrgId = Client.ExtSystemMgr.GetIntOrgId(mExtSystem, ExtOrg)
       If Len(Client.OrgMgr.TextFromId(.OrgId)) = 0 Then
          .OrgId = 0
       End If
       If .OrgId <> 0 Then
-         If Not Client.OrgMgr.CheckUserRole(.OrgId, "A") Then
+         If Not Client.OrgMgr.CheckUserRole(.OrgId, RTAuthor) Then
             .OrgId = 0
          End If
-      End If
-      .PrioId = Client.ExtSystemMgr.GetIntPriorityId(mExtSystem, ExtPriority)
-      If Len(Client.PriorityMgr.TextFromId(.PrioId)) = 0 Then
-         .PrioId = 0
       End If
    End With
    
@@ -359,7 +359,7 @@ Public Function SignDict(DictId As String, _
    End If
    If DId > 0 Then
       If Client.DictMgr.CheckOut(Dict, DId, False) = 0 Then
-         If Client.OrgMgr.CheckUserRole(Dict.OrgId, "A") Then
+         If Client.OrgMgr.CheckUserRole(Dict.OrgId, RTAuthor) Then
             Dict.StatusId = Transcribed
          End If
          Res = Client.DictMgr.CheckIn(Dict, False)

@@ -363,9 +363,19 @@ Private Sub txtConfirmPassword_Change()
    SetEnabled
 End Sub
 
+Private Sub txtConfirmPassword_GotFocus()
+
+   SelectAllText ActiveControl
+End Sub
+
 Private Sub txtNewPassword_Change()
 
    SetEnabled
+End Sub
+
+Private Sub txtNewPassword_GotFocus()
+
+   SelectAllText ActiveControl
 End Sub
 
 Private Sub txtPassword_Change()
@@ -373,7 +383,17 @@ Private Sub txtPassword_Change()
    SetEnabled
 End Sub
 
+Private Sub txtPassword_GotFocus()
+
+   SelectAllText ActiveControl
+End Sub
+
 Private Sub txtUserName_Change()
 
    SetEnabled
+End Sub
+
+Private Sub txtUserName_GotFocus()
+
+   SelectAllText ActiveControl
 End Sub

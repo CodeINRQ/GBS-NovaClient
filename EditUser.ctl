@@ -4,9 +4,9 @@ Begin VB.UserControl ucEditUser
    ClientHeight    =   7185
    ClientLeft      =   0
    ClientTop       =   0
-   ClientWidth     =   9435
+   ClientWidth     =   9225
    ScaleHeight     =   7185
-   ScaleWidth      =   9435
+   ScaleWidth      =   9225
    Begin VB.Frame fraUsers 
       Caption         =   "Användare"
       Height          =   7095
@@ -16,6 +16,15 @@ Begin VB.UserControl ucEditUser
       Tag             =   "1130101"
       Top             =   0
       Width           =   9135
+      Begin VB.CheckBox chkShowAll 
+         Caption         =   "Visa alla"
+         Height          =   495
+         Left            =   7800
+         TabIndex        =   4
+         Tag             =   "1130107"
+         Top             =   1080
+         Width           =   1215
+      End
       Begin VB.CommandButton cmdNew 
          Caption         =   "&Lägg till..."
          Height          =   300
@@ -75,6 +84,8 @@ Public Event UsersChanged()
 Private WithEvents frmEdit As frmEditUser
 Attribute frmEdit.VB_VarHelpID = -1
 Private CurrUser As clsUser
+Private CurrentOrgId As Long
+
 
 Public Sub NewLanguage()
 
@@ -85,14 +96,20 @@ Public Sub NewLanguage()
    Next I
 End Sub
 
-Public Sub Init()
+Public Sub GetData(OrgId As Long)
 
    Dim I As Integer
    Dim LstIdx As Integer
    Dim Usr As clsUser
    Dim Row As Integer
    Static SettingDone As Boolean
-     
+   Dim ShowThisUser As Boolean
+   
+   If CurrentOrgId = OrgId Then
+      Exit Sub
+   End If
+   CurrentOrgId = OrgId
+   
    lstUsers.MaxRows = 0
    lstUsers.ClearRange -1, -1, -1, -1, True
    If Not SettingDone Then
@@ -102,8 +119,19 @@ Public Sub Init()
    Row = 1
    For I = 0 To Client.UserMgr.Count - 1
       Client.UserMgr.GetUserFromIndex Usr, I
+      
+      ShowThisUser = False
       If Usr.HomeOrgId > 0 Then
-         If Client.OrgMgr.CheckUserRole(Usr.HomeOrgId, "S") Then
+         If Client.OrgMgr.CheckUserRole(Usr.HomeOrgId, RTUserAdmin) Then
+            If chkShowAll.Value = vbChecked Then
+               ShowThisUser = True
+            Else
+               If Client.OrgMgr.IsOrgBelowTop(OrgId, Usr.HomeOrgId) Then
+                  ShowThisUser = True
+               End If
+            End If
+         End If
+         If ShowThisUser Then
             lstUsers.MaxRows = Row
             UpdateRowInList Row, Usr
             Row = Row + 1
@@ -186,6 +214,11 @@ Private Sub SetEnabled()
    cmdChange.Enabled = True
 End Sub
 
+Private Sub chkShowAll_Click()
+
+   UpdateList
+End Sub
+
 Private Sub cmdChange_Click()
 
    ChangeOneUser
@@ -194,6 +227,7 @@ End Sub
 Private Sub cmdNew_Click()
 
   Set CurrUser = New clsUser
+  CurrUser.HomeOrgId = CurrentOrgId
   EditCurrUser
 End Sub
 
@@ -206,14 +240,14 @@ End Sub
 
 Private Sub frmEdit_DeleteClicked()
 
-   Init
+   UpdateList
    RaiseEvent UsersChanged
    SetEnabled
 End Sub
 
 Private Sub frmEdit_SaveClicked()
 
-   Init
+   UpdateList
    RaiseEvent UsersChanged
    SetEnabled
 End Sub
@@ -255,4 +289,11 @@ Private Sub ChangeOneUser()
    Client.UserMgr.GetUserFromId CurrUser, CLng(lstUsers.GetRowItemData(lstUsers.ActiveRow))
    EditCurrUser
 End Sub
+Private Sub UpdateList()
 
+   Dim Temp As Long
+   
+   Temp = CurrentOrgId        'Force creation of a new list
+   CurrentOrgId = -1
+   GetData Temp
+End Sub

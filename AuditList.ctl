@@ -48,14 +48,6 @@ Const Gray = &HC0C0C0
 
 Public DictId        As Long
 
-Private loadingdata  As Boolean
-
-
-Private Sub UserControl_Initialize()
-
-   loadingdata = True
-End Sub
-
 Private Sub UserControl_Resize()
 
    lstAudit.Move 0, 0, UserControl.ScaleWidth - 100, UserControl.ScaleHeight - 100
@@ -149,8 +141,6 @@ Public Sub GetDataNow()
    Dim Row As Integer
    Dim Col As Integer
    
-   loadingdata = True
-
    ClearWorkBook lstAudit
    Row = 1
    Client.DictAuditMgr.CreateList DictId
@@ -163,7 +153,6 @@ Public Sub GetDataNow()
       Col = Col + 1: SetCellValue Row, Col, Audit.StationId
       Row = Row + 1
    Loop
-   loadingdata = False
    Set Audit = Nothing
 End Sub
 Private Sub ClearWorkBook(Spread As fpSpread)

@@ -18,7 +18,22 @@ Private mDictTypeCount As Integer
 
 Private mOrgDictTypeArr() As clsOrgDictType
 Private mOrgDictTypeCount As Integer
+Public Sub SaveDictType(DictType As clsDictType)
 
+   Dim Eno As Long
+
+   On Error GoTo SaveDictType_Err
+   
+   Client.Server.SaveDictType DictType
+   Client.LoggMgr.Insert 1320120, LoggLevel_SysAdmin, 0, DictType.LoggData
+   Init
+   Exit Sub
+   
+SaveDictType_Err:
+   Eno = Err.Number
+   ErrorHandle "12002", Eno, 12002, "Diktattypen kunde inte sparas", False
+   Resume Next
+End Sub
 Public Sub Init()
 
    mDictTypeCount = 0
@@ -141,12 +156,12 @@ Public Sub FillComboForOrg(Cbo As ComboBox, Org As clsOrg, SelectedId As Integer
                End If
                If mOrgDictTypeArr(I).Def Then
                   DefaultIndex = NewIdx
-               Else
-                  If DefaultIndex < 0 Then
-                     If CurrId = Client.SysSettings.DictInfoDefaultDictTypeId Then
-                        DefaultIndex = NewIdx
-                     End If
-                  End If
+               'Else
+               '   If DefaultIndex < 0 Then
+               '      If CurrId = Client.SysSettings.DictInfoDefaultDictTypeId Then
+               '         DefaultIndex = NewIdx
+               '      End If
+               '   End If
                End If
             End If
          Next J
@@ -160,8 +175,8 @@ Public Sub FillComboForOrg(Cbo As ComboBox, Org As clsOrg, SelectedId As Integer
          If SetDefault Then                  'Should we look for a default
             If DefaultIndex >= 0 Then        'Did we found a default?
                Cbo.ListIndex = DefaultIndex
-            Else
-               Cbo.ListIndex = 0             'Take first entry
+            'Else
+            '   Cbo.ListIndex = 0             'Take first entry
             End If
          End If
       End If
@@ -186,6 +201,14 @@ Public Function IdFromIndex(Index As Integer) As Long
 End Function
 Public Function GetFromIndex(DictType As clsDictType, Idx As Integer)
 
+   Set DictType = mDictTypeArr(Idx)
+End Function
+
+Public Function GetFromId(DictType As clsDictType, Id As Long)
+
+   Dim Idx As Integer
+   
+   Idx = IndexFromId(Id)
    Set DictType = mDictTypeArr(Idx)
 End Function
 

@@ -18,7 +18,7 @@ Begin VB.UserControl ucLoggList
       _ExtentX        =   2355
       _ExtentY        =   661
       _Version        =   393216
-      Format          =   51838977
+      Format          =   52494337
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -69,7 +69,7 @@ Begin VB.UserControl ucLoggList
       _ExtentX        =   2355
       _ExtentY        =   661
       _Version        =   393216
-      Format          =   51838977
+      Format          =   52494337
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -105,8 +105,6 @@ Const Red = &HC0C0FF
 Const Yellow = &HC0FFFF
 Const Gray = &HC0C0C0
 
-Private loadingdata         As Boolean
-
 Private StartDate As Date
 Private EndDate As Date
 Public Sub Init()
@@ -138,11 +136,6 @@ End Sub
 Private Sub dtpStartDate_Change()
 
    StartDate = DateSerial(dtpStartDate.Year, dtpStartDate.Month, dtpStartDate.Day)
-End Sub
-
-Private Sub UserControl_Initialize()
-   
-   loadingdata = False
 End Sub
 
 Private Sub UserControl_Resize()
@@ -232,8 +225,6 @@ Private Sub GetDataNow()
    Dim Row As Integer
    Dim Col As Integer
    
-   loadingdata = True
-
    ClearWorkBook lstLogg
    Row = 1
    Client.LoggMgr.CreateList StartDate, EndDate, 0, 1000
@@ -248,7 +239,6 @@ Private Sub GetDataNow()
       Col = Col + 1: SetCellValue Row, Col, Logg.LoggData
       Row = Row + 1
    Loop
-   loadingdata = False
    Set Logg = Nothing
 End Sub
 Private Sub ClearWorkBook(Spread As fpSpread)

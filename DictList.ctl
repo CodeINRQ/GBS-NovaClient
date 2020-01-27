@@ -1,16 +1,16 @@
 VERSION 5.00
 Object = "{F856EC8B-F03C-4515-BDC6-64CBD617566A}#7.0#0"; "FPSPR70.ocx"
 Begin VB.UserControl ucDictList 
-   ClientHeight    =   4560
+   ClientHeight    =   4575
    ClientLeft      =   0
    ClientTop       =   0
-   ClientWidth     =   9435
-   ScaleHeight     =   4560
-   ScaleWidth      =   9435
+   ClientWidth     =   9495
+   ScaleHeight     =   4575
+   ScaleWidth      =   9495
    Begin FPSpreadADO.fpSpread lstDict 
       Height          =   4575
       HelpContextID   =   1080000
-      Left            =   0
+      Left            =   -120
       TabIndex        =   0
       Top             =   0
       Width           =   9495
@@ -33,6 +33,24 @@ Begin VB.UserControl ucDictList
       MaxRows         =   0
       SpreadDesigner  =   "DictList.ctx":0000
    End
+   Begin VB.Image imgIcon 
+      Height          =   480
+      Index           =   5
+      Left            =   1920
+      Picture         =   "DictList.ctx":0370
+      Top             =   0
+      Width           =   480
+      Visible         =   0   'False
+   End
+   Begin VB.Image imgIcon 
+      Height          =   480
+      Index           =   4
+      Left            =   1440
+      Picture         =   "DictList.ctx":0C3A
+      Top             =   0
+      Width           =   480
+      Visible         =   0   'False
+   End
    Begin VB.Image imgLater 
       Height          =   480
       Left            =   0
@@ -40,27 +58,30 @@ Begin VB.UserControl ucDictList
       Width           =   480
       Visible         =   0   'False
    End
-   Begin VB.Image imgLocked 
+   Begin VB.Image imgIcon 
       Height          =   480
-      Left            =   4080
-      Picture         =   "DictList.ctx":0370
-      Top             =   2040
-      Width           =   480
-      Visible         =   0   'False
-   End
-   Begin VB.Image imgSoon 
-      Height          =   480
-      Left            =   0
-      Picture         =   "DictList.ctx":0C3A
+      Index           =   3
+      Left            =   960
+      Picture         =   "DictList.ctx":107C
       Top             =   0
       Width           =   480
       Visible         =   0   'False
    End
-   Begin VB.Image imgUrgent 
+   Begin VB.Image imgIcon 
       Height          =   480
-      Left            =   1200
-      Picture         =   "DictList.ctx":1504
-      Top             =   1680
+      Index           =   2
+      Left            =   0
+      Picture         =   "DictList.ctx":1946
+      Top             =   0
+      Width           =   480
+      Visible         =   0   'False
+   End
+   Begin VB.Image imgIcon 
+      Height          =   480
+      Index           =   1
+      Left            =   480
+      Picture         =   "DictList.ctx":2210
+      Top             =   0
       Width           =   480
       Visible         =   0   'False
    End
@@ -75,10 +96,10 @@ Option Explicit
 Public Event Click(DictId As Long)
 Public Event DblClick(DictId As Long)
 Public Event RightClick(DictId As Long)
+Public Event ChangeWarnings(NumberOfWarnings As Long)
 
-Dim loadingdata As Boolean
-Dim zoomindex As Integer
-Dim lastOrg As Long
+Dim SetNewSortOrder As Boolean
+Dim NumberOfWarnings As Long
 
 Dim CurrentOrgId As Long
 Dim CurrentTimeStamp As Double
@@ -86,10 +107,12 @@ Dim CurrentTimeStamp As Double
 Private NewSearchFilter As Boolean
 Private NewCurrPatientFilter As Boolean
 
-Private Const ImgNrLocked = 0
+Private Const ImgNrLater = 0
 Private Const ImgNrNow = 1
 Private Const ImgNrSoon = 2
-Private Const ImgNrLater = 3
+Private Const ImgNrLocked = 3
+Private Const ImgNrWarning = 4
+Private Const ImgNrNote = 5
 
 Const SS_SORT_ORDER_ASCENDING = 1
 
@@ -124,26 +147,29 @@ Public Property Set CurrPatientFilter(Flt As clsFilter)
    Set Client.DictMgr.CurrPatientFilter = Flt
    NewCurrPatientFilter = True
 End Property
+
+
 Private Sub lstDict_AfterUserSort(ByVal Col As Long)
 
    Dim Sortkeys As Variant
    Dim SortKeyOrder As Variant
    Static Desc As Boolean
+   Dim WarnCol As Long
    
    Desc = lstDict.ColUserSortIndicator(Col) = ColUserSortIndicatorDescending
    lstDict.Col = Col
-   If lstDict.ColID = "1" Then
-      Col = lstDict.GetColFromID(4)
+   If lstDict.ColID = "1" Then         'Flags och lock
+      Col = lstDict.GetColFromID(6)    'Expiration date
    End If
-   Sortkeys = Array(Col, 0)
+   WarnCol = lstDict.GetColFromID("2")
+   Sortkeys = Array(WarnCol, Col, 0)
    If Desc Then
-      SortKeyOrder = Array(2, 2)
+      SortKeyOrder = Array(2, 2, 2)
    Else
-      SortKeyOrder = Array(1, 1)
+      SortKeyOrder = Array(2, 1, 1)
    End If
    lstDict.Sort -1, -1, -1, -1, SortByRow, Sortkeys, SortKeyOrder
 End Sub
-
 
 Private Sub lstDict_ColWidthChange(ByVal Col1 As Long, ByVal Col2 As Long)
 
@@ -152,6 +178,16 @@ Private Sub lstDict_ColWidthChange(ByVal Col1 As Long, ByVal Col2 As Long)
    PicCol = lstDict.GetColFromID("1")
    If PicCol >= Col1 And PicCol <= Col2 Then
       lstDict.ColWidth(PicCol) = 2
+   Else
+      PicCol = lstDict.GetColFromID("2")
+      If PicCol >= Col1 And PicCol <= Col2 Then
+         lstDict.ColWidth(PicCol) = 2
+      Else
+         PicCol = lstDict.GetColFromID("3")
+         If PicCol >= Col1 And PicCol <= Col2 Then
+            lstDict.ColWidth(PicCol) = 2
+         End If
+      End If
    End If
 End Sub
 
@@ -176,12 +212,6 @@ Private Sub lstDict_RightClick(ByVal ClickType As Integer, ByVal Col As Long, By
    End If
 End Sub
 
-Private Sub UserControl_Initialize()
-
-   'isgrouped = True
-   loadingdata = False
-End Sub
-
 Private Sub UserControl_Resize()
 
    lstDict.Move 0, 0, UserControl.ScaleWidth, UserControl.ScaleHeight
@@ -193,7 +223,7 @@ Public Sub RestoreSettings(Settings As String, Ver As String)
 
    With lstDict
       Ok = False
-      If Len(Settings) > 0 And Ver >= "1.01.0000" Then
+      If Len(Settings) > 0 And Ver >= "1.20.0000" Then
          TempFilePath = WriteStringToTempFile(Settings)
          If .LoadFromFile(TempFilePath) Then
             Ok = True
@@ -225,6 +255,8 @@ Public Sub RestoreSettings(Settings As String, Ver As String)
          
          .Col = 0:        .ColID = CStr(.Col):   .ColWidth(.Col) = 5
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 2
+         .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 2
+         .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 2
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 8
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 8
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 8
@@ -235,25 +267,30 @@ Public Sub RestoreSettings(Settings As String, Ver As String)
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 8
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 11
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 8
+         .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 11
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 10
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 8
          .MaxCols = .Col
+         SetNewSortOrder = True
       End If
       
       SetCellValue 0, 0, Client.Texts.Txt(1080101, "Id")
-      SetCellValue 0, 1, ""
-      SetCellValue 0, 2, Client.Texts.Txt(1080102, "Personnr")
-      SetCellValue 0, 3, Client.Texts.Txt(1080103, "Namn")
-      SetCellValue 0, 4, Client.Texts.Txt(1080104, "Skriv senast")
-      SetCellValue 0, 5, Client.Texts.Txt(1080113, "Prioritet")
-      SetCellValue 0, 6, Client.Texts.Txt(1080105, "Organisation")
-      SetCellValue 0, 7, Client.Texts.Txt(1080106, "Typ")
-      SetCellValue 0, 8, Client.Texts.Txt(1080107, "Längd")
-      SetCellValue 0, 9, Client.Texts.Txt(1080108, "Intalare")
-      SetCellValue 0, 10, Client.Texts.Txt(1080109, "Intalat")
-      SetCellValue 0, 11, Client.Texts.Txt(1080110, "Utskrivare")
-      SetCellValue 0, 12, Client.Texts.Txt(1080111, "Status")
-      SetCellValue 0, 13, Client.Texts.Txt(1080112, "Används av")
+      SetCellValue 0, 1, ""                                       'Expiration Flags och lock
+      SetCellValue 0, 2, ""                                       'Warning
+      SetCellValue 0, 3, ""                                       'note
+      SetCellValue 0, 4, Client.Texts.Txt(1080102, "Personnr")
+      SetCellValue 0, 5, Client.Texts.Txt(1080103, "Namn")
+      SetCellValue 0, 6, Client.Texts.Txt(1080104, "Skriv senast")
+      SetCellValue 0, 7, Client.Texts.Txt(1080113, "Prioritet")
+      SetCellValue 0, 8, Client.Texts.Txt(1080105, "Organisation")
+      SetCellValue 0, 9, Client.Texts.Txt(1080106, "Typ")
+      SetCellValue 0, 10, Client.Texts.Txt(1080107, "Längd")
+      SetCellValue 0, 11, Client.Texts.Txt(1080108, "Intalare")
+      SetCellValue 0, 12, Client.Texts.Txt(1080109, "Intalat")
+      SetCellValue 0, 13, Client.Texts.Txt(1080110, "Utskrivare")
+      SetCellValue 0, 14, Client.Texts.Txt(1080115, "Utskrivet")
+      SetCellValue 0, 15, Client.Texts.Txt(1080111, "Status")
+      SetCellValue 0, 16, Client.Texts.Txt(1080112, "Används av")
    
       .RowHeadersShow = Client.SysSettings.DictListShowDictId
    End With
@@ -262,29 +299,25 @@ Public Sub GetData(OrgId As Long)
 
    Dim I As Integer
    Dim NumCol As Integer
-   Dim W As Long
    Dim Dict As clsDict
    Dim Row As Integer
    Dim RowUpdated(MaxNumberOfDictation) As Boolean
    Dim ReSort As Boolean
    Dim PrevTimeStamp As Double
    Dim DictIdForSelectedRow As Long
-   Dim ToMany As Boolean
+   Dim TooMany As Boolean
+   Dim LastNumberOfWarnings As Long
    
-   loadingdata = True
+   LastNumberOfWarnings = NumberOfWarnings
    
    If CurrentOrgId = OrgId And Not NewSearchFilter And Not NewCurrPatientFilter Then
-      'Uppdate
-      'For I = LBound(RowUpdated) To UBound(RowUpdated)     'Already False as local variable
-      '   RowUpdated(I) = False
-      'Next I
       ReSort = False
       
       DictIdForSelectedRow = lstDict.GetRowItemData(lstDict.SelModeIndex)
       PrevTimeStamp = CurrentTimeStamp
-      CurrentTimeStamp = Client.DictMgr.CreateList(OrgId, CurrentTimeStamp, ToMany)
+      CurrentTimeStamp = Client.DictMgr.CreateList(OrgId, CurrentTimeStamp, TooMany)
       Do While Client.DictMgr.ListNextItem(Dict)
-         Row = FindRowFromDictId(Dict)
+         Row = FindRowFromDictId(Dict.DictId)
          If Row <= 0 Then
             lstDict.MaxRows = lstDict.MaxRows + 1
             Row = lstDict.MaxRows
@@ -300,19 +333,13 @@ Public Sub GetData(OrgId As Long)
       Loop
       For I = lstDict.MaxRows To 1 Step -1
          If Not RowUpdated(I) Then
-            lstDict.DeleteRows I, 1
-            lstDict.MaxRows = lstDict.MaxRows - 1
+            DeleteRowInList I
             ReSort = True
          End If
       Next I
       If ReSort Then
          lstDict.UserColAction = UserColActionSort
-         For I = 1 To lstDict.MaxRows
-            If lstDict.GetRowItemData(I) = DictIdForSelectedRow Then
-               lstDict.SelModeIndex = I
-               Exit For
-            End If
-         Next I
+         lstDict.SelModeIndex = FindRowFromDictId(DictIdForSelectedRow)
       End If
    Else
       NewSearchFilter = False
@@ -321,134 +348,154 @@ Public Sub GetData(OrgId As Long)
       CurrentTimeStamp = 0
       
       'SetBusy
-      CurrentTimeStamp = Client.DictMgr.CreateList(OrgId, CurrentTimeStamp, ToMany)
+      CurrentTimeStamp = Client.DictMgr.CreateList(OrgId, CurrentTimeStamp, TooMany)
       
       lstDict.MaxRows = 0
       lstDict.ClearRange -1, -1, -1, -1, True
+      NumberOfWarnings = 0
       Row = 1
       Do While Client.DictMgr.ListNextItem(Dict)
          lstDict.MaxRows = Row
          UpdateRowInList Row, Dict
          Row = Row + 1
       Loop
+      If SetNewSortOrder And lstDict.MaxRows > 0 Then
+         SetNewSortOrder = False
+         lstDict_AfterUserSort 5
+      End If
       lstDict.UserColAction = UserColActionSort
-      If ToMany Then
+      If TooMany Then
          MsgBox Client.Texts.Txt(1080114, "För många diktat funna. Avgränsa sökvillkor!"), vbOKOnly
       End If
    End If
-   loadingdata = False
    Set Dict = Nothing
+   
+   If LastNumberOfWarnings <> NumberOfWarnings Then
+      RaiseEvent ChangeWarnings(NumberOfWarnings)
+   End If
 End Sub
-Private Function FindRowFromDictId(Dict As clsDict) As Long
+Private Function FindRowFromDictId(DictId As Long) As Long
 
    Dim I As Long
     
-   With lstDict
-      For I = 1 To .MaxRows
-         If CLng(.GetRowItemData(I)) = Dict.DictId Then
-            FindRowFromDictId = I
-            Exit For
-         End If
-      Next I
-   End With
+   For I = 1 To lstDict.MaxRows
+      If CLng(lstDict.GetRowItemData(I)) = DictId Then
+         FindRowFromDictId = I
+         Exit For
+      End If
+   Next I
 End Function
+Private Sub DeleteRowInList(Row)
 
+   lstDict.Row = Row
+   lstDict.Col = lstDict.GetColFromID("2")
+   If Len(lstDict.Text) > 0 Then
+      NumberOfWarnings = NumberOfWarnings - 1
+   End If
+   lstDict.DeleteRows Row, 1
+   lstDict.MaxRows = lstDict.MaxRows - 1
+End Sub
 Private Sub UpdateRowInList(Row As Integer, Dict As clsDict)
 
    Dim C As Integer
    Dim Mark As Integer
+   Dim Warning As Integer
+   Dim NotePic As Integer
+   Dim PriorityText As String
    Dim Ddiff As Integer
 
-   With lstDict
-      .SetRowItemData Row, CStr(Dict.DictId)
+   lstDict.SetRowItemData Row, CStr(Dict.DictId)
+   
+   lstDict.Row = Row
+   lstDict.Col = -1
       
-      Mark = -1
-      If Len(Dict.LockedByUserShortName) > 0 Then
-         Mark = ImgNrLocked
-         .Row = Row
-         .Col = -1
-         .ForeColor = &H808080
-         .FontItalic = True
-      Else
-         If Dict.StatusId < Transcribed Then
-            Ddiff = DateDiff("d", Now, Dict.ExpiryDate)
-            If Ddiff < 0 Then
-               Mark = ImgNrNow
-            ElseIf Ddiff = 0 Then
-               Mark = ImgNrSoon
-            Else
-               Mark = ImgNrLater
-            End If
+   Mark = 0
+   If Len(Dict.LockedByUserShortName) > 0 Then
+      Mark = ImgNrLocked
+      lstDict.ForeColor = &H808080
+      lstDict.FontItalic = True
+   Else
+      If Dict.StatusId < Transcribed Then
+         Ddiff = DateDiff("d", Now, Dict.ExpiryDate)
+         If Ddiff < 0 Then
+            Mark = ImgNrNow
+         ElseIf Ddiff = 0 Then
+            Mark = ImgNrSoon
+         Else
+            Mark = ImgNrLater
          End If
-         .Row = Row
-         .Col = -1
-         .ForeColor = 0
-         .FontItalic = False
       End If
-      
-      C = 0:     SetCellValue Row, C, Dict.DictId
-      C = C + 1: SetCellPicture Row, C, Mark
-      C = C + 1: SetCellValue Row, C, Dict.Pat.PatIdFormatted
-      C = C + 1: SetCellValue Row, C, Dict.Pat.PatName
-      C = C + 1: SetCellValue Row, C, Format$(Dict.ExpiryDate, "ddddd")
-      C = C + 1: SetCellValue Row, C, Dict.PriorityText
-      C = C + 1: SetCellValue Row, C, Dict.OrgText
-      C = C + 1: SetCellValue Row, C, Dict.DictTypeText
-      C = C + 1: SetCellValue Row, C, FormatLength(Dict.SoundLength)
-      C = C + 1: SetCellValue Row, C, Dict.AuthorShortName
-      C = C + 1: SetCellValue Row, C, Format$(Dict.Created, "ddddd hh:nn")
-      
-'      If Dict.Changed <> 0 Then
-'         C = C + 1: SetCellValue Row, C, Format$(Dict.Changed, "ddddd hh:nn")
-'      Else
-'         C = C + 1: SetCellValue Row, C, ""
-'      End If
-      
-      C = C + 1: SetCellValue Row, C, Dict.TranscriberShortName
-      C = C + 1: SetCellValue Row, C, Dict.StatusText
-      C = C + 1: SetCellValue Row, C, Dict.LockedByUserShortName
-   End With
+      lstDict.ForeColor = 0
+      lstDict.FontItalic = False
+   End If
+   
+   Dim Priority As clsPriority
+   Client.PriorityMgr.GetFromId Priority, Dict.PriorityId
+   PriorityText = Priority.PriortyText
+   If Priority.Colour > 0 Then
+      lstDict.BackColor = Priority.Colour
+   End If
+   If Priority.Warning And Dict.StatusId < Transcribed Then
+      NumberOfWarnings = NumberOfWarnings + 1
+      Warning = ImgNrWarning
+   Else
+      Warning = 0
+   End If
+   Set Priority = Nothing
+   
+   If Len(Dict.Note) > 0 Then
+      NotePic = ImgNrNote
+   End If
+   C = 0:     SetCellValue Row, C, Dict.DictId
+   C = C + 1: SetCellPicture Row, C, Mark
+   C = C + 1: SetCellPicture Row, C, Warning, CStr(Warning)
+   C = C + 1: SetCellPicture Row, C, NotePic, Dict.Note
+   C = C + 1: SetCellValue Row, C, Dict.Pat.PatIdFormatted
+   C = C + 1: SetCellValue Row, C, Dict.Pat.PatName
+   C = C + 1: SetCellValue Row, C, Format$(Dict.ExpiryDate, "ddddd")
+   C = C + 1: SetCellValue Row, C, PriorityText
+   C = C + 1: SetCellValue Row, C, Dict.OrgText
+   C = C + 1: SetCellValue Row, C, Dict.DictTypeText
+   C = C + 1: SetCellValue Row, C, FormatLength(Dict.SoundLength)
+   C = C + 1: SetCellValue Row, C, Dict.AuthorShortName
+   C = C + 1: SetCellValue Row, C, Format$(Dict.Created, "ddddd hh:nn")
+   C = C + 1: SetCellValue Row, C, Dict.TranscriberShortName
+   If Dict.TranscribedDate <> 0 Then
+      C = C + 1: SetCellValue Row, C, Format$(Dict.TranscribedDate, "ddddd hh:nn")
+   Else
+      C = C + 1: SetCellValue Row, C, ""
+   End If
+   C = C + 1: SetCellValue Row, C, Dict.StatusText
+   C = C + 1: SetCellValue Row, C, Dict.LockedByUserShortName
 End Sub
 Sub SetCellValue(Row As Integer, Col As Integer, Txt As String)
 
-   With lstDict
-      .Row = Row
-      .Col = .GetColFromID(CStr(Col))
-      .Value = Txt
-   End With
+   lstDict.Row = Row
+   lstDict.Col = lstDict.GetColFromID(CStr(Col))
+   lstDict.Value = Txt
 End Sub
-Sub SetCellPicture(Row As Integer, Col As Integer, PicNr As Integer)
+Sub SetCellPicture(Row As Integer, Col As Integer, PicNr As Integer, Optional Text As String = "")
 
-   'If PicNr >= 0 Then
-      With lstDict
-         .Row = Row
-         .Col = .GetColFromID(CStr(Col))
-         .CellType = CellTypePicture
-         .TypePictCenter = True
-         .TypePictStretch = True
-         .TypePictMaintainScale = True
-         '.TypePictPicture = .LoadPicture(App.Path & "\images\" & PicName & ".ico", PictureTypeICO)
-         Select Case PicNr
-            Case ImgNrLocked
-               Set .TypePictPicture = imgLocked.Picture
-            Case ImgNrNow
-               Set .TypePictPicture = imgUrgent.Picture
-            Case ImgNrSoon
-               Set .TypePictPicture = imgSoon.Picture
-            Case ImgNrLater
-               Set .TypePictPicture = imgLater.Picture
-         End Select
-      End With
-   'End If
+   lstDict.Row = Row
+   lstDict.Col = lstDict.GetColFromID(CStr(Col))
+   If PicNr > 0 Then
+      lstDict.CellType = CellTypePicture
+      lstDict.Text = Text
+      lstDict.TypePictCenter = True
+      lstDict.TypePictStretch = True
+      lstDict.TypePictMaintainScale = True
+      Set lstDict.TypePictPicture = imgIcon(PicNr)
+   Else
+      lstDict.CellType = CellTypeStaticText
+      lstDict.Text = ""
+   End If
 End Sub
 
 Private Function GetCellValue(Row As Integer, Col As Integer) As String
 
-   With lstDict
-      .Row = Row
-      .Col = .GetColFromID(CStr(Col))
-      GetCellValue = .Text
-   End With
+   lstDict.Row = Row
+   lstDict.Col = lstDict.GetColFromID(CStr(Col))
+   GetCellValue = lstDict.Text
 End Function
 
 Public Function GetSetting() As String

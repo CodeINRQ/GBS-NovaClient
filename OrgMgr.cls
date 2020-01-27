@@ -137,7 +137,7 @@ Public Function TextFromId(OrgId As Long) As String
       End If
    Next
 End Function
-Public Function CheckUserRole(ByVal OrgId As Long, ByVal Role As String) As Boolean
+Public Function CheckUserRole(ByVal OrgId As Long, ByVal Role As RoleTypeEnum) As Boolean
 
    Dim I As Integer
    Dim Org As clsOrg
@@ -145,18 +145,35 @@ Public Function CheckUserRole(ByVal OrgId As Long, ByVal Role As String) As Bool
    If OrgId > 0 Then
       GetOrgFromId Org, OrgId
       If Not Org Is Nothing Then
-         If InStr(Org.Roles.Roles, Role) > 0 Then
+         If Org.Roles.GetOneRole(Role) Then
             CheckUserRole = True
          End If
       End If
    Else
       For I = 0 To mOrgCount - 1
-         If InStr(mOrgArr(I).Roles.Roles, Role) > 0 Then
+         If mOrgArr(I).Roles.GetOneRole(Role) Then
             CheckUserRole = True
             Exit For
          End If
       Next I
    End If
+End Function
+Public Function IsOrgBelowTop(ByVal TopOrgId As Long, ByVal BelowOrgId As Long) As Boolean
+
+   Dim Org As clsOrg
+   
+   Do
+      If TopOrgId = BelowOrgId Then
+         Exit Do
+      End If
+      GetOrgFromId Org, BelowOrgId
+      If Not Org Is Nothing Then
+         BelowOrgId = Org.OrgParent
+      Else
+         BelowOrgId = 0
+      End If
+   Loop Until BelowOrgId = 0  'root
+   IsOrgBelowTop = TopOrgId = BelowOrgId
 End Function
 Public Function CheckUserAllowListening(ByVal OrgId As Long) As Boolean
 
@@ -166,7 +183,7 @@ Public Function CheckUserAllowListening(ByVal OrgId As Long) As Boolean
    If OrgId > 0 Then
       GetOrgFromId Org, OrgId
       If Not Org Is Nothing Then
-         If Len(Org.Roles.Roles) > 0 Then
+         If Org.Roles.GetOneRole(RTList) Then
             CheckUserAllowListening = True
          End If
       End If

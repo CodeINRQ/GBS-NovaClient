@@ -359,7 +359,7 @@ Begin VB.UserControl ucDSSRecGUI
       Begin MSComctlLib.Slider sldPos 
          Height          =   315
          Left            =   4665
-         TabIndex        =   11
+         TabIndex        =   12
          Top             =   190
          Width           =   1215
          _ExtentX        =   2143
@@ -375,7 +375,7 @@ Begin VB.UserControl ucDSSRecGUI
       Begin MSComctlLib.Slider sldVol 
          Height          =   255
          Left            =   5880
-         TabIndex        =   12
+         TabIndex        =   14
          Top             =   190
          Width           =   1245
          _ExtentX        =   2196
@@ -392,7 +392,7 @@ Begin VB.UserControl ucDSSRecGUI
       Begin MSComctlLib.Slider sldSpeed 
          Height          =   255
          Left            =   7125
-         TabIndex        =   13
+         TabIndex        =   16
          Top             =   190
          Width           =   1245
          _ExtentX        =   2196
@@ -412,7 +412,7 @@ Begin VB.UserControl ucDSSRecGUI
          Caption         =   "0"
          Height          =   255
          Left            =   4545
-         TabIndex        =   16
+         TabIndex        =   11
          Top             =   0
          Width           =   1515
       End
@@ -422,7 +422,7 @@ Begin VB.UserControl ucDSSRecGUI
          Caption         =   "&Volym"
          Height          =   255
          Left            =   5880
-         TabIndex        =   15
+         TabIndex        =   13
          Tag             =   "1090103"
          Top             =   0
          Width           =   1245
@@ -433,7 +433,7 @@ Begin VB.UserControl ucDSSRecGUI
          Caption         =   "&Hastighet"
          Height          =   255
          Left            =   7125
-         TabIndex        =   14
+         TabIndex        =   15
          Tag             =   "1090104"
          Top             =   0
          Width           =   1245
@@ -625,7 +625,6 @@ Private Function ConvertTo100Scale(PosInMilliSec As Long, LengthInMilliSec) As I
    ConvertTo100Scale = CInt(PosInMilliSec / LengthInMilliSec * CLng(100))
 End Function
 
-
 Private Sub lblSpeed_Click()
 
    sldSpeed.Value = 50
@@ -796,7 +795,15 @@ Private Sub sldPos_Scroll()
    DSSRec.MoveTo CLng(sldPos.Value * L / CLng(100))
    InPositioning = False
 End Sub
+Public Property Let Position(Pos As Long)
 
+   Dim L As Long
+   
+   DSSRec.GetLength L
+   If Pos > 0 And Pos < L Then
+      DSSRec.MoveTo Pos
+   End If
+End Property
 Private Sub sldSpeed_Scroll()
 
    DSSRec.SetPlaySpeed (sldSpeed.Value + 65) * 10

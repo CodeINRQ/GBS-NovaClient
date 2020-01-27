@@ -172,7 +172,7 @@ Private Sub Form_Load()
    lblVersion.Caption = Client.Texts.Txt(1020101, "Version") & " " & ApplicationVersion
    lblTitle.Caption = Client.Texts.Txt(1000417, "CareTalk")
    lblDescription.Caption = Client.Texts.Txt(1020102, "CareTalk - Ett modernt system för digital diktering") & vbLf & vbLf & _
-                            Client.Texts.Txt(1020103, "Programmet utvecklas av") & vbLf & Client.Texts.Txt(1020104, "Grundig Svenska AB") & vbLf & vbLf & _
+                            Client.Texts.Txt(1020103, "Programmet utvecklas av") & vbLf & Client.Texts.Txt(1020104, "Grundig Nordic AB") & vbLf & vbLf & _
                             Client.Texts.Txt(1020109, "Utrustning:") & " " & DevName & vbLf & _
                             Client.Texts.Txt(1020110, "Serienr:") & " " & DevSerialno & vbLf & _
                             Client.Texts.Txt(1020111, "Firmware:") & " " & DevFirmwareVersion

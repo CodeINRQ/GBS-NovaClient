@@ -1,8 +1,32 @@
+1.20.0.0
+----------
+Starts from 1.10.0.237
+OrgPriority
+No default DictType or Priority for org unit force user to choose
+New tab for Organization on frmMain
+New columns for Warning and Colour in Priority table
+Priority warnings are shown with an icon i dictation list. New Column
+New column in dictation list for Transcribed Date
+Always sort dictations with warning at top
+New event ChangeWarnings(NumberOfWarnings) in ucDictList
+New roles C=Statistics; H=History; N=Unlocking; A=Auditing
+Last position for author and transcriber are saved with dictation in database
+New field for Note i dictation. Shown in dictlist as an icon. Hover text.
+Shortcuts to Volume and Speed now work
+Automatic status change when transcribing. Yellow efter 3 sek and green when <5 sek left
+Som new default values for system settings. Sound/UseImageField=Yes
+SelectAllText on all textboxes at GotFocus event
+Only show users with home org unit below current unit at Admin tab
+Set current org unit as home when creating a new user
+Check for show all at admin tab
+Word "Rights" is used instead of "Role" in Gui
+
+
 1.10.0.237
 ----------
 Bug fix: ReDim Preserve mOrgDictTypeArr(mOrgDictTypeCount + 50) on right array
 Place frmMain at 50,50
-Text "För mänga diktat..." is now text no 1080114
+Text "För många diktat..." is now text no 1080114
 Use ShutDownRequest to make shure that opened dictations are checked in before closing application
 Remove End statements to make API work smoother
 New event declared in ini-file: OnCtCmdFile. Environment variables can be used in Path and filename

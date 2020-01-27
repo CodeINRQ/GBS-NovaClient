@@ -73,7 +73,6 @@ Const SheetMax = 2
 Const MaxRows = 1000
 Const MaxCols = 10
 
-Dim loadingdata As Boolean
 Dim NumberOfFooterRow As Integer
 
 Dim CurrentOrgId As Long
@@ -104,10 +103,6 @@ Public Sub Init()
 
    cboType.AddItem Client.Texts.Txt(1160102, "Fördelning skriv-senast")
    cboType.ListIndex = 0
-End Sub
-Private Sub UserControl_Initialize()
-
-   loadingdata = False
 End Sub
 
 Private Sub UserControl_Resize()
@@ -245,8 +240,6 @@ Private Sub GetDataNow()
    Dim Col As Integer
    Dim RowHeader As String
    
-   loadingdata = True
-   
    If CurrentOrgId <> NextOrgId Then
       CurrentOrgId = NextOrgId
 
@@ -277,9 +270,7 @@ Private Sub GetDataNow()
       Else
          NumberOfFooterRow = 0
       End If
-      'lstStat.UserColAction = UserColActionSort
    End If
-   loadingdata = False
    Set Stat = Nothing
 End Sub
 Private Sub AddFooterRow()

@@ -177,9 +177,11 @@ Private Sub ShowOrg()
 End Sub
 Private Sub SetEnabled()
 
-   cmdSave.Enabled = Dirty And mOrg.OrgParent <> 0
-   cmdNew.Enabled = Not Dirty And mOrg.OrgId <> 0
-   cmdReset.Enabled = Dirty
+   If Not mOrg Is Nothing Then
+      cmdSave.Enabled = Dirty And mOrg.OrgParent <> 0
+      cmdNew.Enabled = Not Dirty And mOrg.OrgId <> 0
+      cmdReset.Enabled = Dirty
+   End If
 End Sub
 
 Private Sub chkDictContainer_Click()
@@ -231,4 +233,9 @@ Private Sub txtOrgText_Change()
 
    Dirty = True
    SetEnabled
+End Sub
+
+Private Sub txtOrgText_GotFocus()
+
+   SelectAllText ActiveControl
 End Sub

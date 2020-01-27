@@ -29,8 +29,13 @@ Sub FillDemoDictation(NumberOfDictations As Long)
       If Rnd < 0.1 Then
          D.Changed = DateAdd("h", 5, D.Created)
       End If
-      D.PriorityId = RndPrio()
-      D.ExpiryDate = DateAdd("d", Client.PriorityMgr.DaysFromIndex(Client.PriorityMgr.IndexFromId(D.PriorityId)), D.Created)
+      
+      Dim Prio As clsPriority
+      Client.PriorityMgr.GetFromId Prio, RndPrio()
+      D.PriorityId = Prio.PriorityId
+      D.ExpiryDate = DateAdd("d", Prio.Days, D.Created)
+      Set Prio = Nothing
+      
       If D.StatusId < SoundDeleted Then
          D.LocalFilename = RndDictFile()
       End If
@@ -61,8 +66,13 @@ Sub FillHistoryDemo(Days As Integer, MaxNumberPerDay As Integer, MinNumberPerDay
          Rs("Created") = DateAdd("d", -Cr, Now)
          Rs("OrgId") = RndOrg()
          Rs("DictTypeId") = RndDictType()
-         Rs("PriorityId") = RndPrio()
-         Rs("ExpiryDate") = DateAdd("d", Client.PriorityMgr.DaysFromIndex(Rs("PriorityId")), Rs("created"))
+         
+         Dim Prio As clsPriority
+         Client.PriorityMgr.GetFromId Prio, RndPrio()
+         Rs("PriorityId") = Prio.PriorityId
+         Rs("ExpiryDate") = DateAdd("d", Prio.Days, Rs("created"))
+         Set Prio = Nothing
+         
          Rs("AuthorId") = RndUser(Rs("OrgId"), "A")
          Rs("TranscriberId") = RndUser(Rs("OrgId"), "T")
          Rs("TranscriberOrgId") = RndOrg

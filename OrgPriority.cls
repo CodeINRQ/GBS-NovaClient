@@ -6,15 +6,13 @@ BEGIN
   DataSourceBehavior  = 0  'vbNone
   MTSTransactionMode  = 0  'NotAnMTSObject
 END
-Attribute VB_Name = "clsPriority"
+Attribute VB_Name = "clsOrgPriority"
 Attribute VB_GlobalNameSpace = False
-Attribute VB_Creatable = True
+Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Public PriorityId    As Long
-Public PriortyText   As String
-Public Days          As Integer
-Public Warning       As Boolean
-Public Colour        As Long
+Public OrgId As Long
+Public PriorityId As Integer
+Public Def As Boolean
