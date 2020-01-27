@@ -18,7 +18,7 @@ Begin VB.UserControl ucLoggList
       _ExtentX        =   2355
       _ExtentY        =   661
       _Version        =   393216
-      Format          =   52494337
+      Format          =   49414145
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -69,7 +69,7 @@ Begin VB.UserControl ucLoggList
       _ExtentX        =   2355
       _ExtentY        =   661
       _Version        =   393216
-      Format          =   52494337
+      Format          =   49414145
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -122,6 +122,46 @@ Public Sub NewLanguage()
       Client.Texts.ApplyToControl UserControl.Controls(I)
    Next I
 End Sub
+Public Sub ExportExcelFile(Fn As String)
+
+   lstLogg.ExportExcelBookEx Fn, "", ExcelSaveFlagNone
+End Sub
+Public Sub ExportToHtml(Fn As String)
+
+   lstLogg.ExportToHtml Fn, False, ""
+End Sub
+Public Sub ExportToXml(Fn As String)
+
+   lstLogg.ExportToXml Fn, "", "", ExportToXMLFormattedData, ""
+End Sub
+Public Sub ExportTextFile(Fn As String)
+
+   lstLogg.SaveTabFile Fn
+End Sub
+Public Sub ExportListToFile(DefFileName As String)
+
+   Dim Fn As String
+   Dim Ext As String
+   
+   If Len(DefFileName) = 0 Then
+      DefFileName = Client.Texts.Txt(1000424, "Logg")
+   End If
+   
+   Fn = GetExportFileName(DefFileName)
+   If Len(Fn) = 0 Then Exit Sub
+      
+   Ext = LCase$(Right$(Fn, 3))
+   Select Case Ext
+      Case "xml"
+         ExportToXml Fn
+      Case "htm"
+         ExportToHtml Fn
+      Case "xls"
+        ExportExcelFile Fn
+      Case Else
+        ExportTextFile Fn
+   End Select
+End Sub
 
 Private Sub cmdGo_Click()
 
@@ -136,6 +176,16 @@ End Sub
 Private Sub dtpStartDate_Change()
 
    StartDate = DateSerial(dtpStartDate.Year, dtpStartDate.Month, dtpStartDate.Day)
+End Sub
+
+Private Sub lstLogg_KeyPress(KeyAscii As Integer)
+
+   Select Case KeyAscii
+      Case KeyAsciiExportList
+         If Client.SysSettings.ExportAllowMenu Then
+            ExportListToFile ""
+         End If
+   End Select
 End Sub
 
 Private Sub UserControl_Resize()

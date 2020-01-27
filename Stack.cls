@@ -14,16 +14,20 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Private ObjArr(20) As Object
-Private StackDeep As Integer
+Private mStackDepth As Integer
 
 Public Sub Push(O As Object)
 
-   Set ObjArr(StackDeep) = O
-   StackDeep = StackDeep + 1
-   Debug.Print "StackDeep " & CStr(StackDeep)
+   Set ObjArr(mStackDepth) = O
+   mStackDepth = mStackDepth + 1
+   Debug.Print "mStackDepth " & CStr(mStackDepth)
 End Sub
 Public Sub Pop(O As Object)
 
-   StackDeep = StackDeep - 1
-   Set O = ObjArr(StackDeep)
+   mStackDepth = mStackDepth - 1
+   Set O = ObjArr(mStackDepth)
 End Sub
+Public Property Get StackDepth() As Integer
+
+   mStackDepth = mStackDepth
+End Property

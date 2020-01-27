@@ -13,6 +13,8 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
+Public FilterFromSearch    As Boolean
+
 Public OrgId               As Long
 Public AuthorId            As Long
 Public AuthorName          As String
@@ -40,4 +42,29 @@ Private Sub Class_Initialize()
    Set Pat = New clsPat
    DictTypeId = -1
    PriorityId = -1
+End Sub
+
+Public Sub Copy(Flt As clsFilter)
+
+   FilterFromSearch = Flt.FilterFromSearch
+   OrgId = Flt.OrgId
+   AuthorId = Flt.AuthorId
+   AuthorName = Flt.AuthorName
+   TranscriberId = Flt.TranscriberId
+   TranscriberName = Flt.TranscriberName
+   StatusStart = Flt.StatusStart
+   StatusEnd = Flt.StatusEnd
+   NoPatient = Flt.NoPatient
+   Pat.Copy Flt.Pat
+   DictTypeId = Flt.DictTypeId
+   PriorityId = Flt.PriorityId
+   Txt = Flt.Txt
+   
+   RecDateUsed = Flt.RecDateUsed
+   RecStartDate = Flt.RecStartDate
+   RecEndDate = Flt.RecEndDate
+   
+   TranscribedDateUsed = Flt.TranscribedDateUsed
+   TranscribedStartDate = Flt.TranscribedStartDate
+   TranscribedEndDate = Flt.TranscribedEndDate
 End Sub

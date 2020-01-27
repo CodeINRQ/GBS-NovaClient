@@ -188,12 +188,14 @@ Public Function CurrPat(PatId1 As String, _
    
    Set frmMain.ucDictList.CurrPatientFilter = CurrPatFilter
    
-   If Not BlankCurrPat Then
-      frmMain.ucOrgTree.PickOrgId 30005
-   Else
-      frmMain.ucOrgTree.PickOrgId Client.User.HomeOrgId
+   If Not RecorderInUse Then
+      If Not BlankCurrPat Then
+         frmMain.ucOrgTree.PickOrgId 30005
+      Else
+         frmMain.ucOrgTree.PickOrgId Client.User.HomeOrgId
+      End If
+      frmMain.Tabs.Tab = 0
    End If
-   frmMain.Tabs.Tab = 0
    CurrPat = 0
    
 CurrPat_Exit:

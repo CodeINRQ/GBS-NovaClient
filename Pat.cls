@@ -17,6 +17,12 @@ Public PatName       As String
 Private mPatId1      As String
 Private mPatId2      As String
 
+Public Sub Copy(Pat As clsPat)
+
+   Me.PatName = Pat.PatName
+   Me.PatId = Pat.PatId
+   Me.PatId2 = Pat.PatId2
+End Sub
 Public Property Get PatIdFormatted() As String
 
    If Len(mPatId1) = 12 Then

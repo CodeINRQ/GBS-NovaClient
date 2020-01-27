@@ -1,4 +1,31 @@
-1.20.0.0
+1.21.0.0
+---------
+Starts from 1.20.0.84
+Don't select all text when PatId or PatName in frmDict get focus
+Insert ucCloseChoice in tab order again
+Save top and left of frmDict in public variables and restore when form next load
+Change label text for cboPriority in frmDict to support shortcut
+Set Id column to type number in DictList
+Set ForwardFocus=False in ucCloseChoise to make it possible to tab to Close button
+Public method ExportListToFile in all user controls with fpList
+All fpList act on Ctrl-E for Export to file
+frmDict act on PlayerKeyWindowSize (Alt-Z)
+Allow Export on File menu for tabs: Dictlist, Stat, Hist, Admin, Logg
+Search in part of organization tree
+Search for given status
+Show number and total length of dications in list at status line
+Show user in user list even if HomeOrgId is null (only when ShowAll is checked)
+Check if user already exist before try to save new user
+Search (filter) in ucEditUsers
+Search order for drive of portable Import.DSSDrives
+Filter cboDictType and cboPriority according to selected orgunit
+Don't recreate DictList at new search or currentpat if not these folders opened
+Don't change to Current Pat folder if RecorderInUse (ClientAPI.CurrPat)
+Check for new CtCmdFile before restoring dictlist after EditExistingDictation
+New SysSetting PlayerHWcheckfreq divide timer (200 ms) to check hw change in addition to event
+
+
+1.20.0.84
 ----------
 Starts from 1.10.0.237
 OrgPriority

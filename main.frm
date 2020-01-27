@@ -1,8 +1,8 @@
 VERSION 5.00
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
-Object = "{BDC217C8-ED16-11CD-956C-0000C04E4C0A}#1.1#0"; "tabctl32.ocx"
+Object = "{BDC217C8-ED16-11CD-956C-0000C04E4C0A}#1.1#0"; "TABCTL32.OCX"
 Object = "{A455B2A1-A33C-11D1-A8BD-002078104456}#1.0#0"; "CP5OCX32.OCX"
-Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "comdlg32.ocx"
+Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "COMDLG32.OCX"
 Begin VB.Form frmMain 
    Caption         =   "Grundig"
    ClientHeight    =   10200
@@ -76,7 +76,7 @@ Begin VB.Form frmMain
    End
    Begin VB.Timer tmrCheckButtons 
       Enabled         =   0   'False
-      Interval        =   100
+      Interval        =   200
       Left            =   10920
       Top             =   120
    End
@@ -134,43 +134,34 @@ Begin VB.Form frmMain
       TabPicture(4)   =   "main.frx":0750
       Tab(4).ControlEnabled=   0   'False
       Tab(4).Control(0)=   "ucEditUser"
-      Tab(4).Control(0).Enabled=   0   'False
       Tab(4).ControlCount=   1
       TabCaption(5)   =   "Organisation"
       TabPicture(5)   =   "main.frx":076C
       Tab(5).ControlEnabled=   0   'False
       Tab(5).Control(0)=   "ucOrgDictType"
-      Tab(5).Control(0).Enabled=   0   'False
       Tab(5).Control(1)=   "ucOrgPriority"
-      Tab(5).Control(1).Enabled=   0   'False
       Tab(5).Control(2)=   "ucEditOrg"
-      Tab(5).Control(2).Enabled=   0   'False
       Tab(5).ControlCount=   3
       TabCaption(6)   =   "Systeminställningar"
       TabPicture(6)   =   "main.frx":0788
       Tab(6).ControlEnabled=   0   'False
-      Tab(6).Control(0)=   "ucEditGroup"
-      Tab(6).Control(0).Enabled=   0   'False
-      Tab(6).Control(1)=   "ucEditSysSettings"
-      Tab(6).Control(1).Enabled=   0   'False
+      Tab(6).Control(0)=   "ucEditSysSettings"
+      Tab(6).Control(1)=   "ucEditGroup"
       Tab(6).ControlCount=   2
       TabCaption(7)   =   "Tab 6"
       TabPicture(7)   =   "main.frx":07A4
       Tab(7).ControlEnabled=   0   'False
       Tab(7).Control(0)=   "ucVoiceXpress"
-      Tab(7).Control(0).Enabled=   0   'False
       Tab(7).ControlCount=   1
       TabCaption(8)   =   "Demo"
       TabPicture(8)   =   "main.frx":0D06
       Tab(8).ControlEnabled=   0   'False
       Tab(8).Control(0)=   "ucDemo1"
-      Tab(8).Control(0).Enabled=   0   'False
       Tab(8).ControlCount=   1
       TabCaption(9)   =   "Logg"
       TabPicture(9)   =   "main.frx":0D22
       Tab(9).ControlEnabled=   0   'False
       Tab(9).Control(0)=   "ucLoggList"
-      Tab(9).Control(0).Enabled=   0   'False
       Tab(9).ControlCount=   1
       Begin CareTalk.ucDemo ucDemo1 
          Height          =   3975
@@ -242,14 +233,14 @@ Begin VB.Form frmMain
          _ExtentY        =   11880
       End
       Begin CareTalk.ucSearch ucSearch 
-         Height          =   6015
+         Height          =   7095
          HelpContextID   =   1150000
          Left            =   -74880
          TabIndex        =   8
          Top             =   480
          Width           =   4935
          _ExtentX        =   8705
-         _ExtentY        =   10610
+         _ExtentY        =   12515
       End
       Begin CareTalk.ucHistList ucHistList 
          Height          =   6735
@@ -512,8 +503,8 @@ Attribute mDictForm.VB_VarHelpID = -1
 Private WithEvents mPopupForm As frmPopup
 Attribute mPopupForm.VB_VarHelpID = -1
 Public CurrentOrg As Long
+Public CurrentOrgText As String
 Private LastOrgidForNewDictation As Long
-Public RecorderInUse As Boolean
 Private IsDictButtonPressed As Boolean
 
 Private DictRecoveryMode As TempDictInfoTypeEnum
@@ -524,10 +515,14 @@ Public IsPlayFromAPI As Boolean
 Private DictFormSettings As New clsStringStore
 Private RecordingAllowed As Boolean
 Private VoiceXpressAllowed As Boolean
+Private LastSearchOrg As Long
 
 Private UIBusy As Boolean
 Private ShutDownRequest As Boolean
 Private defProgBarHwnd  As Long
+Private DictList_TotalNumber As Long
+Private DictList_NumberOfWarnings As Long
+Private DictList_TotalLength As Long
 
 Private Declare Function SetParent Lib "user32" _
   (ByVal hWndChild As Long, _
@@ -565,6 +560,7 @@ Private Sub Form_Load()
    Dim LoginResult As Integer
    Dim LoginFromExtSystem As Boolean
    Dim Eno As Long
+   Dim Msg As String
    
    On Error GoTo frmMain_Form_Load_Err
    
@@ -597,6 +593,7 @@ Private Sub Form_Load()
       End
    End If
    Client.SysSettings.Init "CT"
+      
    frmMain.cmdSetHomeOrg.Visible = Client.SysSettings.UserAllowChangeHome
    Client.CultureLanguage = Client.SysSettings.CultureDefaultLanguage
    Client.Texts.NewLanguage Client.CultureLanguage
@@ -604,6 +601,25 @@ Private Sub Form_Load()
    Client.ExtSystemMgr.Init
 
    LoginFromExtSystem = Len(StartUpUserLoginName) > 0
+   
+   Msg = Client.SysSettings.ClientStopLoginMsg
+   If Len(Msg) = 0 Then
+      Msg = Client.SysSettings.ClientForceLogoffMsg
+   End If
+   If Len(Msg) = 0 Then
+      If ApplicationVersion < Client.SysSettings.ClientMinVersion Then
+         Msg = Client.Texts.Txt(1000429, "För gammal version. Kontakta systemadministratör!")
+      End If
+   End If
+   If Len(Msg) > 0 Then
+      If Not LoginFromExtSystem Then
+         MsgBox Msg, vbOKOnly
+      End If
+      StartUpFormMainIsLoaded = 0
+      Unload Me
+      End
+   End If
+      
    LoginResult = 1
    Do While LoginResult > 0 And LoginResult < 100
       LoginResult = Client.UserMgr.LoginUser(StartUpUserLoginName, StartUpPassword, StartUpExtSystem, StartUpExtPassword)
@@ -715,7 +731,12 @@ Private Sub CheckHardware()
    Static NotFirst As Boolean
    
    Client.DSSRec.GetHardWare NewValue
+   If NewValue = GRU_HW_NONE And Client.Hw <> GRU_HW_NONE Then
+      TryToWakeGoneHardware
+      Client.DSSRec.GetHardWare NewValue
+   End If
    If Client.Hw <> NewValue Or Not NotFirst Then
+      Client.DSSRec.GetHardWare NewValue
       Client.Hw = NewValue
       NotFirst = True
       RecordingAllowed = (Client.Hw = GRU_HW_RECORD) And Client.OrgMgr.CheckUserRole(0, RTAuthor)
@@ -850,13 +871,21 @@ Private Sub ShowOrgTree(ShowAll As Boolean, ShowVirtual As Boolean, Optional Use
    Dim StartOrgId As Long
    Dim EnabledDueToRights As Boolean
    Static LastUserUserRights As RoleTypeEnum
+   Static LastShowAll As Boolean
+   Static LastShowVirtual As Boolean
    Dim UserRights As RoleTypeEnum
+
 
    If UsedUserRights = RTNotUsed Then
       UserRights = LastUserUserRights
    Else
       UserRights = UsedUserRights
    End If
+   
+   If ShowAll = LastShowAll And ShowVirtual = LastShowVirtual And UsedUserRights = LastUserUserRights Then Exit Sub
+   
+   LastShowAll = ShowAll
+   LastShowVirtual = ShowVirtual
    LastUserUserRights = UserRights
    
    Client.OrgMgr.Init ShowAll
@@ -921,6 +950,7 @@ Private Sub Form_Resize()
          Me.ucStatList.Width = Me.Tabs.Width - 1 * 240
          Me.ucHistList.Width = Me.Tabs.Width - 1 * 240
          Me.ucLoggList.Width = Me.Tabs.Width - 1 * 240
+         Me.ucEditUser.Width = Me.Tabs.Width - 1 * 240
          Me.picLogo.Left = Me.Width - Me.picLogo.Width - 300
          'Me.imgLogo.Left = Me.Width - Me.imgLogo.Width - 300
          'Me.Toolbar1.Width = Me.imgLogo.Left - 200
@@ -1054,22 +1084,23 @@ End Sub
 Private Sub mnuFile_Click(Index As Integer)
 
    Dim Fn As String
+   Dim Uc As UserControl
 
    Select Case Index
       Case 5
          ImportNewDictation
       Case 6
          Select Case Tabs.Tab
+            Case tabDictList
+               ucDictList.ExportListToFile ""
             Case tabHistList
-               Fn = GetExportFileName()
-               If Len(Fn) > 0 Then
-                  ucHistList.ExportExcelFile Fn
-               End If
+               ucHistList.ExportListToFile ""
             Case tabStatList
-               Fn = GetExportFileName()
-               If Len(Fn) > 0 Then
-                  ucStatList.ExportExcelFile Fn
-               End If
+               ucStatList.ExportListToFile ""
+            Case tabAdmin
+               ucEditUser.ExportListToFile ""
+            Case tabLoggList
+               ucLoggList.ExportExcelFile ""
          End Select
       Case 10
          Unload Me
@@ -1139,6 +1170,7 @@ End Sub
 Private Sub tmrCheckButtons_Timer()
 
    Dim Dict As clsDict
+   Static Freq As Integer
    
    If DictRecoveryMode = tdiNew Then
       DictRecoveryMode = tdiEmpty
@@ -1166,6 +1198,16 @@ Private Sub tmrCheckButtons_Timer()
       IsPlayFromAPI = False
       If Not RecorderInUse Then
          EditExistingDictation Client.PlayDictIdFromAPI
+      End If
+   End If
+   If Client.SysSettings.PlayerHWcheckfreq > 0 Then
+      If Freq <= 0 Then
+         Freq = Client.SysSettings.PlayerHWcheckfreq
+         If Not RecorderInUse Then
+            KeepHardwareAlive
+         End If
+      Else
+         Freq = Freq - 1
       End If
    End If
 End Sub
@@ -1241,6 +1283,14 @@ Private Sub ucDemo1_UIStatusSetSub(SubText As String)
    UIStatusSetSub SubText
 End Sub
 
+Private Sub ucDictList_ChangeNumberInList(TotalNumber As Long, NumberOfWarnings As Long, TotalLength As Long)
+
+   DictList_TotalNumber = TotalNumber
+   DictList_NumberOfWarnings = NumberOfWarnings
+   DictList_TotalLength = TotalLength
+   UIStatusShowNumberIfNoOtherStatus
+End Sub
+
 Private Sub ucDictList_DblClick(DictId As Long)
 
    EditExistingDictation DictId
@@ -1292,7 +1342,10 @@ End Sub
 Private Sub ucOrgTree_NewSelect(OrgId As Long, Txt As String)
 
    CurrentOrg = OrgId
-   Me.Caption = Client.Texts.Txt(1000417, "CareTalk") & " - " & Txt
+   CurrentOrgText = Txt
+   Me.Caption = Client.Texts.Txt(1000417, "CareTalk") & " - " & CurrentOrgText
+   
+   Me.ucSearch.SetNewCurrentOrg CurrentOrg, CurrentOrgText
    UpdateCurrentView
 End Sub
 Private Sub UpdateCurrentView()
@@ -1309,15 +1362,15 @@ Private Sub UpdateCurrentView()
    
    If PreviousOrg <> CurrentOrg Then
       If CurrentOrg < 30000 Then
-         If Client.OrgMgr.CheckUserRole(0, RTAuthor) Then
-            Client.OrgMgr.GetOrgFromId Org, CurrentOrg
-            If Not Org Is Nothing Then
+         Client.OrgMgr.GetOrgFromId Org, CurrentOrg
+         If Not Org Is Nothing Then
+            If Client.OrgMgr.CheckUserRole(0, RTAuthor) Then
                Me.cmdSetHomeOrg.Enabled = Client.OrgMgr.CheckUserRole(CurrentOrg, RTAuthor) And Org.DictContainer
             Else
-               Me.cmdSetHomeOrg.Enabled = False
+               Me.cmdSetHomeOrg.Enabled = Client.OrgMgr.CheckUserRole(CurrentOrg, RTList) And Org.DictContainer
             End If
          Else
-            Me.cmdSetHomeOrg.Enabled = Client.OrgMgr.CheckUserRole(CurrentOrg, RTList)
+            Me.cmdSetHomeOrg.Enabled = False
          End If
       Else
          Me.cmdSetHomeOrg.Enabled = False
@@ -1328,11 +1381,10 @@ Private Sub UpdateCurrentView()
    End If
       UIStatusSet Client.Texts.Txt(1000418, "Mappen uppdateras"), False
       If PreviousTab <> Tabs.Tab Then
-         Select Case PreviousTab
-            Case tabOrg, tabSysSettings, tabStatList, tabHistList, tabAdmin
-               frmMain.mnuFile(6).Visible = False
-         End Select
          PreviousTab = Tabs.Tab                    'must be here
+         
+         frmMain.mnuFile(6).Visible = False
+         
          Select Case Tabs.Tab
             Case tabOrg, tabSysSettings
                If Not Client.OrgMgr.CheckUserRole(CurrentOrg, RTSysAdmin) Then CurrentOrg = 0
@@ -1340,6 +1392,7 @@ Private Sub UpdateCurrentView()
                ucOrgTree.PickOrgId CurrentOrg
             Case tabAdmin
                If Not Client.OrgMgr.CheckUserRole(CurrentOrg, RTUserAdmin) Then CurrentOrg = 0
+               frmMain.mnuFile(6).Visible = True And Client.SysSettings.ExportAllowMenu
                ShowOrgTree True, False, RTUserAdmin
                ucOrgTree.PickOrgId CurrentOrg
                Client.UserMgr.Init
@@ -1356,7 +1409,12 @@ Private Sub UpdateCurrentView()
                ShowOrgTree True, False, RTHistory
                Client.UserMgr.Init
                ucOrgTree.PickOrgId CurrentOrg
+            Case tabSearch
+               If LastSearchOrg > 0 Then
+                  ucOrgTree.PickOrgId LastSearchOrg
+               End If
             Case tabDictList
+               frmMain.mnuFile(6).Visible = True And Client.SysSettings.ExportAllowMenu
                If CurrentOrg < 30000 Then
                   If Not Client.OrgMgr.CheckUserRole(CurrentOrg, RTList) Then CurrentOrg = 0
                End If
@@ -1381,7 +1439,6 @@ Private Sub UpdateCurrentView()
             If CurrentOrg > 0 Then
                Me.ucEditUser.GetData CurrentOrg
             End If
-         
          Case tabOrg, tabSysSettings
             If CurrentOrg > 0 Then
                Me.ucEditOrg.OrgSelected CurrentOrg
@@ -1750,6 +1807,11 @@ Public Sub EditExistingDictation(DictId As Long)
          Set mDictForm = Nothing
                   
          RestoreForegroundWindow
+         
+         If Not ShutDownRequest Then
+            Client.EventMgr.CheckForCtCmdFiles
+         End If
+   
          ucOrgTree.PickOrgId SavedCurrentOrg
       End If
       Client.Trace.AddRow Trace_Level_Full, "10006", "10006A", "", CStr(Dict.DictId), CStr(Dict.StatusId)
@@ -1820,6 +1882,7 @@ Private Sub ucSearch_NewSearch(SearchFilter As clsFilter)
 
    UIStatusSet Client.Texts.Txt(1000427, "Sökning sker..."), True
 
+      LastSearchOrg = SearchFilter.OrgId
       Set ucDictList.SearchFilter = SearchFilter
       ucOrgTree.PickOrgId 30050
       Tabs.Tab = 0
@@ -1983,7 +2046,16 @@ Private Sub UIStatusClear()
       Screen.ActiveForm.Enabled = True
       DoEvents
    End If
+   UIStatusShowNumberIfNoOtherStatus
 End Sub
+Private Sub UIStatusShowNumberIfNoOtherStatus()
+
+   If UIStatusStack.StackDepth = 0 Then
+      StatusBar.Panels(1).Text = CurrentOrgText
+      StatusBar.Panels(2).Text = CStr(DictList_TotalNumber) & " / " & FormatLength(DictList_TotalLength) ' & " / " & CStr(DictList_NumberOfWarnings) Value not ok
+   End If
+End Sub
+
 
 Private Sub WaitForUIBusy()
 
@@ -2022,34 +2094,6 @@ Private Function GetImportFileName() As String
 
    GetImportFileName = frmMain.CDialog.Filename
 End Function
-Private Function GetExportFileName() As String
-
-   Dim Filter As String
-   Dim Pos As Integer
-   
-   Filter = Client.Texts.Txt(1000901, "Excel-filer") & " (*.xls)|*.xls|"
-   Filter = Filter & Client.Texts.Txt(1000902, "Alla filer") & " (*.*)|*.*"
-   
-   frmMain.CDialog.Filename = ""
-   frmMain.CDialog.InitDir = ""
-   frmMain.CDialog.CancelError = True
-   frmMain.CDialog.DefaultExt = "xls"
-   frmMain.CDialog.DialogTitle = Client.Texts.Txt(1000900, "Importera diktat")
-   frmMain.CDialog.Filter = Filter
-   frmMain.CDialog.FilterIndex = 1
-   frmMain.CDialog.Flags = cdlOFNExplorer Or cdlOFNOverwritePrompt
-   frmMain.CDialog.HelpFile = ""
-   frmMain.CDialog.HelpCommand = 0
-   frmMain.CDialog.HelpContext = 0
-   On Error Resume Next
-   frmMain.CDialog.Action = 2
-   If Err <> 0 Then
-      Exit Function
-   End If
-   On Error GoTo 0
-
-   GetExportFileName = frmMain.CDialog.Filename
-End Function
 Private Function CopyImportFileToTempStorage(Source As String, Dest As String) As Boolean
 
    On Error GoTo CopyImportFileToTempStorage_Err
@@ -2061,3 +2105,37 @@ CopyImportFileToTempStorage_Err:
    CopyImportFileToTempStorage = False
    Exit Function
 End Function
+Private Sub KeepHardwareAlive()
+
+   CheckHardware
+   
+'   Dim Adapter As ADAPTERSERVERLib.AdapterControl
+'   Dim S As String
+'
+'   On Error Resume Next
+'   Set Adapter = Client.DSSRec.Adapter
+'   If Adapter.IsOpen Then
+'      S = Adapter.ReceiveString(PCSTAT_ASK_KENNUNG)
+'      If Len(S) = 0 Then
+'         MsgBox "Borta"
+'      End If
+'   End If
+'   Set Adapter = Nothing
+End Sub
+Private Sub TryToWakeGoneHardware()
+
+   Debug.Print "TryToWakeGoneHardware"
+   'MsgWaitObj 2000
+   'Client.DSSRec.Adapter.Close
+   'MsgWaitObj 2000
+   'Client.DSSRec.Adapter.Open
+   'MsgWaitObj 2000
+
+'   Set Client.DSSRec = Nothing
+'   Set Client.DSSRecConnector = Nothing
+'
+'   Set Client.DSSRecConnector = New CareTalkDSSRec3.Connector
+'   Set Client.DSSRec = Client.DSSRecConnector.DSSRecorder
+'   Client.DSSRec.Play
+'   Client.DSSRec.Rec
+End Sub

@@ -48,6 +48,19 @@ Const Gray = &HC0C0C0
 
 Public DictId        As Long
 
+Private Sub lstAudit_KeyPress(KeyAscii As Integer)
+
+   Dim Fn As String
+
+   Select Case KeyAscii
+      Case KeyAsciiExportList
+         If Client.SysSettings.ExportAllowMenu Then
+            ExportListToFile ""
+         End If
+   End Select
+
+End Sub
+
 Private Sub UserControl_Resize()
 
    lstAudit.Move 0, 0, UserControl.ScaleWidth - 100, UserControl.ScaleHeight - 100
@@ -59,6 +72,46 @@ Public Sub NewLanguage()
    For I = 0 To UserControl.Controls.Count - 1
       Client.Texts.ApplyToControl UserControl.Controls(I)
    Next I
+End Sub
+Public Sub ExportExcelFile(Fn As String)
+
+   lstAudit.ExportExcelBookEx Fn, "", ExcelSaveFlagNone
+End Sub
+Public Sub ExportToHtml(Fn As String)
+
+   lstAudit.ExportToHtml Fn, False, ""
+End Sub
+Public Sub ExportToXml(Fn As String)
+
+   lstAudit.ExportToXml Fn, "", "", ExportToXMLFormattedData, ""
+End Sub
+Public Sub ExportTextFile(Fn As String)
+
+   lstAudit.SaveTabFile Fn
+End Sub
+Public Sub ExportListToFile(DefFileName As String)
+
+   Dim Fn As String
+   Dim Ext As String
+   
+   If Len(DefFileName) = 0 Then
+      DefFileName = Client.Texts.Txt(1350106, "Diktatspårning")
+   End If
+   
+   Fn = GetExportFileName(DefFileName)
+   If Len(Fn) = 0 Then Exit Sub
+      
+   Ext = LCase$(Right$(Fn, 3))
+   Select Case Ext
+      Case "xml"
+         ExportToXml Fn
+      Case "htm"
+         ExportToHtml Fn
+      Case "xls"
+        ExportExcelFile Fn
+      Case Else
+        ExportTextFile Fn
+   End Select
 End Sub
 Public Sub RestoreSettings(Settings As String)
 

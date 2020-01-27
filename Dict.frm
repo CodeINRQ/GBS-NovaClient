@@ -87,8 +87,8 @@ Begin VB.Form frmDict
       TabIndex        =   14
       Top             =   600
       Width           =   2655
-      _extentx        =   4683
-      _extenty        =   2990
+      _ExtentX        =   4683
+      _ExtentY        =   2990
    End
    Begin CareTalk.ucDSSRecGUI ucDSSRecGUI 
       Height          =   495
@@ -96,8 +96,8 @@ Begin VB.Form frmDict
       TabIndex        =   17
       Top             =   60
       Width           =   8295
-      _extentx        =   14631
-      _extenty        =   873
+      _ExtentX        =   14631
+      _ExtentY        =   873
    End
    Begin CareTalk.ucOrgTree ucOrgTree 
       Height          =   4455
@@ -105,8 +105,8 @@ Begin VB.Form frmDict
       TabIndex        =   15
       Top             =   600
       Width           =   2175
-      _extentx        =   3836
-      _extenty        =   5953
+      _ExtentX        =   3836
+      _ExtentY        =   5953
    End
    Begin VB.Label lblNoteTitle 
       BackStyle       =   0  'Transparent
@@ -426,7 +426,7 @@ Private WithEvents DSSRecorder As CareTalkDSSRec3.DSSRecorder
 Attribute DSSRecorder.VB_VarHelpID = -1
 
 Private FormFullHeight As Integer
-Private FormLowHeihgt As Integer
+Private FormLowHeight As Integer
 
 Private mDict As clsDict
 Private mNewDict As Boolean
@@ -522,18 +522,24 @@ End Sub
 
 Private Sub Form_Activate()
 
+   If LastfrmDictLeft <> 0 Or LastfrmDictTop <> 0 Then
+      Me.Move LastfrmDictLeft, LastfrmDictTop
+      TranslateForm Me
+   Else
+      CenterAndTranslateForm Me, frmMain
+   End If
+   
    'Has to be here...
    ShowWindow Me.hwnd, SW_Hide
    Me.Caption = Me.Caption
    ShowWindow Me.hwnd, SW_ShowNormal
-      
-   CenterAndTranslateForm Me, frmMain
-   
+         
    SetWindowTopMostAndForeground Me
    If mFloating Then
       WindowFloating Me
    End If
    ShowFormCaption
+        
 End Sub
 
 Public Property Let CloseText(Index As Integer, Text As String)
@@ -622,6 +628,8 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
    Dim SpeedChange As Integer
    Dim CloseIndex As Integer
    Dim CloseX As Boolean
+   Dim WindowSize As Boolean
+   
    
    B = butNone
    CloseIndex = -1
@@ -663,6 +671,8 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
          CloseIndex = 2
       Case Client.SysSettings.PlayerKeyCloseX, Client.SysSettings.PlayerKeyCloseXAlt
          CloseX = True
+      Case Client.SysSettings.PlayerKeyWindowSize
+         WindowSize = True
    End Select
    If B <> butNone Then
       KeyCode = 0
@@ -695,6 +705,13 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
          End If
       End If
    End If
+   If WindowSize Then
+      If imgLess.Visible Then
+         imgLess_Click
+      ElseIf imgMore.Visible Then
+         imgMore_Click
+      End If
+   End If
 End Sub
 
 Private Sub Form_Load()
@@ -703,7 +720,7 @@ Private Sub Form_Load()
    Dim I As Integer
    
    Trc "frmDict load", ""
-   
+      
    mForceUnload = False
    
    imgPin.Visible = Client.SysSettings.PlayerShowOnTop
@@ -721,7 +738,7 @@ Private Sub Form_Load()
       txtTxt.Visible = False
       FormFullHeight = 5115
    End If
-   FormLowHeihgt = 1100
+   FormLowHeight = 1100
    Me.Height = FormFullHeight
    ucOrgTree.Height = FormFullHeight - 1200
    
@@ -745,7 +762,6 @@ Private Sub Form_Load()
          End If
       End If
    Next I
-   
 End Sub
 Public Sub RestoreSettings(Settings As clsStringStore)
 
@@ -792,6 +808,7 @@ Public Sub EditDictation(ByRef Dictation As clsDict, ByVal NewDict As Boolean)
    InitiallyLengthMilliSec = ucDSSRecGUI.SoundLengthInSec * 1000
    ShowDictation
    mDict.InfoDirty = False
+   
 End Sub
 
 Private Sub ShowDictation()
@@ -888,6 +905,8 @@ Private Sub Form_Unload(Cancel As Integer)
       ucDSSRecGUI.StopAndClose
       Set ucDSSRecGUI.DSSRecorder = Nothing
       Set mDict = Nothing
+      LastfrmDictLeft = Me.Left
+      LastfrmDictTop = Me.Top
    Else
       MsgBox Client.Texts.Txt(1030101, "Uppgifterna är inte kompletta!"), vbCritical
       Cancel = True
@@ -898,7 +917,7 @@ Private Sub imgLess_Click()
 
    imgLess.Visible = False
    imgMore.Visible = True
-   Me.Height = FormLowHeihgt
+   Me.Height = FormLowHeight
 End Sub
 
 Private Sub imgMore_Click()
@@ -979,11 +998,6 @@ Private Sub txtPatId_Change()
    SetEnabled
 End Sub
 
-Private Sub txtPatId_GotFocus()
-
-   SelectAllText ActiveControl
-End Sub
-
 Private Sub txtPatId_KeyPress(KeyAscii As Integer)
 
    If Not Client.SysSettings.DictInfoAlfaInPatid Then
@@ -1000,11 +1014,6 @@ Private Sub txtPatName_Change()
       mDict.InfoDirty = True
    End If
    SetEnabled
-End Sub
-
-Private Sub txtPatName_GotFocus()
-
-   SelectAllText ActiveControl
 End Sub
 
 Private Sub txtTxt_Change()
@@ -1046,7 +1055,7 @@ End Sub
 
 Private Sub ucDSSRecGUI_PosChange(PosInMilliSec As Long, LengthInMilliSec As Long, Formated As String)
 
-   ShowFormCaption
+   ShowFormCaption Formated
    mPos = PosInMilliSec
 End Sub
 
@@ -1149,5 +1158,23 @@ Private Function CheckMandatoryData() As Boolean
 End Function
 Private Sub ShowFormCaption(Optional FormattedPos As String)
 
-   Me.Caption = mDict.Pat.PatIdFormatted & " / " & mDict.Pat.PatName
+   Dim S As String
+   
+   S = Client.SysSettings.PlayerCaption
+   If Len(S) = 0 Then
+      Me.Caption = FormattedPos
+   Else
+      S = ChangeParam(S, "PatId", mDict.Pat.PatIdFormatted)
+      S = ChangeParam(S, "PatName", mDict.Pat.PatName)
+      S = ChangeParam(S, "Pos", FormattedPos)
+      S = ChangeParam(S, "DictType", mDict.DictTypeText)
+      S = ChangeParam(S, "Priority", mDict.PriorityText)
+      S = ChangeParam(S, "Org", mDict.OrgText)
+      
+      Me.Caption = S
+   End If
 End Sub
+Private Function ChangeParam(ByVal S As String, ByVal Param As String, ByVal Value As String) As String
+
+   ChangeParam = Replace(S, "%" & Param & "%", Value, 1, -1, vbTextCompare)
+End Function

@@ -17,8 +17,8 @@ Begin VB.Form frmCalibMic
       TabIndex        =   4
       Top             =   3720
       Width           =   7335
-      _extentx        =   12938
-      _extenty        =   318
+      _ExtentX        =   12938
+      _ExtentY        =   318
    End
    Begin VB.CheckBox chkShow 
       Caption         =   "Visa volymreglage"
@@ -121,7 +121,7 @@ Private Sub Form_Load()
    Me.Show
    WindowFloating Me, True
    
-   frmMain.RecorderInUse = True
+   RecorderInUse = True
    Set G = Client.DSSRec
    G.GetHardWare Hw
    
@@ -156,7 +156,7 @@ Private Sub CleanUpBeforeClosing()
    End If
    VCUnShowRecordSettingsDialog
    KillFileIgnoreError TemFileName
-   frmMain.RecorderInUse = False
+   RecorderInUse = False
 End Sub
 Private Sub G_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long)
 

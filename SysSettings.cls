@@ -48,6 +48,8 @@ Public LoginPasswordMinLength As Long
 Public LoginPasswordCaseSensitive As Boolean
 Public LoginAllowChangePassword As Boolean
 
+Public PlayerHWcheckfreq As Integer
+Public PlayerCaption As String
 Public PlayerForceMicCalib As Boolean
 Public PlayerShowEditButtons As Boolean
 Public PlayerShowOnTop As Boolean
@@ -55,6 +57,8 @@ Public PlayerShowSmallerWindow As Boolean
 Public PlayerIndexButtonAsInsertRec As Boolean
 Public PlayerAutoOverwrite As Boolean
 Public PlayerIndexButtonAsCloseDict As Boolean
+Public PlayerAllowInsertFromMic As Boolean
+Public PlayerAllowInsertFromGUI As Boolean
 Public PlayerKeyPlay As Integer
 Public PlayerKeyPause As Integer
 Public PlayerKeyStop As Integer
@@ -77,11 +81,16 @@ Public PlayerKeyClose3Alt As Integer
 Public PlayerKeyCloseXAlt As Integer
 Public PlayerKeyEscape As Integer
 Public PlayerKeyEscapeAlt As Integer
+Public PlayerKeyWindowSize As Integer
 
 Public DemoAllowGenerate As Boolean
 Public DemoShowTab As Boolean
 
 Public UserAllowChangeHome As Boolean
+
+Public ClientStopLoginMsg As String
+Public ClientForceLogoffMsg As String
+Public ClientMinVersion As String
 
 Public SoundUseImageField As Boolean
 Public SoundChunkSize As Long
@@ -96,6 +105,7 @@ Public DictationAuditEnable As Boolean
 
 Public ImportAllowMenu As Boolean
 Public ImportAllowTool As Boolean
+Public ImportDSSDrives As String
 Public ExportAllowMenu As Boolean
 
 Public Property Get Store() As clsStringStore
@@ -159,11 +169,19 @@ Public Sub Init(Ty As String)
    LoginPasswordCaseSensitive = mSysSettings.GetBool("Login", "PasswordCaseSensitive", True)
    LoginAllowChangePassword = mSysSettings.GetBool("Login", "AllowChangePassword", True)
    
+   ClientStopLoginMsg = mSysSettings.GetString("Client", "StopLoginMsg", "")
+   ClientForceLogoffMsg = mSysSettings.GetString("Client", "ForceLogoffMsg", "")
+   ClientMinVersion = mSysSettings.GetString("Client", "MinVersion", "")
+   
+   PlayerHWcheckfreq = mSysSettings.GetLong("Player", "HWcheckfreq", 10)
+   PlayerCaption = mSysSettings.GetString("Player", "Caption", "")
    PlayerForceMicCalib = mSysSettings.GetBool("Player", "ForceMicCalib", True)
    PlayerShowEditButtons = mSysSettings.GetBool("Player", "ShowEditButtons", True)
    PlayerShowOnTop = mSysSettings.GetBool("Player", "ShowOnTop", True)
    PlayerShowSmallerWindow = mSysSettings.GetBool("Player", "ShowSmallerWindow", True)
    PlayerIndexButtonAsCloseDict = mSysSettings.GetBool("Player", "CloseDict", True)
+   PlayerAllowInsertFromMic = mSysSettings.GetBool("Player", "AllowInsertFromMic", True)
+   PlayerAllowInsertFromGUI = mSysSettings.GetBool("Player", "AllowInsertFromGUI", True)
    PlayerAutoOverwrite = mSysSettings.GetBool("Player", "AutoOverwrite", True)
    PlayerKeyPlay = mSysSettings.GetLong("Player", "KeyPlay", vbKeyF2)
    PlayerKeyPause = mSysSettings.GetLong("Player", "KeyPause", vbKeyF3)
@@ -187,6 +205,7 @@ Public Sub Init(Ty As String)
    PlayerKeyClose3Alt = mSysSettings.GetLong("Player", "KeyClose3Alt", 1075)
    PlayerKeyCloseXAlt = mSysSettings.GetLong("Player", "KeyCloseXAlt", 1089)
    PlayerKeyEscapeAlt = mSysSettings.GetLong("Player", "KeyEscapeAlt", 0)
+   PlayerKeyWindowSize = mSysSettings.GetLong("Player", "KeyWindowSize", 1114)   'Alt-Z
    
    DemoAllowGenerate = mSysSettings.GetBool("Demo", "AllowGenerate", False)
    DemoShowTab = mSysSettings.GetBool("Demo", "ShowTab", False)
@@ -207,6 +226,7 @@ Public Sub Init(Ty As String)
    
    ImportAllowMenu = mSysSettings.GetBool("Import", "AllowMenu", True)
    ImportAllowTool = mSysSettings.GetBool("Import", "AllowTool", True)
+   ImportDSSDrives = mSysSettings.GetString("Import", "DSSDrives", "")
 
    ExportAllowMenu = mSysSettings.GetBool("Export", "AllowMenu", True)
 

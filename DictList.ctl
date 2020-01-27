@@ -96,10 +96,12 @@ Option Explicit
 Public Event Click(DictId As Long)
 Public Event DblClick(DictId As Long)
 Public Event RightClick(DictId As Long)
-Public Event ChangeWarnings(NumberOfWarnings As Long)
+Public Event ChangeNumberInList(TotalNumber As Long, NumberOfWarnings As Long, TotalLength As Long)
 
 Dim SetNewSortOrder As Boolean
 Dim NumberOfWarnings As Long
+Dim TotalNumberInList As Long
+Dim TotalLength As Long
 
 Dim CurrentOrgId As Long
 Dim CurrentTimeStamp As Double
@@ -136,7 +138,46 @@ Public Sub NewLanguage()
       Client.Texts.ApplyToControl UserControl.Controls(I)
    Next I
 End Sub
+Public Sub ExportExcelFile(Fn As String)
 
+   lstDict.ExportExcelBookEx Fn, "", ExcelSaveFlagNone
+End Sub
+Public Sub ExportToHtml(Fn As String)
+
+   lstDict.ExportToHtml Fn, False, ""
+End Sub
+Public Sub ExportToXml(Fn As String)
+
+   lstDict.ExportToXml Fn, "", "", ExportToXMLFormattedData, ""
+End Sub
+Public Sub ExportTextFile(Fn As String)
+
+   lstDict.SaveTabFile Fn
+End Sub
+Public Sub ExportListToFile(DefFileName As String)
+
+   Dim Fn As String
+   Dim Ext As String
+   
+   If Len(DefFileName) = 0 Then
+      DefFileName = Client.Texts.Txt(1000403, "Diktatlista")
+   End If
+   
+   Fn = GetExportFileName(DefFileName)
+   If Len(Fn) = 0 Then Exit Sub
+      
+   Ext = LCase$(Right$(Fn, 3))
+   Select Case Ext
+      Case "xml"
+         ExportToXml Fn
+      Case "htm"
+         ExportToHtml Fn
+      Case "xls"
+        ExportExcelFile Fn
+      Case Else
+        ExportTextFile Fn
+   End Select
+End Sub
 Public Property Set SearchFilter(Flt As clsFilter)
 
    Set Client.DictMgr.SearchFilter = Flt
@@ -147,7 +188,6 @@ Public Property Set CurrPatientFilter(Flt As clsFilter)
    Set Client.DictMgr.CurrPatientFilter = Flt
    NewCurrPatientFilter = True
 End Property
-
 
 Private Sub lstDict_AfterUserSort(ByVal Col As Long)
 
@@ -200,9 +240,16 @@ End Sub
 
 Private Sub lstDict_KeyPress(KeyAscii As Integer)
 
-   If KeyAscii = 13 Then
-      RaiseEvent DblClick(CLng(lstDict.GetRowItemData(lstDict.ActiveRow)))
-   End If
+   Dim Fn As String
+
+   Select Case KeyAscii
+      Case 13
+         RaiseEvent DblClick(CLng(lstDict.GetRowItemData(lstDict.ActiveRow)))
+      Case KeyAsciiExportList
+         If Client.SysSettings.ExportAllowMenu Then
+            ExportListToFile ""
+         End If
+   End Select
 End Sub
 
 Private Sub lstDict_RightClick(ByVal ClickType As Integer, ByVal Col As Long, ByVal Row As Long, ByVal MouseX As Long, ByVal MouseY As Long)
@@ -253,7 +300,7 @@ Public Sub RestoreSettings(Settings As String, Ver As String)
          .ShowScrollTips = ShowScrollTipsOff
          .TextTip = TextTipFloating
          
-         .Col = 0:        .ColID = CStr(.Col):   .ColWidth(.Col) = 5
+         .Col = 0:        .ColID = CStr(.Col):   .ColWidth(.Col) = 5:   .CellType = CellTypeNumber:  .TypeNumberDecPlaces = 0
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 2
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 2
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 2
@@ -272,6 +319,11 @@ Public Sub RestoreSettings(Settings As String, Ver As String)
          .Col = .Col + 1: .ColID = CStr(.Col):   .ColWidth(.Col) = 8
          .MaxCols = .Col
          SetNewSortOrder = True
+      Else
+         .Row = -1
+         .Col = 0
+         .CellType = CellTypeNumber
+         .TypeNumberDecPlaces = 0
       End If
       
       SetCellValue 0, 0, Client.Texts.Txt(1080101, "Id")
@@ -307,16 +359,32 @@ Public Sub GetData(OrgId As Long)
    Dim DictIdForSelectedRow As Long
    Dim TooMany As Boolean
    Dim LastNumberOfWarnings As Long
+   Dim LastTotalNumberInList As Long
+   Dim LastTotalLength As Long
+   Dim T As Variant
+   Dim UpdateCurrentList As Boolean
    
    LastNumberOfWarnings = NumberOfWarnings
+   LastTotalNumberInList = TotalNumberInList
+   LastTotalLength = TotalLength
    
-   If CurrentOrgId = OrgId And Not NewSearchFilter And Not NewCurrPatientFilter Then
+   UpdateCurrentList = CurrentOrgId = OrgId
+   If OrgId = 30050 And NewSearchFilter Then
+      UpdateCurrentList = False
+   End If
+   If OrgId = 30005 And NewCurrPatientFilter Then
+      UpdateCurrentList = False
+   End If
+   
+   If UpdateCurrentList Then
       ReSort = False
       
+      TotalLength = 0
       DictIdForSelectedRow = lstDict.GetRowItemData(lstDict.SelModeIndex)
       PrevTimeStamp = CurrentTimeStamp
       CurrentTimeStamp = Client.DictMgr.CreateList(OrgId, CurrentTimeStamp, TooMany)
       Do While Client.DictMgr.ListNextItem(Dict)
+         TotalLength = TotalLength + Dict.SoundLength
          Row = FindRowFromDictId(Dict.DictId)
          If Row <= 0 Then
             lstDict.MaxRows = lstDict.MaxRows + 1
@@ -348,6 +416,7 @@ Public Sub GetData(OrgId As Long)
       CurrentTimeStamp = 0
       
       'SetBusy
+      TotalLength = 0
       CurrentTimeStamp = Client.DictMgr.CreateList(OrgId, CurrentTimeStamp, TooMany)
       
       lstDict.MaxRows = 0
@@ -355,6 +424,7 @@ Public Sub GetData(OrgId As Long)
       NumberOfWarnings = 0
       Row = 1
       Do While Client.DictMgr.ListNextItem(Dict)
+         TotalLength = TotalLength + Dict.SoundLength
          lstDict.MaxRows = Row
          UpdateRowInList Row, Dict
          Row = Row + 1
@@ -370,8 +440,9 @@ Public Sub GetData(OrgId As Long)
    End If
    Set Dict = Nothing
    
-   If LastNumberOfWarnings <> NumberOfWarnings Then
-      RaiseEvent ChangeWarnings(NumberOfWarnings)
+   TotalNumberInList = lstDict.MaxRows
+   If LastNumberOfWarnings <> NumberOfWarnings Or LastTotalNumberInList <> TotalNumberInList Or LastTotalLength <> TotalLength Then
+      RaiseEvent ChangeNumberInList(TotalNumberInList, NumberOfWarnings, TotalLength)
    End If
 End Sub
 Private Function FindRowFromDictId(DictId As Long) As Long

@@ -81,16 +81,6 @@ Public Function CreateList(ByVal OrgId As Long, TimeStamp As Double, ByRef TooMa
       Case 30000 'My dictations
          AddFilter 0, Client.User.UserId, 0, BeingRecorded, Transcribed
          AddFilter 0, 0, Client.User.UserId, BeingRecorded, Transcribed
-         'AddFilter 0, Client.User.UserId, 0, BeingRecorded, BeingRecorded
-         'AddFilter 0, Client.User.UserId, 0, Recorded, Recorded
-         'AddFilter 0, 0, Client.User.UserId, BeingTrancribed, BeingTrancribed
-         'AddFilter 0, Client.User.UserId, 0, BeingTrancribed, BeingTrancribed
-         'If Client.SysSettings.UseAuthorsSign Then
-         '   AddFilter 0, 0, Client.User.UserId, WaitForSign, WaitForSign
-         '   AddFilter 0, Client.User.UserId, 0, WaitForSign, WaitForSign
-         'End If
-         'AddFilter 0, 0, Client.User.UserId, Transcribed, Transcribed
-         'AddFilter 0, Client.User.UserId, 0, Transcribed, Transcribed
       Case 30010 'Being recorded
          AddFilter 0, Client.User.UserId, 0, BeingRecorded, BeingRecorded
       Case 30005 'Current patient
@@ -114,7 +104,7 @@ Public Function CreateList(ByVal OrgId As Long, TimeStamp As Double, ByRef TooMa
          AddFilter 0, Client.User.UserId, 0, Transcribed, Transcribed
       Case 30050 'Sök
          If Not mSearchFilter Is Nothing Then
-            FilterCol.Add mSearchFilter
+            BuildFilterForSearch mSearchFilter
          End If
    End Select
    
@@ -336,7 +326,7 @@ Private Function FillCacheFromFilter(ByVal OrgId As Long, ByRef TooMany As Boole
 
    TooMany = False
    For Each Flt In FilterCol
-      If Flt.OrgId <> 0 Then
+      If Flt.OrgId <> 0 And Not Flt.FilterFromSearch Then
          If DictCacheTimeStampOrg(Flt.OrgId) < 0 Then
             FirstUpdate = True
             Client.Server.CreateDictList Flt.OrgId, 0, 0, Recorded, Recorded, 0
@@ -413,6 +403,17 @@ Private Function CreateSQLFromFilter(Flt As clsFilter) As String
    Dim TxtWord As String
    
    SelectClause = "Select top " & CStr(MaxNumberDictInSearchResult) & " * from v_Dictation_List"
+   
+   If Flt.OrgId <> 0 Then
+      Client.Server.AddString WhereClause, "and", "OrgId=" & CStr(Flt.OrgId)
+   End If
+      
+   If Flt.StatusStart > 0 Then
+      Client.Server.AddString WhereClause, "and", "StatusId>=" & CStr(Flt.StatusStart)
+   End If
+   If Flt.StatusEnd < 255 Then
+      Client.Server.AddString WhereClause, "and", "StatusId<=" & CStr(Flt.StatusEnd)
+   End If
    
    If Len(RemoveDelimiters(Flt.Pat.PatId)) > 0 Then
       Client.Server.AddString WhereClause, "and", "PatId like '%" & RemoveDelimiters(Flt.Pat.PatId) & "%'"
@@ -491,6 +492,30 @@ Private Function GetNextWordFromTxt(ByRef Txt As String) As String
       Txt = ""
    End If
 End Function
+Private Sub BuildFilterForSearch(Flt As clsFilter)
+
+   FilterCol.Add Flt
+   If Flt.OrgId <> 0 Then
+      BuildFilterForSearchChildren Flt
+   End If
+End Sub
+Private Sub BuildFilterForSearchChildren(Flt As clsFilter)
+
+   Dim I As Integer
+   Dim Org As clsOrg
+   Dim NewFlt As clsFilter
+   
+   For I = 0 To Client.OrgMgr.Count - 1
+      Client.OrgMgr.GetSortedOrg Org, I
+      If Org.OrgParent = Flt.OrgId Then
+         Set NewFlt = New clsFilter
+         NewFlt.Copy Flt
+         NewFlt.OrgId = Org.OrgId
+         FilterCol.Add NewFlt
+         BuildFilterForSearchChildren NewFlt
+      End If
+   Next I
+End Sub
 Private Sub BuildFilterForOrgId(OrgId As Long)
 
    AddFilter OrgId, 0, 0, Recorded, Recorded

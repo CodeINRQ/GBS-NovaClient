@@ -1,13 +1,29 @@
 VERSION 5.00
 Object = "{86CF1D34-0C5F-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCT2.OCX"
 Begin VB.UserControl ucSearch 
-   ClientHeight    =   6060
+   ClientHeight    =   7035
    ClientLeft      =   0
    ClientTop       =   0
    ClientWidth     =   4815
    DefaultCancel   =   -1  'True
-   ScaleHeight     =   6060
+   ScaleHeight     =   7035
    ScaleWidth      =   4815
+   Begin VB.ComboBox cboStatus 
+      Height          =   315
+      Left            =   120
+      TabIndex        =   25
+      Text            =   "Combo1"
+      Top             =   6600
+      Width           =   3015
+   End
+   Begin VB.CheckBox chkSearchOrg 
+      Caption         =   "Check1"
+      Height          =   255
+      Left            =   120
+      TabIndex        =   23
+      Top             =   6000
+      Width           =   255
+   End
    Begin VB.CheckBox chkTranscribedDate 
       Height          =   255
       Left            =   120
@@ -56,7 +72,7 @@ Begin VB.UserControl ucSearch
       Height          =   310
       HelpContextID   =   1150000
       Left            =   3360
-      TabIndex        =   23
+      TabIndex        =   27
       Tag             =   "1150108"
       Top             =   480
       Width           =   1335
@@ -67,7 +83,7 @@ Begin VB.UserControl ucSearch
       Height          =   310
       HelpContextID   =   1150000
       Left            =   3360
-      TabIndex        =   22
+      TabIndex        =   26
       Tag             =   "1150107"
       Top             =   120
       Width           =   1335
@@ -117,7 +133,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   16580609
+      Format          =   49414145
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -133,7 +149,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   16580609
+      Format          =   49414145
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -149,7 +165,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   16580609
+      Format          =   49414145
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -165,10 +181,30 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   16580609
+      Format          =   49414145
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
+   End
+   Begin VB.Label Label5 
+      BackStyle       =   0  'Transparent
+      Caption         =   "Status:"
+      Height          =   255
+      Left            =   120
+      TabIndex        =   24
+      Tag             =   "1150113"
+      Top             =   6360
+      Width           =   3015
+   End
+   Begin VB.Label lblSearchOrg 
+      BackStyle       =   0  'Transparent
+      Caption         =   "Sö&k bara i"
+      Height          =   255
+      Left            =   120
+      TabIndex        =   22
+      Tag             =   "1150112"
+      Top             =   5760
+      Width           =   4575
    End
    Begin VB.Label Label4 
       BackStyle       =   0  'Transparent
@@ -269,6 +305,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Public Event NewSearch(ByRef SearchFilter As clsFilter)
+Public mOrgId As Long
 
 Private mFilter As clsFilter
 Private RecStartDate As Date
@@ -286,6 +323,8 @@ Public Sub NewLanguage()
 End Sub
 
 Public Sub Init()
+
+   Dim Idx As Integer
 
    txtPatId.Text = ""
    txtPatName.Text = ""
@@ -317,6 +356,33 @@ Public Sub Init()
       lblTxtTitle.Visible = False
    End If
    
+   chkSearchOrg.Value = vbUnchecked
+   
+   cboStatus.Clear
+   Idx = 0
+   cboStatus.AddItem "", Idx
+   cboStatus.ItemData(Idx) = 0
+   Idx = Idx + 1
+   cboStatus.AddItem Client.Texts.Txt(1250100 + 20, ""), Idx
+   cboStatus.ItemData(Idx) = 20
+   Idx = Idx + 1
+   cboStatus.AddItem Client.Texts.Txt(1250100 + 30, ""), Idx
+   cboStatus.ItemData(Idx) = 30
+   Idx = Idx + 1
+   cboStatus.AddItem Client.Texts.Txt(1250100 + 40, ""), Idx
+   cboStatus.ItemData(Idx) = 40
+   Idx = Idx + 1
+   cboStatus.AddItem Client.Texts.Txt(1250100 + 50, ""), Idx
+   cboStatus.ItemData(Idx) = 50
+   If Client.SysSettings.UseAuthorsSign Then
+      Idx = Idx + 1
+      cboStatus.AddItem Client.Texts.Txt(1250100 + 60, ""), Idx
+      cboStatus.ItemData(Idx) = 60
+   End If
+   Idx = Idx + 1
+   cboStatus.AddItem Client.Texts.Txt(1250100 + 70, ""), Idx
+   cboStatus.ItemData(Idx) = 70
+      
    SetEnabled
 End Sub
 
@@ -352,7 +418,12 @@ End Sub
 
 Private Sub cmdSearch_Click()
 
+   Dim Status As Integer
+  
    Set mFilter = New clsFilter
+   
+   mFilter.FilterFromSearch = True
+   
    mFilter.Pat.PatId = StringReplace(txtPatId.Text, "-", "")
    mFilter.Pat.PatName = txtPatName.Text
    
@@ -381,7 +452,52 @@ Private Sub cmdSearch_Click()
    mFilter.AuthorName = txtAuthor.Text
    mFilter.TranscriberName = txtTranscriber.Text
    mFilter.Txt = txtTxt.Text
+   If mOrgId < 30000 Then
+      If chkSearchOrg.Value = vbChecked Then
+         mFilter.OrgId = mOrgId
+      End If
+   End If
+   If cboStatus.ListIndex > 0 Then
+      Status = cboStatus.ItemData(cboStatus.ListIndex)
+      mFilter.StatusStart = Status
+      If Status >= 70 Then
+         mFilter.StatusEnd = 100
+      Else
+         mFilter.StatusEnd = mFilter.StatusStart
+      End If
+   End If
    RaiseEvent NewSearch(mFilter)
+End Sub
+Public Sub SetNewCurrentOrg(OrgId As Long, OrgText As String)
+
+   Dim S As String
+   Dim LastDictTypeId As Integer
+   Dim LastPriorityId As Integer
+   
+   mOrgId = OrgId
+   
+   If cboDictType.ListIndex >= 0 Then
+      LastDictTypeId = cboDictType.ItemData(cboDictType.ListIndex)
+   Else
+      LastDictTypeId = -1
+   End If
+   If cboPriority.ListIndex >= 0 Then
+      LastPriorityId = cboPriority.ItemData(cboPriority.ListIndex)
+   Else
+      LastPriorityId = -1
+   End If
+   S = Client.Texts.Txt(1150112, "")
+   If mOrgId < 30000 Then
+      Client.DictTypeMgr.FillCombo cboDictType, mOrgId, LastDictTypeId, False
+      Client.PriorityMgr.FillCombo cboPriority, mOrgId, LastPriorityId, False
+      S = S & " " & OrgText
+   Else
+      Client.DictTypeMgr.FillCombo cboDictType, Client.User.HomeOrgId, LastDictTypeId, False
+      Client.PriorityMgr.FillCombo cboPriority, Client.User.HomeOrgId, LastPriorityId, False
+   End If
+   lblSearchOrg.Caption = S
+   
+   SetEnabled
 End Sub
 
 Private Sub SetEnabled()
@@ -397,6 +513,8 @@ Private Sub SetEnabled()
    B = B Or Len(txtAuthor.Text) > 0
    B = B Or Len(txtTranscriber.Text) > 0
    B = B Or Len(txtTxt.Text) > 0
+   
+   chkSearchOrg.Enabled = mOrgId < 30000
    
    cmdSearch.Enabled = B
 End Sub
@@ -480,3 +598,4 @@ Private Sub txtTxt_GotFocus()
 
    SelectAllText ActiveControl
 End Sub
+

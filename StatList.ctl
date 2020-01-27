@@ -81,10 +81,7 @@ Dim NextOrgId As Long
 Private RowTotal(SheetMax, MaxRows) As Long
 Private ColTotal(SheetMax, MaxCols) As Long
 Private GrandTotal(SheetMax) As Long
-Public Sub ExportExcelFile(Fn As String)
 
-   lstStat.ExportExcelBookEx Fn, "", ExcelSaveFlagNone
-End Sub
 Public Sub NewLanguage()
 
    Dim I As Integer
@@ -93,7 +90,46 @@ Public Sub NewLanguage()
       Client.Texts.ApplyToControl UserControl.Controls(I)
    Next I
 End Sub
+Public Sub ExportExcelFile(Fn As String)
 
+   lstStat.ExportExcelBookEx Fn, "", ExcelSaveFlagNone
+End Sub
+Public Sub ExportToHtml(Fn As String)
+
+   lstStat.ExportToHtml Fn, False, ""
+End Sub
+Public Sub ExportToXml(Fn As String)
+
+   lstStat.ExportToXml Fn, "", "", ExportToXMLFormattedData, ""
+End Sub
+Public Sub ExportTextFile(Fn As String)
+
+   lstStat.SaveTabFile Fn
+End Sub
+Public Sub ExportListToFile(DefFileName As String)
+
+   Dim Fn As String
+   Dim Ext As String
+   
+   If Len(DefFileName) = 0 Then
+      DefFileName = Client.Texts.Txt(1000404, "Statistik")
+   End If
+
+   Fn = GetExportFileName(DefFileName)
+   If Len(Fn) = 0 Then Exit Sub
+      
+   Ext = LCase$(Right$(Fn, 3))
+   Select Case Ext
+      Case "xml"
+         ExportToXml Fn
+      Case "htm"
+         ExportToHtml Fn
+      Case "xls"
+        ExportExcelFile Fn
+      Case Else
+        ExportTextFile Fn
+   End Select
+End Sub
 Private Sub cmdGo_Click()
 
    GetDataNow
@@ -103,6 +139,16 @@ Public Sub Init()
 
    cboType.AddItem Client.Texts.Txt(1160102, "Fördelning skriv-senast")
    cboType.ListIndex = 0
+End Sub
+
+Private Sub lstStat_KeyPress(KeyAscii As Integer)
+
+   Select Case KeyAscii
+      Case KeyAsciiExportList
+         If Client.SysSettings.ExportAllowMenu Then
+            ExportListToFile ""
+         End If
+   End Select
 End Sub
 
 Private Sub UserControl_Resize()

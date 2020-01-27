@@ -15,7 +15,7 @@ Begin VB.UserControl ucDSSRecGUI
       Left            =   3250
       ScaleHeight     =   495
       ScaleWidth      =   1440
-      TabIndex        =   17
+      TabIndex        =   18
       Top             =   0
       Width           =   1440
       Begin VB.PictureBox picEdit 
@@ -26,7 +26,7 @@ Begin VB.UserControl ucDSSRecGUI
          Left            =   0
          ScaleHeight     =   495
          ScaleWidth      =   495
-         TabIndex        =   20
+         TabIndex        =   21
          Top             =   0
          Width           =   495
          Begin VB.CommandButton cmdEdit 
@@ -35,7 +35,7 @@ Begin VB.UserControl ucDSSRecGUI
             Left            =   0
             Picture         =   "DSSRecGUI.ctx":0000
             Style           =   1  'Graphical
-            TabIndex        =   24
+            TabIndex        =   25
             Tag             =   "1090105"
             ToolTipText     =   "Markera start"
             Top             =   0
@@ -48,7 +48,7 @@ Begin VB.UserControl ucDSSRecGUI
             Left            =   195
             Picture         =   "DSSRecGUI.ctx":058A
             Style           =   1  'Graphical
-            TabIndex        =   23
+            TabIndex        =   24
             Tag             =   "1090108"
             ToolTipText     =   "Radera markerad del"
             Top             =   195
@@ -60,7 +60,7 @@ Begin VB.UserControl ucDSSRecGUI
             Left            =   195
             Picture         =   "DSSRecGUI.ctx":0B14
             Style           =   1  'Graphical
-            TabIndex        =   22
+            TabIndex        =   23
             Tag             =   "1090106"
             ToolTipText     =   "Markera slut"
             Top             =   0
@@ -73,7 +73,7 @@ Begin VB.UserControl ucDSSRecGUI
             Left            =   0
             Picture         =   "DSSRecGUI.ctx":109E
             Style           =   1  'Graphical
-            TabIndex        =   21
+            TabIndex        =   22
             Tag             =   "1090107"
             ToolTipText     =   "Avmarkera"
             Top             =   195
@@ -85,7 +85,7 @@ Begin VB.UserControl ucDSSRecGUI
          Height          =   195
          Index           =   1
          Left            =   480
-         TabIndex        =   19
+         TabIndex        =   20
          Tag             =   "1090102"
          ToolTipText     =   "Ersätt diktat vid inspelning"
          Top             =   240
@@ -97,7 +97,7 @@ Begin VB.UserControl ucDSSRecGUI
          Height          =   195
          Index           =   0
          Left            =   480
-         TabIndex        =   18
+         TabIndex        =   19
          Tag             =   "1090101"
          ToolTipText     =   "Infoga diktat vid inspelning"
          Top             =   0
@@ -218,13 +218,13 @@ Begin VB.UserControl ucDSSRecGUI
       Left            =   3120
       ScaleHeight     =   495
       ScaleWidth      =   1575
-      TabIndex        =   25
+      TabIndex        =   26
       Top             =   0
       Width           =   1575
       Begin MSComctlLib.Slider sldAutoRew 
          Height          =   255
          Left            =   240
-         TabIndex        =   26
+         TabIndex        =   12
          Top             =   195
          Width           =   1245
          _ExtentX        =   2196
@@ -259,7 +259,7 @@ Begin VB.UserControl ucDSSRecGUI
       Left            =   0
       ScaleHeight     =   495
       ScaleWidth      =   8415
-      TabIndex        =   0
+      TabIndex        =   8
       Top             =   0
       Width           =   8415
       Begin VB.PictureBox picPlayer 
@@ -271,7 +271,7 @@ Begin VB.UserControl ucDSSRecGUI
          Left            =   0
          ScaleHeight     =   375
          ScaleWidth      =   3135
-         TabIndex        =   2
+         TabIndex        =   10
          Top             =   10
          Width           =   3135
          Begin VB.OptionButton optPlayer 
@@ -279,7 +279,7 @@ Begin VB.UserControl ucDSSRecGUI
             Index           =   0
             Left            =   0
             Style           =   1  'Graphical
-            TabIndex        =   10
+            TabIndex        =   1
             Top             =   0
             Width           =   375
          End
@@ -288,7 +288,7 @@ Begin VB.UserControl ucDSSRecGUI
             Index           =   1
             Left            =   375
             Style           =   1  'Graphical
-            TabIndex        =   9
+            TabIndex        =   0
             Top             =   0
             Width           =   375
          End
@@ -297,7 +297,7 @@ Begin VB.UserControl ucDSSRecGUI
             Index           =   2
             Left            =   750
             Style           =   1  'Graphical
-            TabIndex        =   8
+            TabIndex        =   2
             Top             =   0
             Width           =   375
          End
@@ -306,7 +306,7 @@ Begin VB.UserControl ucDSSRecGUI
             Index           =   3
             Left            =   1200
             Style           =   1  'Graphical
-            TabIndex        =   7
+            TabIndex        =   3
             Top             =   0
             Width           =   375
          End
@@ -315,7 +315,7 @@ Begin VB.UserControl ucDSSRecGUI
             Index           =   4
             Left            =   1560
             Style           =   1  'Graphical
-            TabIndex        =   6
+            TabIndex        =   4
             Top             =   0
             Width           =   375
          End
@@ -333,7 +333,7 @@ Begin VB.UserControl ucDSSRecGUI
             Index           =   6
             Left            =   2280
             Style           =   1  'Graphical
-            TabIndex        =   4
+            TabIndex        =   6
             Top             =   0
             Width           =   375
          End
@@ -342,7 +342,7 @@ Begin VB.UserControl ucDSSRecGUI
             Index           =   7
             Left            =   2760
             Style           =   1  'Graphical
-            TabIndex        =   3
+            TabIndex        =   7
             Top             =   0
             Width           =   375
          End
@@ -350,7 +350,7 @@ Begin VB.UserControl ucDSSRecGUI
       Begin CareTalk.ucVUmeter ucVUmeter 
          Height          =   120
          Left            =   0
-         TabIndex        =   1
+         TabIndex        =   9
          Top             =   400
          Width           =   3135
          _ExtentX        =   5530
@@ -359,7 +359,7 @@ Begin VB.UserControl ucDSSRecGUI
       Begin MSComctlLib.Slider sldPos 
          Height          =   315
          Left            =   4665
-         TabIndex        =   12
+         TabIndex        =   13
          Top             =   190
          Width           =   1215
          _ExtentX        =   2143
@@ -375,7 +375,7 @@ Begin VB.UserControl ucDSSRecGUI
       Begin MSComctlLib.Slider sldVol 
          Height          =   255
          Left            =   5880
-         TabIndex        =   14
+         TabIndex        =   15
          Top             =   190
          Width           =   1245
          _ExtentX        =   2196
@@ -392,7 +392,7 @@ Begin VB.UserControl ucDSSRecGUI
       Begin MSComctlLib.Slider sldSpeed 
          Height          =   255
          Left            =   7125
-         TabIndex        =   16
+         TabIndex        =   17
          Top             =   190
          Width           =   1245
          _ExtentX        =   2196
@@ -409,7 +409,7 @@ Begin VB.UserControl ucDSSRecGUI
       Begin VB.Label lblLength 
          Alignment       =   2  'Center
          BackStyle       =   0  'Transparent
-         Caption         =   "0"
+         Caption         =   "00:00 / 00:00"
          Height          =   255
          Left            =   4545
          TabIndex        =   11
@@ -422,7 +422,7 @@ Begin VB.UserControl ucDSSRecGUI
          Caption         =   "&Volym"
          Height          =   255
          Left            =   5880
-         TabIndex        =   13
+         TabIndex        =   14
          Tag             =   "1090103"
          Top             =   0
          Width           =   1245
@@ -433,7 +433,7 @@ Begin VB.UserControl ucDSSRecGUI
          Caption         =   "&Hastighet"
          Height          =   255
          Left            =   7125
-         TabIndex        =   15
+         TabIndex        =   16
          Tag             =   "1090104"
          Top             =   0
          Width           =   1245
@@ -733,8 +733,10 @@ Private Sub DSSRec_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long
                DSSRec.Rec
             End If
          ElseIf Data = GRU_BUT_INSERT Then
-            optInsert(0).Value = True
-            DSSRec.Rec
+            If Client.SysSettings.PlayerAllowInsertFromMic Then
+               optInsert(0).Value = True
+               DSSRec.Rec
+            End If
          End If
       Case GRU_INPUTCHANGE
          ucVUmeter.Value = Data
@@ -793,6 +795,7 @@ Private Sub sldPos_Scroll()
    InPositioning = True
    DSSRec.GetLength L
    DSSRec.MoveTo CLng(sldPos.Value * L / CLng(100))
+   UpdatePos -1
    InPositioning = False
 End Sub
 Public Property Let Position(Pos As Long)
@@ -872,6 +875,8 @@ Private Sub InitPlayerBeforeUse()
    Dim Speed As Integer
    
    picEdit.Visible = Client.SysSettings.PlayerShowEditButtons
+   optInsert(0).Visible = Client.SysSettings.PlayerAllowInsertFromGUI
+   optInsert(1).Visible = Client.SysSettings.PlayerAllowInsertFromGUI
    
    DSSRec.SetRecordMode GRU_OVERWRITE
    optInsert(1).Value = True

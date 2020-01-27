@@ -67,6 +67,46 @@ Public Sub NewLanguage()
       Client.Texts.ApplyToControl UserControl.Controls(I)
    Next I
 End Sub
+Public Sub ExportExcelFile(Fn As String)
+
+   lstOrgDictType.ExportExcelBookEx Fn, "", ExcelSaveFlagNone
+End Sub
+Public Sub ExportToHtml(Fn As String)
+
+   lstOrgDictType.ExportToHtml Fn, False, ""
+End Sub
+Public Sub ExportToXml(Fn As String)
+
+   lstOrgDictType.ExportToXml Fn, "", "", ExportToXMLFormattedData, ""
+End Sub
+Public Sub ExportTextFile(Fn As String)
+
+   lstOrgDictType.SaveTabFile Fn
+End Sub
+Public Sub ExportListToFile(DefFileName As String)
+
+   Dim Fn As String
+   Dim Ext As String
+   
+   If Len(DefFileName) = 0 Then
+      DefFileName = Client.Texts.Txt(1410101, "Diktattyper")
+   End If
+   
+   Fn = GetExportFileName(DefFileName)
+   If Len(Fn) = 0 Then Exit Sub
+      
+   Ext = LCase$(Right$(Fn, 3))
+   Select Case Ext
+      Case "xml"
+         ExportToXml Fn
+      Case "htm"
+         ExportToHtml Fn
+      Case "xls"
+        ExportExcelFile Fn
+      Case Else
+        ExportTextFile Fn
+   End Select
+End Sub
 
 Public Sub Init()
 
@@ -236,6 +276,16 @@ End Sub
 Private Sub lstOrgDictType_EditChange(ByVal Col As Long, ByVal Row As Long)
 
    cmdSave.Enabled = True
+End Sub
+
+Private Sub lstOrgDictType_KeyPress(KeyAscii As Integer)
+
+   Select Case KeyAscii
+      Case KeyAsciiExportList
+         If Client.SysSettings.ExportAllowMenu Then
+            ExportListToFile ""
+         End If
+   End Select
 End Sub
 
 Private Sub lstOrgDictType_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)

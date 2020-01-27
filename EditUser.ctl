@@ -4,45 +4,61 @@ Begin VB.UserControl ucEditUser
    ClientHeight    =   7185
    ClientLeft      =   0
    ClientTop       =   0
-   ClientWidth     =   9225
+   ClientWidth     =   10155
    ScaleHeight     =   7185
-   ScaleWidth      =   9225
+   ScaleWidth      =   10155
    Begin VB.Frame fraUsers 
       Caption         =   "Användare"
       Height          =   7095
       HelpContextID   =   1130000
       Left            =   0
-      TabIndex        =   1
+      TabIndex        =   7
       Tag             =   "1130101"
       Top             =   0
-      Width           =   9135
-      Begin VB.CheckBox chkShowAll 
-         Caption         =   "Visa alla"
-         Height          =   495
-         Left            =   7800
+      Width           =   10095
+      Begin VB.CheckBox chkSearch 
+         Caption         =   "V&isa sök"
+         Height          =   255
+         Left            =   8520
+         TabIndex        =   5
+         Tag             =   "1130108"
+         Top             =   2520
+         Width           =   1455
+      End
+      Begin VB.TextBox txtSearch 
+         Height          =   375
+         Left            =   8520
          TabIndex        =   4
+         Top             =   2040
+         Width           =   1455
+      End
+      Begin VB.CheckBox chkShowAll 
+         Caption         =   "&Visa alla"
+         Height          =   375
+         Left            =   8520
+         TabIndex        =   6
          Tag             =   "1130107"
-         Top             =   1080
-         Width           =   1215
+         Top             =   2760
+         Width           =   1455
       End
       Begin VB.CommandButton cmdNew 
          Caption         =   "&Lägg till..."
          Height          =   300
-         Left            =   7800
-         TabIndex        =   3
+         Left            =   8520
+         TabIndex        =   1
          Tag             =   "1130102"
          Top             =   240
-         Width           =   1215
+         Width           =   1455
       End
       Begin VB.CommandButton cmdChange 
          Caption         =   "&Ändra..."
          Enabled         =   0   'False
          Height          =   300
-         Left            =   7800
+         Left            =   8520
          TabIndex        =   2
          Tag             =   "1130103"
          Top             =   600
-         Width           =   1215
+         Width           =   1455
       End
       Begin FPSpreadADO.fpSpread lstUsers 
          Height          =   6255
@@ -50,9 +66,9 @@ Begin VB.UserControl ucEditUser
          Left            =   120
          TabIndex        =   0
          Top             =   240
-         Width           =   7575
+         Width           =   8295
          _Version        =   458752
-         _ExtentX        =   13361
+         _ExtentX        =   14631
          _ExtentY        =   11033
          _StockProps     =   64
          DisplayColHeaders=   0   'False
@@ -69,6 +85,15 @@ Begin VB.UserControl ucEditUser
          MaxCols         =   1
          MaxRows         =   0
          SpreadDesigner  =   "EditUser.ctx":0000
+      End
+      Begin VB.Label lblSearch 
+         Caption         =   "&Sökning:"
+         Height          =   255
+         Left            =   8520
+         TabIndex        =   3
+         Tag             =   "1130109"
+         Top             =   1800
+         Width           =   1455
       End
    End
 End
@@ -94,6 +119,46 @@ Public Sub NewLanguage()
    For I = 0 To UserControl.Controls.Count - 1
       Client.Texts.ApplyToControl UserControl.Controls(I)
    Next I
+End Sub
+Public Sub ExportExcelFile(Fn As String)
+
+   lstUsers.ExportExcelBookEx Fn, "", ExcelSaveFlagNone
+End Sub
+Public Sub ExportToHtml(Fn As String)
+
+   lstUsers.ExportToHtml Fn, False, ""
+End Sub
+Public Sub ExportToXml(Fn As String)
+
+   lstUsers.ExportToXml Fn, "", "", ExportToXMLFormattedData, ""
+End Sub
+Public Sub ExportTextFile(Fn As String)
+
+   lstUsers.SaveTabFile Fn
+End Sub
+Public Sub ExportListToFile(DefFileName As String)
+
+   Dim Fn As String
+   Dim Ext As String
+   
+   If Len(DefFileName) = 0 Then
+      DefFileName = Client.Texts.Txt(1130101, "Användare")
+   End If
+   
+   Fn = GetExportFileName(DefFileName)
+   If Len(Fn) = 0 Then Exit Sub
+      
+   Ext = LCase$(Right$(Fn, 3))
+   Select Case Ext
+      Case "xml"
+         ExportToXml Fn
+      Case "htm"
+         ExportToHtml Fn
+      Case "xls"
+        ExportExcelFile Fn
+      Case Else
+        ExportTextFile Fn
+   End Select
 End Sub
 
 Public Sub GetData(OrgId As Long)
@@ -131,16 +196,32 @@ Public Sub GetData(OrgId As Long)
                End If
             End If
          End If
-         If ShowThisUser Then
-            lstUsers.MaxRows = Row
-            UpdateRowInList Row, Usr
-            Row = Row + 1
+      Else
+         If chkShowAll.Value = vbChecked Then
+            ShowThisUser = True
          End If
+      End If
+      If ShowThisUser And chkSearch.Value = vbChecked Then
+         ShowThisUser = CheckSearchFilter(Usr, txtSearch.Text)
+      End If
+      If ShowThisUser Then
+         lstUsers.MaxRows = Row
+         UpdateRowInList Row, Usr
+         Row = Row + 1
       End If
    Next I
    lstUsers.UserColAction = UserColActionSort
    SetEnabled
 End Sub
+Private Function CheckSearchFilter(U As clsUser, ByVal SearchCrit As String) As Boolean
+
+   SearchCrit = UCase$(SearchCrit)
+   
+   CheckSearchFilter = InStr(UCase$(U.LoginName), SearchCrit) > 0 Or _
+                       InStr(UCase$(U.ShortName), SearchCrit) > 0 Or _
+                       InStr(UCase$(U.LongName), SearchCrit) > 0
+End Function
+
 Private Sub RestoreSettings()
 
    With lstUsers
@@ -214,6 +295,11 @@ Private Sub SetEnabled()
    cmdChange.Enabled = True
 End Sub
 
+Private Sub chkSearch_Click()
+
+   UpdateList
+End Sub
+
 Private Sub chkShowAll_Click()
 
    UpdateList
@@ -276,7 +362,30 @@ End Sub
 
 Private Sub lstUsers_KeyPress(KeyAscii As Integer)
    
-   ChangeOneUser
+   Dim Fn As String
+
+   Select Case KeyAscii
+      Case 13
+         ChangeOneUser
+      Case KeyAsciiExportList
+         If Client.SysSettings.ExportAllowMenu Then
+            ExportListToFile ""
+         End If
+   End Select
+End Sub
+
+Private Sub txtSearch_Change()
+
+   If chkSearch.Value <> vbChecked Then
+      chkSearch.Value = vbChecked
+   Else
+      UpdateList
+   End If
+End Sub
+
+Private Sub txtSearch_GotFocus()
+
+   SelectAllText ActiveControl
 End Sub
 
 Private Sub UserControl_Resize()

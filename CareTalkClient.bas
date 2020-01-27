@@ -56,6 +56,7 @@ End Enum
 Public ApplicationVersion As String
 Public GlobalCommandLine As String
 Public ReadyForApiCalls As Boolean
+Public RecorderInUse As Boolean
 
 Public StartUpServer As String
 Public StartUpDatabase As String
@@ -66,6 +67,9 @@ Public StartUpExtSystem As String
 Public StartUpLoginResult As Integer
 Public StartUpFormMainIsLoaded As Integer    '0=no, 1=being, 2=yes
 
+Public LastfrmDictTop As Long
+Public LastfrmDictLeft As Long
+
 Public Const MaxNumberOfDictation = 30000
 
 Public Const TraceTitle_Entry = "Entry"
@@ -73,13 +77,15 @@ Public Const TraceTitle_Exit = "Exit"
 Public Const TraceTitle_Err = "Error"
 Public Const TraceTitle_Event = "Event"
 
+Public Const KeyAsciiExportList = 5
+
 Public Function GetDigtaDSSFolder() As String
 
    Dim DigtaDrive As String
    Dim S As String
     
-   DigtaDrive = "C"    'skip A and B, they are probably diskette drives, I think...
-   Do While GetNextRemovableDrive(DigtaDrive)
+   DigtaDrive = ""   'First try
+   Do While GetNextPossibleDrive(DigtaDrive)
       S = ""
       On Error Resume Next
       S = Dir(DigtaDrive & ":\DSS", vbDirectory)
@@ -87,24 +93,45 @@ Public Function GetDigtaDSSFolder() As String
       If S = "DSS" Then
          GetDigtaDSSFolder = DigtaDrive & ":\DSS\"
          Exit Function
-      Else
-         DigtaDrive = Chr$(Asc(DigtaDrive) + 1)
       End If
    Loop
 End Function
-Private Function GetNextRemovableDrive(ByRef DriveLetter As String) As Boolean
+Private Function GetNextPossibleDrive(ByRef DriveLetter As String) As Boolean
 
    Dim DriveType As Long
+   Dim S As String
+   Dim Pos As Integer
    
-   Do While DriveLetter <= "Z"
-      DriveType = GetDriveType(DriveLetter & ":\")
-      If DriveType = 2 Then
-         GetNextRemovableDrive = True
-         Exit Function
+   S = Client.SysSettings.ImportDSSDrives
+   If Len(S) = 0 Then
+      If Len(DriveLetter) = 0 Then
+         DriveLetter = "C"    'skip A and B, they are probably diskette drives, I think...
+      Else
+         DriveLetter = Chr$(Asc(DriveLetter) + 1)
       End If
-      DriveLetter = Chr$(Asc(DriveLetter) + 1)
-   Loop
-   GetNextRemovableDrive = False
+      Do While DriveLetter <= "Z"
+         DriveType = GetDriveType(DriveLetter & ":\")
+         If DriveType = 2 Then
+            GetNextPossibleDrive = True
+            Exit Function
+         End If
+         DriveLetter = Chr$(Asc(DriveLetter) + 1)
+      Loop
+      GetNextPossibleDrive = False
+   Else
+      If Len(DriveLetter) = 0 Then
+         Pos = 1
+      Else
+         Pos = InStr(S, DriveLetter)
+         Pos = Pos + 1
+      End If
+      If Pos > Len(S) Then
+         GetNextPossibleDrive = False
+      Else
+         DriveLetter = mId$(S, Pos, 1)
+         GetNextPossibleDrive = True
+      End If
+   End If
 End Function
 Public Sub Trc(Loc As String, Value As String)
 
@@ -462,3 +489,36 @@ Sub SelectAllText(C As Control)
    C.Selstart = 0
    C.SelLength = Len(C.Text)
 End Sub
+
+Public Function GetExportFileName(DefFileName As String) As String
+
+   Dim Filter As String
+   Dim Pos As Integer
+   
+   Filter = Client.Texts.Txt(1000901, "Excel-filer") & " (*.xls)|*.xls|"
+   Filter = Filter & Client.Texts.Txt(1000905, "Text-filer") & " (*.txt)|*.txt|"
+   Filter = Filter & Client.Texts.Txt(1000903, "Html-filer") & " (*.htm)|*.htm|"
+   Filter = Filter & Client.Texts.Txt(1000904, "Xml-filer") & " (*.xml)|*.xml|"
+   Filter = Filter & Client.Texts.Txt(1000902, "Alla filer") & " (*.*)|*.*"
+   
+   frmMain.CDialog.Filename = DefFileName
+   frmMain.CDialog.InitDir = ""
+   frmMain.CDialog.CancelError = True
+   frmMain.CDialog.DefaultExt = "xls"
+   frmMain.CDialog.DialogTitle = Client.Texts.Txt(1000900, "Exportera")
+   frmMain.CDialog.Filter = Filter
+   frmMain.CDialog.FilterIndex = 1
+   frmMain.CDialog.Flags = cdlOFNExplorer Or cdlOFNOverwritePrompt
+   frmMain.CDialog.HelpFile = ""
+   frmMain.CDialog.HelpCommand = 0
+   frmMain.CDialog.HelpContext = 0
+   On Error Resume Next
+   frmMain.CDialog.Action = 2
+   If Err <> 0 Then
+      Exit Function
+   End If
+   On Error GoTo 0
+
+   GetExportFileName = frmMain.CDialog.Filename
+End Function
+

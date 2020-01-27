@@ -210,6 +210,8 @@ Private Sub cmdSave_Click()
 
    Dim I As Integer
    Dim Grp As clsGroup
+   Dim OkToSave As Boolean
+   Dim UsrTmp As clsUser
 
    UserToEdit.LoginName = txtLoginName.Text
    UserToEdit.Password = txtPassword.Text
@@ -218,20 +220,31 @@ Private Sub cmdSave_Click()
    UserToEdit.LongName = txtLongName.Text
    UserToEdit.HomeOrgId = CurrHomeOrgId
 
-   Client.UserMgr.SaveUser UserToEdit
-
-   If UserToEdit.UserId > 0 Then
-      For I = 0 To lstUserGroup.ListCount - 1
-         If lstUserGroup.Selected(I) Then
-            Client.GroupMgr.SaveUserGroup UserToEdit.UserId, lstUserGroup.ItemData(I)
-         Else
-            Client.GroupMgr.DeleteOneUserGroup UserToEdit.UserId, lstUserGroup.ItemData(I)
-         End If
-      Next I
+   OkToSave = True 'default
+   If UserToEdit.UserId = 0 Then   'new user
+      Client.UserMgr.GetUserFromLoginName UsrTmp, UserToEdit.LoginName
+      If Not UsrTmp Is Nothing Then
+         MsgBox Client.Texts.Txt(1050112, "Användaren finns redan!"), vbOKOnly
+         OkToSave = False
+      End If
    End If
    
-   RaiseEvent SaveClicked
-   Unload Me
+   If OkToSave Then
+      Client.UserMgr.SaveUser UserToEdit
+   
+      If UserToEdit.UserId > 0 Then
+         For I = 0 To lstUserGroup.ListCount - 1
+            If lstUserGroup.Selected(I) Then
+               Client.GroupMgr.SaveUserGroup UserToEdit.UserId, lstUserGroup.ItemData(I)
+            Else
+               Client.GroupMgr.DeleteOneUserGroup UserToEdit.UserId, lstUserGroup.ItemData(I)
+            End If
+         Next I
+      End If
+      
+      RaiseEvent SaveClicked
+      Unload Me
+   End If
 End Sub
 
 Private Sub Form_Activate()

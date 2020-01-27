@@ -77,6 +77,46 @@ Public Sub NewLanguage()
       Client.Texts.ApplyToControl UserControl.Controls(I)
    Next I
 End Sub
+Public Sub ExportExcelFile(Fn As String)
+
+   lstSettings.ExportExcelBookEx Fn, "", ExcelSaveFlagNone
+End Sub
+Public Sub ExportToHtml(Fn As String)
+
+   lstSettings.ExportToHtml Fn, False, ""
+End Sub
+Public Sub ExportToXml(Fn As String)
+
+   lstSettings.ExportToXml Fn, "", "", ExportToXMLFormattedData, ""
+End Sub
+Public Sub ExportTextFile(Fn As String)
+
+   lstSettings.SaveTabFile Fn
+End Sub
+Public Sub ExportListToFile(DefFileName As String)
+
+   Dim Fn As String
+   Dim Ext As String
+   
+   If Len(DefFileName) = 0 Then
+      DefFileName = Client.Texts.Txt(1120101, "Inställningar")
+   End If
+
+   Fn = GetExportFileName(DefFileName)
+   If Len(Fn) = 0 Then Exit Sub
+      
+   Ext = LCase$(Right$(Fn, 3))
+   Select Case Ext
+      Case "xml"
+         ExportToXml Fn
+      Case "htm"
+         ExportToHtml Fn
+      Case "xls"
+        ExportExcelFile Fn
+      Case Else
+        ExportTextFile Fn
+   End Select
+End Sub
 
 Public Property Set Settings(SS As clsStringStore)
 
@@ -212,4 +252,16 @@ End Function
 Private Sub lstSettings_EditChange(ByVal Col As Long, ByVal Row As Long)
 
    cmdSave.Enabled = True
+End Sub
+
+Private Sub lstSettings_KeyPress(KeyAscii As Integer)
+
+   Dim Fn As String
+
+   Select Case KeyAscii
+      Case KeyAsciiExportList
+         If Client.SysSettings.ExportAllowMenu Then
+            ExportListToFile ""
+         End If
+   End Select
 End Sub

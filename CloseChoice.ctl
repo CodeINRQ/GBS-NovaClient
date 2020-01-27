@@ -5,7 +5,6 @@ Begin VB.UserControl ucCloseChoice
    ClientLeft      =   0
    ClientTop       =   0
    ClientWidth     =   2625
-   ForwardFocus    =   -1  'True
    ScaleHeight     =   1710
    ScaleWidth      =   2625
    Begin VB.Frame fraChoice 
@@ -19,10 +18,9 @@ Begin VB.UserControl ucCloseChoice
       Width           =   2535
       Begin VB.CommandButton cmdClose 
          Caption         =   "Stäng"
-         Enabled         =   0   'False
          Height          =   275
          Left            =   120
-         TabIndex        =   6
+         TabIndex        =   0
          Tag             =   "1060102"
          Top             =   1350
          Width           =   2295
@@ -34,7 +32,7 @@ Begin VB.UserControl ucCloseChoice
          Left            =   240
          Picture         =   "CloseChoice.ctx":0000
          TabIndex        =   1
-         Top             =   255
+         Top             =   240
          Width           =   255
       End
       Begin VB.OptionButton optChoice 
@@ -43,7 +41,7 @@ Begin VB.UserControl ucCloseChoice
          Index           =   1
          Left            =   240
          Picture         =   "CloseChoice.ctx":0502
-         TabIndex        =   3
+         TabIndex        =   2
          Top             =   615
          Width           =   255
       End
@@ -53,7 +51,7 @@ Begin VB.UserControl ucCloseChoice
          Index           =   2
          Left            =   240
          Picture         =   "CloseChoice.ctx":0A04
-         TabIndex        =   5
+         TabIndex        =   3
          Top             =   975
          Width           =   255
       End
@@ -105,7 +103,7 @@ Begin VB.UserControl ucCloseChoice
          Height          =   255
          Index           =   0
          Left            =   600
-         TabIndex        =   0
+         TabIndex        =   4
          Top             =   315
          UseMnemonic     =   0   'False
          Width           =   1935
@@ -115,7 +113,7 @@ Begin VB.UserControl ucCloseChoice
          Height          =   255
          Index           =   1
          Left            =   600
-         TabIndex        =   2
+         TabIndex        =   5
          Top             =   675
          UseMnemonic     =   0   'False
          Width           =   1935
@@ -125,7 +123,7 @@ Begin VB.UserControl ucCloseChoice
          Height          =   255
          Index           =   2
          Left            =   600
-         TabIndex        =   4
+         TabIndex        =   6
          Top             =   1035
          UseMnemonic     =   0   'False
          Width           =   1935
@@ -160,6 +158,7 @@ Public Property Let ChoiceText(Index As Integer, Text As String)
          optChoice(Index).Enabled = True
          optChoice(Index).Value = True
       Else
+         optChoice(Index).Enabled = False
          optChoice(Index).Value = False
       End If
    End If
@@ -222,7 +221,7 @@ Private Sub UserControl_Initialize()
 
    Trc "ucClose Initialize", ""
    mChoiceValue = -1
-   cmdClose.Enabled = False
+   cmdClose.Enabled = True
 End Sub
 
 Private Sub UserControl_Terminate()

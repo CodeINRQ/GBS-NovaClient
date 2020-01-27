@@ -97,7 +97,43 @@ Private ColTotal(SheetMax, MaxCols) As Long
 Private GrandTotal(SheetMax) As Long
 Public Sub ExportExcelFile(Fn As String)
 
-   lstHist.ExportExcelBook Fn, ""
+   lstHist.ExportExcelBookEx Fn, "", ExcelSaveFlagNone
+End Sub
+Public Sub ExportToHtml(Fn As String)
+
+   lstHist.ExportToHtml Fn, False, ""
+End Sub
+Public Sub ExportToXml(Fn As String)
+
+   lstHist.ExportToXml Fn, "", "", ExportToXMLFormattedData, ""
+End Sub
+Public Sub ExportTextFile(Fn As String)
+
+   lstHist.SaveTabFile Fn
+End Sub
+Public Sub ExportListToFile(DefFileName As String)
+
+   Dim Fn As String
+   Dim Ext As String
+   
+   If Len(DefFileName) = 0 Then
+      DefFileName = Client.Texts.Txt(1000405, "Historik")
+   End If
+
+   Fn = GetExportFileName(DefFileName)
+   If Len(Fn) = 0 Then Exit Sub
+      
+   Ext = LCase$(Right$(Fn, 3))
+   Select Case Ext
+      Case "xml"
+         ExportToXml Fn
+      Case "htm"
+         ExportToHtml Fn
+      Case "xls"
+        ExportExcelFile Fn
+      Case Else
+        ExportTextFile Fn
+   End Select
 End Sub
 Public Sub Init()
 
@@ -139,6 +175,16 @@ Private Sub cmdGo_Click()
    HistYear = Year(Now) - cboHistYear.ListIndex
    HistType = cboType.ListIndex
    GetDataNow
+End Sub
+
+Private Sub lstHist_KeyPress(KeyAscii As Integer)
+
+   Select Case KeyAscii
+      Case KeyAsciiExportList
+         If Client.SysSettings.ExportAllowMenu Then
+            ExportListToFile ""
+         End If
+   End Select
 End Sub
 
 Private Sub UserControl_Resize()
