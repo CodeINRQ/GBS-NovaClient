@@ -151,27 +151,23 @@ End Sub
 
 Private Sub Form_Load()
     
-   Dim Adapter As ADAPTERSERVERLib.AdapterControl
    Dim DevName As String
    Dim DevSerialno As String
    Dim DevFirmwareVersion As String
    
    On Error Resume Next
-   Set Adapter = Client.DSSRec.Adapter
-   If Adapter.IsOpen Then
-      DevName = Adapter.ReceiveString(PCSTAT_ASK_KENNUNG)
-      DevSerialno = Adapter.ReceiveString(PCSTAT_ASK_SERNO)
-      DevFirmwareVersion = Adapter.ReceiveString(PCSTAT_ASK_VERSION)
-   End If
-   Set Adapter = Nothing
+   DevName = Client.DSSRec.DeviceName
+   DevSerialno = Client.DSSRec.DeviceSerialNo
+   DevFirmwareVersion = Client.DSSRec.DeviceFirmwareVersion
+   On Error GoTo 0
    
    CenterAndTranslateForm Me, frmMain
     
-   Me.Caption = Client.Texts.Txt(1020100, "Om") & " " & Client.Texts.Txt(1000417, "CareTalk")
+   Me.Caption = Client.Texts.Txt(1020100, "Om") & " " & Client.Texts.Txt(1000417, "Grundig Nova")
    Me.Icon = frmMain.Icon
    lblVersion.Caption = Client.Texts.Txt(1020101, "Version") & " " & ApplicationVersion
-   lblTitle.Caption = Client.Texts.Txt(1000417, "CareTalk")
-   lblDescription.Caption = Client.Texts.Txt(1020102, "CareTalk - Ett modernt system för digital diktering") & vbLf & vbLf & _
+   lblTitle.Caption = Client.Texts.Txt(1000417, "Grundig Nova")
+   lblDescription.Caption = Client.Texts.Txt(1020102, "Grundig Nova - Ett modernt system för digital diktering") & vbLf & vbLf & _
                             Client.Texts.Txt(1020103, "Programmet utvecklas av") & vbLf & Client.Texts.Txt(1020104, "Grundig Nordic AB") & vbLf & vbLf & _
                             Client.Texts.Txt(1020109, "Utrustning:") & " " & DevName & vbLf & _
                             Client.Texts.Txt(1020110, "Serienr:") & " " & DevSerialno & vbLf & _

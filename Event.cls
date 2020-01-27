@@ -33,7 +33,6 @@ Public Obj As String
 Public CtCmdFile As String
 Public CtCmdFileDate As Date
 
-
 Public WindowModuleName As String
 Public WindowUseTopLevel As Boolean
 Public WindowIdentControlId As String
@@ -43,25 +42,15 @@ Public WindowIdentParse As String
 Public WindowIdentWindowRectangle As String
 Public WindowIdentClientRectangle As String
 
-Public WindowIdControlId As String
-Public WindowIdParse As String
+Public IdCheckCompatibility As Boolean
 
-Public WindowNameControlId As String
-Public WindowNameParse As String
-
-Public WindowKeywordControlId As String
-Public WindowKeywordParse As String
-
-Public WindowOrgControlId As String
-Public WindowOrgParse As String
-
-Public WindowPriControlId As String
-Public WindowPriParse As String
-
-Public WindowDictTypeControlId As String
-Public WindowDictTypeParse As String
-
-Public WindowTipControlId As String
+Public IdControl As clsEventWindowControl
+Public NameControl As clsEventWindowControl
+Public KeywordControl As clsEventWindowControl
+Public OrgControl As clsEventWindowControl
+Public PriControl As clsEventWindowControl
+Public DictTypeControl As clsEventWindowControl
+Public TipControl As clsEventWindowControl
 
 Public WindowHndl As Long
 Public WindowLastCheckedHndl As Long
@@ -73,3 +62,24 @@ Public WindowLastPri As String
 Public WindowLastDictType As String
 
 
+Private Sub Class_Initialize()
+
+   Set IdControl = New clsEventWindowControl
+   Set NameControl = New clsEventWindowControl
+   Set KeywordControl = New clsEventWindowControl
+   Set OrgControl = New clsEventWindowControl
+   Set PriControl = New clsEventWindowControl
+   Set DictTypeControl = New clsEventWindowControl
+   Set TipControl = New clsEventWindowControl
+End Sub
+
+Private Sub Class_Terminate()
+
+   Set IdControl = Nothing
+   Set NameControl = Nothing
+   Set KeywordControl = Nothing
+   Set OrgControl = Nothing
+   Set PriControl = Nothing
+   Set DictTypeControl = Nothing
+   Set TipControl = Nothing
+End Sub

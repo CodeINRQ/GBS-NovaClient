@@ -29,7 +29,7 @@ Begin VB.Form frmLogin
       MaskColor       =   12632256
       _Version        =   393216
       BeginProperty Images {2C247F25-8591-11D1-B16A-00C0F0283628} 
-         NumListImages   =   7
+         NumListImages   =   8
          BeginProperty ListImage1 {2C247F27-8591-11D1-B16A-00C0F0283628} 
             Picture         =   "Login.frx":030A
             Key             =   ""
@@ -56,6 +56,10 @@ Begin VB.Form frmLogin
          EndProperty
          BeginProperty ListImage7 {2C247F27-8591-11D1-B16A-00C0F0283628} 
             Picture         =   "Login.frx":1CF6
+            Key             =   ""
+         EndProperty
+         BeginProperty ListImage8 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+            Picture         =   "Login.frx":2148
             Key             =   ""
          EndProperty
       EndProperty
@@ -262,14 +266,15 @@ Private Sub Form_Load()
    CenterAndTranslateForm Me, frmMain
 
    If Client.SysSettings.CultureAllowChange Then
-      ImageCombo1.ComboItems.Add 1, "SE", , 1
-      ImageCombo1.ComboItems.Add 2, "EN", , 2
-      ImageCombo1.ComboItems.Add 3, "DK", , 3
-      ImageCombo1.ComboItems.Add 4, "NO", , 4
-      ImageCombo1.ComboItems.Add 5, "FI", , 5
-      ImageCombo1.ComboItems.Add 6, "DE", , 6
-      ImageCombo1.ComboItems.Add 7, "FR", , 7
-      ImageCombo1.SelectedItem = ImageCombo1.ComboItems(Client.SysSettings.CultureDefaultLanguage)
+      InsertFlagForLanguageIfEnabled 1, "SE"
+      InsertFlagForLanguageIfEnabled 2, "FR"
+      InsertFlagForLanguageIfEnabled 3, "EN"
+      InsertFlagForLanguageIfEnabled 4, "DK"
+      InsertFlagForLanguageIfEnabled 5, "NO"
+      InsertFlagForLanguageIfEnabled 6, "FI"
+      InsertFlagForLanguageIfEnabled 7, "DE"
+      InsertFlagForLanguageIfEnabled 8, "NL"
+      ImageCombo1.SelectedItem = ImageCombo1.ComboItems(Client.CultureLanguage)
       ImageCombo1.Visible = True
    Else
       ImageCombo1.Visible = False
@@ -279,6 +284,12 @@ Private Sub Form_Load()
    chkChangePassword.Visible = Client.SysSettings.LoginAllowChangePassword
 End Sub
 
+Private Sub InsertFlagForLanguageIfEnabled(Index As Integer, CultureCode As String)
+
+   If InStr(Client.SysSettings.CultureList, CultureCode) > 0 Then
+      ImageCombo1.ComboItems.Add , CultureCode, , Index
+   End If
+End Sub
 Private Sub CollapsWindow()
 
    Dim T As Integer

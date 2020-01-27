@@ -47,8 +47,6 @@ Public HistMgr As clsHistoryMgr
 Public LoggMgr As clsLoggMgr
 Public DictAuditMgr As clsDictAuditMgr
 
-Public DSSRec As CareTalkDSSRec3.DSSRecorder
-Public DSSRecConnector As CareTalkDSSRec3.Connector
 Public Hw As Gru_Harware
 
 Public VoiceXpress As clsVoiceXpress
@@ -65,11 +63,12 @@ Public PlayDictIdFromAPI As Long
 Public ExportSettings As clsExportSettings
 
 Public WindowHandleForIndicator As Long
+Public DSSRec As clsDSSRecorder
 
 Private Sub Class_Initialize()
 
    Set Settings = New clsSettings
-   Settings.IniFilePath = App.Path & "\" & CommandValue("Profile", "CareTalk") & ".ini"
+   Settings.IniFilePath = App.Path & "\" & CommandValue("Profile", "GrundigNova") & ".ini"
 
    Set Trace = New clsTrace
    Trace.Initialize Settings
@@ -97,12 +96,7 @@ Private Sub Class_Initialize()
    Set HistMgr = New clsHistoryMgr
    Set ExportSettings = New clsExportSettings
    
-   Set DSSRecConnector = New CareTalkDSSRec3.Connector
-   Set DSSRec = DSSRecConnector.DSSRecorder
-   DSSRec.Play
-   DSSRec.Rec
-   'DSSRec.Initialize ""
-   
+   Set DSSRec = New clsDSSRecorder
    Set VoiceXpress = New clsVoiceXpress
 End Sub
 
@@ -110,7 +104,6 @@ Private Sub Class_Terminate()
 
    Set ExportSettings = Nothing
    Set DSSRec = Nothing
-   Set DSSRecConnector = Nothing
    Set DictMgr = Nothing
    Set StationMgr = Nothing
    Set Station = Nothing

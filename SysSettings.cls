@@ -20,6 +20,7 @@ Private mDeleteSound As Integer
 Private mDeleteDictInfo As Integer
 Private mDeleteHistory As Integer
 Public DeleteLogg As Integer
+Public DeleteTemp As Integer
 
 Public DictListShowDictId As Boolean
 Public DictListUpdateK As Long
@@ -28,10 +29,6 @@ Public DictListUpdateMax As Long
 Public DictListUpdateValues As Long
 Public DictListCurrStatusStart As Long
 Public DictListCurrStatusEnd As Long
-Public DictListCacheMax As Long
-Public DictListCacheRefresh As Long
-Public DictListCacheClean As Long
-Public DictListTSOverlap As Long
 
 Public VoiceExpressActive As Boolean
 Public VoiceExpressShowTab As Boolean
@@ -57,7 +54,6 @@ Public LoginPasswordCaseSensitive As Boolean
 Public LoginAllowChangePassword As Boolean
 
 Public PlayerWarningLowRecLevel As Long
-Public PlayerWarningHighRecLevel As Long
 Public PlayerWindingSpeed As Long
 Public PlayerHWcheckfreq As Integer
 Public PlayerCaption As String
@@ -108,6 +104,7 @@ Public SoundChunkSize As Long
 
 Public CultureDefaultLanguage As String
 Public CultureAllowChange As Boolean
+Public CultureList As String
 
 Public LoggEnable As Boolean
 Public LoggFilter As String
@@ -125,16 +122,12 @@ Public ImportDefaultNote As String
 Public ExportAllowMenu As Boolean
 
 Public IndicatorActive As Boolean
+Public IndicatorStyle As String
 Public IndicatorBgColor As Long
 Public IndicatorLightColor As Long
 Public IndicatorLightTime As Long
 Public IndicatorDarkTime As Long
 Public IndicatorMaxBlink As Long
-
-Public ShowMeUrl As String
-Public ShowMeSite As String
-
-Public LicenseActivate As Boolean
 
 Public Property Get Store() As clsStringStore
 
@@ -158,6 +151,8 @@ Public Sub Init(Ty As String)
    Dim Ke As String
    Dim Va As String
 
+   mSysSettings.EmptyStore
+
    Client.Server.CreateSysSettingsList Ty
    Do While Client.Server.SysSettingsListGetNext(Se, Ke, Va)
       mSysSettings.AddString Se, Ke, Va
@@ -169,18 +164,15 @@ Public Sub Init(Ty As String)
    mDeleteDictInfo = mSysSettings.GetLong("Delete", "DictInfo", -1)
    mDeleteHistory = mSysSettings.GetLong("Delete", "History", -1)
    DeleteLogg = mSysSettings.GetLong("Delete", "Logg", 30)
+   DeleteTemp = mSysSettings.GetLong("Delete", "Temp", 0)
    
    DictListShowDictId = mSysSettings.GetBool("DictList", "ShowDictId", False)
    DictListUpdateK = mSysSettings.GetLong("DictList", "UpdateK", 10)
    DictListUpdateM = mSysSettings.GetLong("DictList", "UpdateM", 2000)
-   DictListUpdateMax = mSysSettings.GetLong("DictList", "UpdateMax", 30000)
+   DictListUpdateMax = mSysSettings.GetLong("DictList", "UpdateMax", 100000)
    DictListUpdateValues = mSysSettings.GetLong("DictList", "UpdateValues", 5)
    DictListCurrStatusStart = mSysSettings.GetLong("DictList", "CurrStatusStart", 20)
    DictListCurrStatusEnd = mSysSettings.GetLong("DictList", "CurrStatusEnd", 60)
-   DictListCacheMax = mSysSettings.GetLong("DictList", "CacheMax", 25000)
-   DictListCacheRefresh = mSysSettings.GetLong("DictList", "CacheRefresh", 60)
-   DictListCacheClean = mSysSettings.GetLong("DictList", "CacheClean", 120)
-   DictListTSOverlap = mSysSettings.GetLong("DictList", "TSOverlap", 10)
    
    VoiceExpressActive = mSysSettings.GetBool("VoiceExpress", "Active", False)
    VoiceExpressShowTab = mSysSettings.GetBool("VoiceExpress", "ShowTab", False)
@@ -210,7 +202,6 @@ Public Sub Init(Ty As String)
    ClientMinVersion = mSysSettings.GetString("Client", "MinVersion", "")
    
    PlayerWarningLowRecLevel = mSysSettings.GetLong("Player", "WarningLowRecLevel", 5)
-   PlayerWarningHighRecLevel = mSysSettings.GetLong("Player", "WarningHighRecLevel", 40)
    PlayerWindingSpeed = mSysSettings.GetLong("Player", "WindingSpeed", 6000)
    PlayerHWcheckfreq = mSysSettings.GetLong("Player", "HWcheckfreq", 10)
    PlayerCaption = mSysSettings.GetString("Player", "Caption", "")
@@ -257,6 +248,7 @@ Public Sub Init(Ty As String)
    
    CultureDefaultLanguage = mSysSettings.GetString("Culture", "DefaultLanguage", "SE")
    CultureAllowChange = mSysSettings.GetBool("Culture", "AllowChange", True)
+   CultureList = mSysSettings.GetString("Culture", "DefaultList", "SE;EN;DK;NO")
    
    LoggEnable = mSysSettings.GetBool("Logg", "Enable", True)
    LoggFilter = mSysSettings.GetString("Logg", "Filter", "")
@@ -274,17 +266,12 @@ Public Sub Init(Ty As String)
    ExportAllowMenu = mSysSettings.GetBool("Export", "AllowMenu", True)
 
    IndicatorActive = mSysSettings.GetBool("Indicator", "Active", True)
+   IndicatorStyle = mSysSettings.GetString("Indicator", "Style", "")
    IndicatorBgColor = mSysSettings.GetLong("Indicator", "BgColor", 8454143)
    IndicatorLightColor = mSysSettings.GetLong("Indicator", "LightColor", 49152)
    IndicatorLightTime = mSysSettings.GetLong("Indicator", "LightTime", 2)
    IndicatorDarkTime = mSysSettings.GetLong("Indicator", "DarkTime", 20)
    IndicatorMaxBlink = mSysSettings.GetLong("Indicator", "MaxBlink", -1)
-
-   ShowMeUrl = mSysSettings.GetString("ShowMe", "Url", "")
-   ShowMeSite = mSysSettings.GetString("ShowMe", "Site", "")
-
-   LicenseActivate = mSysSettings.GetBool("License", "Activate", True)
-
 End Sub
 Public Sub Save(Ty As String)
 

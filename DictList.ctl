@@ -7,22 +7,6 @@ Begin VB.UserControl ucDictList
    ClientWidth     =   9495
    ScaleHeight     =   4800
    ScaleWidth      =   9495
-   Begin VB.PictureBox picShowMe 
-      Appearance      =   0  'Flat
-      BorderStyle     =   0  'None
-      ForeColor       =   &H80000008&
-      Height          =   255
-      HelpContextID   =   1080000
-      Left            =   9240
-      MouseIcon       =   "DictList.ctx":0000
-      MousePointer    =   99  'Custom
-      Picture         =   "DictList.ctx":030A
-      ScaleHeight     =   255
-      ScaleWidth      =   255
-      TabIndex        =   2
-      Top             =   0
-      Width           =   255
-   End
    Begin FPSpreadADO.fpSpread lstDict 
       Height          =   4575
       HelpContextID   =   1080000
@@ -47,7 +31,7 @@ Begin VB.UserControl ucDictList
       EndProperty
       MaxCols         =   1
       MaxRows         =   0
-      SpreadDesigner  =   "DictList.ctx":0379
+      SpreadDesigner  =   "DictList.ctx":0000
    End
    Begin VB.Label lblNote 
       BackStyle       =   0  'Transparent
@@ -61,7 +45,7 @@ Begin VB.UserControl ucDictList
       Height          =   480
       Index           =   5
       Left            =   1920
-      Picture         =   "DictList.ctx":06E9
+      Picture         =   "DictList.ctx":0370
       Top             =   0
       Width           =   480
       Visible         =   0   'False
@@ -70,7 +54,7 @@ Begin VB.UserControl ucDictList
       Height          =   480
       Index           =   4
       Left            =   1440
-      Picture         =   "DictList.ctx":0FB3
+      Picture         =   "DictList.ctx":0C3A
       Top             =   0
       Width           =   480
       Visible         =   0   'False
@@ -86,7 +70,7 @@ Begin VB.UserControl ucDictList
       Height          =   480
       Index           =   3
       Left            =   960
-      Picture         =   "DictList.ctx":13F5
+      Picture         =   "DictList.ctx":107C
       Top             =   0
       Width           =   480
       Visible         =   0   'False
@@ -95,7 +79,7 @@ Begin VB.UserControl ucDictList
       Height          =   480
       Index           =   2
       Left            =   0
-      Picture         =   "DictList.ctx":1CBF
+      Picture         =   "DictList.ctx":1946
       Top             =   0
       Width           =   480
       Visible         =   0   'False
@@ -104,7 +88,7 @@ Begin VB.UserControl ucDictList
       Height          =   480
       Index           =   1
       Left            =   480
-      Picture         =   "DictList.ctx":2589
+      Picture         =   "DictList.ctx":2210
       Top             =   0
       Width           =   480
       Visible         =   0   'False
@@ -308,24 +292,15 @@ Private Sub lstDict_SelChange(ByVal BlockCol As Long, ByVal BlockRow As Long, By
    DisplayNoteInLabelControl
 End Sub
 
-Private Sub picShowMe_Click()
-
-   Dim SM As New clsShowMe
-   SM.ShowMeContextHelp picShowMe
-End Sub
-
 Private Sub UserControl_Resize()
 
    lstDict.Move 0, 0, UserControl.ScaleWidth, UserControl.ScaleHeight - lblNote.Height
    lblNote.Move 0, UserControl.ScaleHeight - lblNote.Height + 3, UserControl.ScaleWidth
-   picShowMe.Move UserControl.ScaleWidth - picShowMe.Width, UserControl.ScaleHeight - lblNote.Height + 10, picShowMe.Width
 End Sub
 Public Sub RestoreSettings(Settings As String, Ver As String)
 
    Dim TempFilePath As String
    Dim Ok As Boolean
-
-   EnableShowMeHelp Len(Client.SysSettings.ShowMeUrl) > 0
 
    With lstDict
       Ok = False
@@ -690,8 +665,3 @@ Private Sub ClearNoteInLabelControl()
 
    lblNote.Caption = ""
 End Sub
-Private Sub EnableShowMeHelp(Value As Boolean)
-
-   picShowMe.Visible = Value
-End Sub
-

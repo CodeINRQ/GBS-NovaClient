@@ -72,12 +72,10 @@ Public Sub SetIndicatorText(Txt As String, Id As String)
       lblCurrent.Caption = mTxt
       If Len(Txt) > 0 Then
          Me.Visible = True
-         Me.Width = 1425
          WindowFloating Me
       Else
-         Me.Width = 0
-         ''WindowNotFloating Me
-         'Me.Visible = False
+         'WindowNotFloating Me
+         Me.Visible = False
       End If
    End If
    If Id <> mId Then

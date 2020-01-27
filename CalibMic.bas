@@ -3,12 +3,12 @@ Option Explicit
 
 Private Declare Function VCStoreIni _
     Lib "Helper.dll" _
-    Alias "_VolumeControl_StoreIni@4" (ByVal iniFileName As String) As Long
+    Alias "_VolumeControl_StoreIni@4" (ByVal IniFileName As String) As Long
 
 Private Declare Function VCPrepareSettingsForPlayer _
     Lib "Helper.dll" _
     Alias "_VolumeControl_PrepareSettingsForPlayer@8" (ByVal bWithRecorder As Long, _
-                                                       ByVal iniFileName As String) As Long
+                                                       ByVal IniFileName As String) As Long
 
 Private Declare Function VCResetSettingsForPlayer _
     Lib "Helper.dll" _
@@ -37,7 +37,6 @@ Public Function RestoreCalibration() As Boolean
    Dim AudioSettings As String
    Dim Ver As String
    Dim IsCalibStoredInDb As Boolean
-   Dim IsCalibStoredInIni As Boolean
    Dim OldIniFile As String
    
    IsCalibStoredInDb = Client.Server.ReadStationData("Audio", "Calib", "", Ver) = "Y"
@@ -47,15 +46,8 @@ Public Function RestoreCalibration() As Boolean
       FileForSettings = WriteStringToTempFile(AudioSettings)
       VCPrepareSettingsForPlayer 1, FileForSettings
       KillFileIgnoreError FileForSettings
-   Else
-      OldIniFile = Client.DSSRec.iniFileName
-      If CheckIfThereIsMicCalibrationInIniFile(OldIniFile) Then
-         IsCalibStoredInIni = True
-         VCPrepareSettingsForPlayer 1, OldIniFile
-         SaveCalibration
-      End If
    End If
-   RestoreCalibration = IsCalibStoredInDb Or IsCalibStoredInIni
+   RestoreCalibration = IsCalibStoredInDb
 End Function
 Public Sub StartCalibration()
 
@@ -83,7 +75,7 @@ End Sub
 Private Function CheckIfThereIsMicCalibrationInIniFile(Fn As String) As Boolean
 
    Dim ReadFile As Integer
-   Dim S As String
+   Dim s As String
    Dim Res As Boolean
    
    On Error Resume Next
@@ -93,8 +85,8 @@ Private Function CheckIfThereIsMicCalibrationInIniFile(Fn As String) As Boolean
       Exit Function
    End If
    Do While Not EOF(ReadFile)
-      Line Input #ReadFile, S
-      If InStr(LCase$(S), "mixer") > 0 Then
+      Line Input #ReadFile, s
+      If InStr(LCase$(s), "mixer") > 0 Then
          CheckIfThereIsMicCalibrationInIniFile = True
          Exit Do
       End If

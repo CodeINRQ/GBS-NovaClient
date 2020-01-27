@@ -38,8 +38,8 @@ Begin VB.Form frmEditUser
       TabIndex        =   1
       Top             =   360
       Width           =   3135
-      _ExtentX        =   5530
-      _ExtentY        =   7435
+      _extentx        =   5530
+      _extenty        =   7435
    End
    Begin VB.TextBox txtLongName 
       Height          =   285
@@ -244,11 +244,10 @@ Private Sub cmdSave_Click()
       Client.UserMgr.SaveUser UserToEdit
    
       If UserToEdit.UserId > 0 Then
+         Client.GroupMgr.DeleteAllUserGroup UserToEdit.UserId
          For I = 0 To lstUserGroup.ListCount - 1
             If lstUserGroup.Selected(I) Then
                Client.GroupMgr.SaveUserGroup UserToEdit.UserId, lstUserGroup.ItemData(I)
-            Else
-               Client.GroupMgr.DeleteOneUserGroup UserToEdit.UserId, lstUserGroup.ItemData(I)
             End If
          Next I
       End If

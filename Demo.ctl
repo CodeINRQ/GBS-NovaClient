@@ -116,42 +116,42 @@ Public Sub NewLanguage()
 End Sub
 Private Sub cmdDemo_Click()
 
-   Dim NumDict As Long
-   Dim DaysHist As Integer
-   Dim MaxPerDay As Integer
-   Dim MinPerDay As Integer
-   
-   On Error Resume Next
-   NumDict = CLng(txtNumberOfDemoDictations.Text)
-   'If NumDict > MaxNumberOfDictation Then
-   '   NumDict = MaxNumberOfDictation
-   'End If
-   DaysHist = CInt(txtDaysInHistory.Text)
-   MaxPerDay = CInt(txtMaxPerDay.Text)
-   MinPerDay = CInt(txtMinPerDay.Text)
-   'On Error GoTo 0
-      
-   
-   If MsgBox(Client.Texts.Txt(1070104, "Om du fortsätter kommer alla befinliga diktat och all historik att raderas!"), vbOKCancel) = vbOK Then
-      RaiseEvent UIStatusSet(Client.Texts.Txt(1070105, "Generering av demo"), True)
-      
-         RaiseEvent UIStatusSet(Client.Texts.Txt(1070106, "Tidigare diktat raderas"), True)
-         Client.Server.DeleteAllDictations
-         RaiseEvent UIStatusClear
-        
-         RaiseEvent UIStatusSet(Client.Texts.Txt(1070107, "Tidigare historik raderas"), True)
-         Client.Server.DeleteHistory 0
-         RaiseEvent UIStatusClear
-        
-         RaiseEvent UIStatusSet(Client.Texts.Txt(1070108, "Nya diktat och ny historik genereras"), True)
-         FillDemoDictation NumDict
-         FillHistoryDemo DaysHist, MaxPerDay, MinPerDay
-         RaiseEvent UIStatusClear
-      
-         Client.LoggMgr.Insert 1320109, LoggLevel_SysAdmin, 0, txtNumberOfDemoDictations.Text
-         
-      RaiseEvent UIStatusClear
-   End If
+'   Dim NumDict As Long
+'   Dim DaysHist As Integer
+'   Dim MaxPerDay As Integer
+'   Dim MinPerDay As Integer
+'
+'   On Error Resume Next
+'   NumDict = CLng(txtNumberOfDemoDictations.Text)
+'   'If NumDict > MaxNumberOfDictation Then
+'   '   NumDict = MaxNumberOfDictation
+'   'End If
+'   DaysHist = CInt(txtDaysInHistory.Text)
+'   MaxPerDay = CInt(txtMaxPerDay.Text)
+'   MinPerDay = CInt(txtMinPerDay.Text)
+'   'On Error GoTo 0
+'
+'
+'   If MsgBox(Client.Texts.Txt(1070104, "Om du fortsätter kommer alla befinliga diktat och all historik att raderas!"), vbOKCancel) = vbOK Then
+'      RaiseEvent UIStatusSet(Client.Texts.Txt(1070105, "Generering av demo"), True)
+'
+'         RaiseEvent UIStatusSet(Client.Texts.Txt(1070106, "Tidigare diktat raderas"), True)
+'         Client.Server.DeleteAllDictations
+'         RaiseEvent UIStatusClear
+'
+'         RaiseEvent UIStatusSet(Client.Texts.Txt(1070107, "Tidigare historik raderas"), True)
+'         Client.Server.DeleteHistory 0
+'         RaiseEvent UIStatusClear
+'
+'         RaiseEvent UIStatusSet(Client.Texts.Txt(1070108, "Nya diktat och ny historik genereras"), True)
+'         FillDemoDictation NumDict
+'         FillHistoryDemo DaysHist, MaxPerDay, MinPerDay
+'         RaiseEvent UIStatusClear
+'
+'         Client.LoggMgr.Insert 1320109, LoggLevel_SysAdmin, 0, txtNumberOfDemoDictations.Text
+'
+'      RaiseEvent UIStatusClear
+'   End If
 End Sub
 
 Private Sub txtDaysInHistory_Change()

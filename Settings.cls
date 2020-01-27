@@ -15,27 +15,27 @@ Option Explicit
 Private Declare Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As Any, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Long, ByVal lpFileName As String) As Long
 Private Declare Function WritePrivateProfileString Lib "kernel32" Alias "WritePrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As Any, ByVal lpString As Any, ByVal lpFileName As String) As Long
 
-Private mIniFilePath As String
+Private mIniFilepath As String
 
 Public Property Let IniFilePath(ByVal Path As String)
 
-   mIniFilePath = Path
+   mIniFilepath = Path
 End Property
 Public Property Get IniFilePath() As String
 
-   IniFilePath = mIniFilePath
+   IniFilePath = mIniFilepath
 End Property
 
 Function GetBool(Section As String, Entry As String, Default As Boolean) As Boolean
    
    Dim Tmp As String
-   Dim S As String * 10
+   Dim s As String * 10
    Dim I As Integer
    Dim Värde As Boolean
 
-   If Len(mIniFilePath) > 0 Then
-      I = GetPrivateProfileString(Section, Entry, "", S, Len(S), mIniFilePath)
-      Tmp = Left$(S, I)
+   If Len(mIniFilepath) > 0 Then
+      I = GetPrivateProfileString(Section, Entry, "", s, Len(s), mIniFilepath)
+      Tmp = Left$(s, I)
    End If
    If Tmp = "" Then
       Värde = Default
@@ -51,13 +51,13 @@ End Function
 Function GetLong(Section As String, Entry As String, Default As Long) As Long
 
    Dim I As Integer
-   Dim S As String * 10
+   Dim s As String * 10
    Dim Tmp As String
    Dim Värde As Long
 
-   If Len(mIniFilePath) > 0 Then
-      I = GetPrivateProfileString(Section, Entry, "", S, Len(S), mIniFilePath)
-      Tmp = Left$(S, I)
+   If Len(mIniFilepath) > 0 Then
+      I = GetPrivateProfileString(Section, Entry, "", s, Len(s), mIniFilepath)
+      Tmp = Left$(s, I)
    End If
    Värde = Default
    On Error Resume Next
@@ -86,12 +86,12 @@ End Function
 Function GetString(Section As String, Entry As String, Default As String) As String
 
    Dim I As Integer
-   Dim S As String * 1024
+   Dim s As String * 1024
    Dim Värde As String
 
-   If Len(mIniFilePath) > 0 Then
-      I = GetPrivateProfileString(Section, Entry, Default, S, Len(S), mIniFilePath)
-      Värde = Left$(S, I)
+   If Len(mIniFilepath) > 0 Then
+      I = GetPrivateProfileString(Section, Entry, Default, s, Len(s), mIniFilepath)
+      Värde = Left$(s, I)
    Else
       Värde = Default
    End If
@@ -124,8 +124,8 @@ Sub WriteString(Section As String, Entry As String, Value As String)
    Dim Eno As Long
 
    On Error GoTo WriteString_Err
-   If Len(mIniFilePath) > 0 Then
-      I = WritePrivateProfileString(Section, Entry, Value, mIniFilePath)
+   If Len(mIniFilepath) > 0 Then
+      I = WritePrivateProfileString(Section, Entry, Value, mIniFilepath)
    End If
    Exit Sub
    

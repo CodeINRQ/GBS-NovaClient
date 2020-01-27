@@ -65,7 +65,7 @@ Public Function Init(ExtSystem As String, AccessCode As String) As Long
    AccessCodeOk = (AccessCode = API_ACCESS_CODE)
    If Not AccessCodeOk Then Exit Function
    
-   mExtSystem = ExtSystem
+   mExtSystem = UCase(ExtSystem)
    If StartUpFormMainIsLoaded > 0 Then
       Set mfrmMain = frmMain
    End If
@@ -157,6 +157,7 @@ Public Function CurrPat(PatId1 As String, _
    Const FuncName As String = "CurrPat"
    
    Dim Ret As Long
+   Dim BlankCurrPat As Boolean
 
    On Error GoTo CurrPat_Err
    If Not InitAtEveryFunction(FuncName, PatId1, PatId2) Then Exit Function
@@ -164,13 +165,14 @@ Public Function CurrPat(PatId1 As String, _
    'Body
    
    Dim CurrPatFilter As New clsFilter
-     
-   If Len(PatId1) = 0 And Len(PatId2) > 0 Then
-      Client.CurrPatient.PatId = PatId2
-   Else
-      Client.CurrPatient.PatId = PatId1
-      Client.CurrPatient.PatId2 = PatId2
-   End If
+   
+   BlankCurrPat = Len(PatId1) = 0 And Len(PatId2) = 0
+   
+   Client.CurrPatient.ExtSystem = mExtSystem
+   
+   Client.CurrPatient.PatId = PatId1
+   Client.CurrPatient.PatId2 = PatId2
+   
    Client.CurrPatient.PatName = GetPatNameFromNameParameter(PatName)
    Client.CurrPatient.KeyWord = GetKeyWordFromNameParameter(PatName)
    
@@ -180,13 +182,27 @@ Public Function CurrPat(PatId1 As String, _
    
    CurrPatFilter.StatusStart = Client.SysSettings.DictListCurrStatusStart
    CurrPatFilter.StatusEnd = Client.SysSettings.DictListCurrStatusEnd
-   CurrPatFilter.Pat.PatId = StringReplace(StringReplace(PatId1, "-", ""), "/", "")
-   CurrPatFilter.Pat.PatId2 = StringReplace(StringReplace(PatId2, "-", ""), "/", "")
-      
-   Set frmMain.ucDictList.CurrPatientFilter = CurrPatFilter
+   
+   If Left(mExtSystem, 6) <> "ASYNJA" Then
+      CurrPatFilter.Pat.PatId = StringReplace(StringReplace(StringReplace(PatId1, "-", ""), "/", ""), "*", "")
+   Else
+      CurrPatFilter.Pat.PatId = ""
+   End If
+   CurrPatFilter.Pat.PatId2 = StringReplace(StringReplace(StringReplace(PatId2, "-", ""), "/", ""), "*", "")
    
    frmMain.ShowNewCurrPat
    
+   Set frmMain.ucDictList.CurrPatientFilter = CurrPatFilter
+   
+   If Not RecorderInUse Then
+      If Not BlankCurrPat Then
+         frmMain.ucOrgTree.PickOrgId 30005
+      Else
+         ShowIndicator "", ""
+         frmMain.ucOrgTree.PickOrgId Client.User.HomeOrgId
+      End If
+      frmMain.Tabs.Tab = 0
+   End If
    CurrPat = 0
    
 CurrPat_Exit:
@@ -213,7 +229,7 @@ Public Function RecNew(PatId As String, _
    
    'Body
    
-   Dim S As String
+   Dim s As String
       
    On Error Resume Next
 

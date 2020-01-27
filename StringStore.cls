@@ -20,6 +20,11 @@ Private mFilterSection As String
 Private Const RecDelimit = "¤"
 Private Const FieldDelemit = "#"
 
+Public Sub EmptyStore()
+
+   mStore = ""
+End Sub
+
 Public Property Let Filter(Section As String)
 
    mStoreFiltered = mStore
@@ -64,15 +69,15 @@ Public Sub AddLong(Section As String, Key As String, Value As Long)
 End Sub
 Public Function GetString(Section As String, Key As String, Default As String) As String
 
-   Dim S As String
+   Dim s As String
    Dim Record As String
    Dim Sec As String
    Dim K As String
    Dim V As String
    
-   S = mStore
-   Do While Len(S) > 0
-      Record = GetRecord(S)
+   s = mStore
+   Do While Len(s) > 0
+      Record = GetRecord(s)
       SplitRecord Record, Sec, K, V
       If NormalizedKey(Section) = NormalizedKey(Sec) And NormalizedKey(Key) = NormalizedKey(K) Then
          GetString = V
@@ -106,55 +111,55 @@ Public Property Let Serialized(Serialized As String)
 
    mStore = StringReplace(StringReplace(Serialized, vbLf, ""), vbCr, "")
 End Property
-Private Function NormalizedKey(S As String) As String
+Private Function NormalizedKey(s As String) As String
 
-   NormalizedKey = UCase$(Trim$(S))
+   NormalizedKey = UCase$(Trim$(s))
 End Function
 Private Sub AddToStore(Section As String, Key As String, Value As String)
 
    mStore = mStore & Section & FieldDelemit & Key & FieldDelemit & Value & RecDelimit
 End Sub
-Private Function GetRecord(ByRef S) As String
+Private Function GetRecord(ByRef s) As String
 
    Dim P As Integer
    
-   P = InStr(S, RecDelimit)
+   P = InStr(s, RecDelimit)
    If P > 0 Then
-      GetRecord = Left$(S, P)
-      S = Mid$(S, P + 1)
+      GetRecord = Left$(s, P)
+      s = mId$(s, P + 1)
    End If
 End Function
-Private Sub SplitRecord(ByVal R As String, ByRef S As String, ByRef K As String, ByRef V As String)
+Private Sub SplitRecord(ByVal r As String, ByRef s As String, ByRef K As String, ByRef V As String)
 
    Dim P
    
-   P = InStr(R, FieldDelemit)
+   P = InStr(r, FieldDelemit)
    If P > 0 Then
-      S = Left$(R, P - 1)
-      R = Mid$(R, P + 1)
+      s = Left$(r, P - 1)
+      r = mId$(r, P + 1)
    Else
-      S = ""
+      s = ""
    End If
    
-   P = InStr(R, FieldDelemit)
+   P = InStr(r, FieldDelemit)
    If P > 0 Then
-      K = Left$(R, P - 1)
-      R = Mid$(R, P + 1)
+      K = Left$(r, P - 1)
+      r = mId$(r, P + 1)
    Else
       K = ""
    End If
    
-   P = InStr(R, RecDelimit)
+   P = InStr(r, RecDelimit)
    If P > 0 Then
-      V = Left$(R, P - 1)
+      V = Left$(r, P - 1)
    Else
       V = ""
    End If
 End Sub
 Private Sub RemoveFromStore(Section As String, Key As String)
 
-   Dim R As String
-   Dim S As String
+   Dim r As String
+   Dim s As String
    Dim K As String
    Dim V As String
    Dim NewStore As String
@@ -165,11 +170,11 @@ Private Sub RemoveFromStore(Section As String, Key As String)
    Do While Len(OldStore) > 0
       P = InStr(OldStore, RecDelimit)
       If P > 0 Then
-         R = Left$(OldStore, P)
-         OldStore = Mid$(OldStore, P + 1)
-         SplitRecord R, S, K, V
-         If NormalizedKey(Section) <> NormalizedKey(S) Or NormalizedKey(Key) <> NormalizedKey(K) Then
-            NewStore = NewStore & R
+         r = Left$(OldStore, P)
+         OldStore = mId$(OldStore, P + 1)
+         SplitRecord r, s, K, V
+         If NormalizedKey(Section) <> NormalizedKey(s) Or NormalizedKey(Key) <> NormalizedKey(K) Then
+            NewStore = NewStore & r
          End If
       Else
          NewStore = NewStore & OldStore

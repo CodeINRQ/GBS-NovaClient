@@ -1,259 +1,42 @@
-1.45.0.5
+1.50.0.113
 --------
-Starts from 1.45.0.4
-Fix bug in delayed rights in cslServerSQL.AddRole. Wrong summery och right for current and parent org.
-New CareTalk.ini setting: [Export]\ExportHoursOld=N; where N is a long value. Never export a dictation newer than N hours
+Starts from 1.50.0.112
+Changed filtering at Patid1 and Patid2
+Add ExtSystem to clsCurrPat for use in future
+Only filter on Patid2 for current patient from Asynja. Check in ClientAPI.Currpat
 
 
 
-1.45.0.4
----------
-Starts from 1.40.0.45
-New menu item "Help\Training" tag 1000305
-New menu item "Help\Activate license" tab 1000304
-
-New SysSettings.ShowMeUrl url to ShowMe web site. Default blank.
-New SysSettings.ShowMeSite string defining CareTalk site. Make statistics possible.
-New SysSettings.LicenseActivate boolean. if true Show menu item Help\Activate license
-New SysSettings.PlayerWarningHighRecLevel sets level for warning of high input signal. Def 50
-
-Changed function in frmMain for Export. Use new settings from ExportSettings
-Changed function EventMgr.CreateDictString from Private to Public
-
-New class clsShowMe
-
-Move frmDict.picWarning to lower position to make input to cboPriority possible
-
-New public method frmDict.ShowWarning
-
-Some logic moved from ClientAPI.Currpat to frmMain.ShowCurrPat, for better structure
-If open dictation in frmDict when change i CUrrPat: Warn if CurrPat.Patid <> frmDict.txtPatid
-
-New SysSettings.DictListCacheMax
-New SysSettings.DictListCacheRefresh
-New SysSettings.DictListCacheClean
-New SysSettings.TSOverlap
-
-Remove 
-
-1.40.0.xx
----------
-Starts from 1.40.0.39
+1.50.0.112
+--------
+Starts from 1.50.0.111
+When filtering at Patid2 only identical string compair.
 
 
-1.40.0.39
----------
-Starts from 1.40.0.38
-Don't bring frmMain to top when set frmIndicator to invisible
-Correct spelling för frmEditUser (Activera)
+1.50.0.111
+--------
+Starts from 1.50.0.108
+Get also Patid2 från CurrentPatient when create new dictation (for Asynja integration)
+Also filter with Patid2 in DictMgr (for Asynja integration)
+Call to sp s_Dictation_GetListByPatId2 with Patid and Patid2 of length 20
 
 
+1.50.0.108
+--------
+Starts from 1.50.0.107
+New method EmptyStore to clsStringStore
+Call EmptyStore first in clsSysSettings.Init
 
 
-1.40.0.38
----------
-Starts from 1.32.0.15
-
-Indicator (frmIndicator, modIndicator (earlier frmCurrTip and modCurrTip))
-New SysSettings: 
-	Indicator\Active
-	Indicator\BgColor
-	Indicator\LightColor
-	Indicator\LightTime
-	Indicator\DarkTime
-	Indicator\MaxBlink
-
-Enable menu File\Export initially in SetVisibleTabs
-
-New SysSettings:
-	DictInfo\KeepDictTypeNoDef
-	DictInfo\KeepDictTypeAlways
-frmMain.LastDictTypeIdForNewDictation
-New member clsDict.DictTypeIdNoDefault
-New parameter IdIfNoDeafult to clsDictTypeMgr.FillCombo
-
-New SysSetting:
-	PlayerWarningLowRecLevel (level 0-100, 0 no warning)
-ucDSSRecGUI: New Event WarningLowInputWhenRecording
-	New variables RecMonitor_
-	New subs StartRecMonitoring, StopRecMonitoring, CheckForLowRecLevel
-frmDict: Handle Event ucDSSRecGUI_WarningLowInputWhenRecording
-	New Picture with Label to warn user about low level
-
-frmEditUser: Both Deactivate na d activate user.
-	Change caption of button in SetEanbled
-	Changed event ActtivateClicked(Deactivate as boolean)
-	New texts för msgbox
-clsUserMgr.ActivateUser (earlier DeleteUser)
-	New logg texts
-clsServer.ActivateUser (earlier DeleteUser)
-
-Initial check in clsDictMgr.IsDictIdInDictIdList for DictIdListIdx=0
-
-Diasable frmMain when initializing Client object (DSSRec takes time)
-
-Alway unlock user account when saving user values. (clsServer.SaveUser)
-
-Always set ShutdownRequest in frmMain.Unload
-
-Don't check MandatoryData at Index button. We check later at Unload event
-
-clsDictMgr: AdjustDictBeforeCheckin added before server.CheckIn and ServerCheckInNew
-	Trim blanks for patid, patid2 and patname
-
-FormatPatIdForStorage moved to public module. Remove also + sign
-
-Strip Patid in ucSearch.cmdSearch before search (FormatPatIdForStorage)
+1.50.0.107
+--------
+Starts from 1.50.0.105
+New SysSettings Delete Tempfil
+New sub KillLocalTempDictationFile. Delete only local dss temp file if this setting is 0
+clsServerSQL don´t delete local file after CheckInNew. This is done by DictMgr
 
 
-
-1.32.0.14
----------
-Starts from 1.31.0.46
-WindowWatch in EventMgr: All ControlId is string instead of long, format x:y:z. For nested windows (frames) 0 is WindowText
-Embryo Indicator for demo  (frmCurrTip)
-
-
-1.31.0.46
----------
-Starts from 1.30.0.39
-New CareTalk.ini section [Autostart]
-New CareTalk.ini section [Export]
-
-
-1.30.0.41
----------
-Starts from 1.30.0.39
-Clear Note label in ucDictList when user change tree folder.
-New SysSetting Plyer/WindingSpeed default 6000
-
-
-1.30.0.39
----------
-Starts from 1.22.0.45
-Show dictation audit sorted by user. Pick user in users list.
-	Add patient to clsDictAudit
-	Change DictAuditMgr.CreateList to accept UserId as parameter
-	Add clsServerSQL.CreateDictAuditForUserList, DictAuditForUserGetNext
-	Change ucDictAuditList
-	Take care of rightclick in ucEditUser
-	Add item in popup menu
-Change parse function in HandleWindow 
-Calculate List and Listen rights from other rights. Prevents only admins from list or listen
-Only set TransciberId and create history when new status is WaitForSign or Transcribed
-Make clsCurrPat to a private class
-Init DSSRec.AutoRewind to 0 when recording hardware is connected
-Sort priorities by PriorityText in stead of Days
-Add lblNote at bottom of ucDictList where clsDict.Note is displayed
-Inactivate users instead of delete. InactivatedByUserId and inactivatedTime added to both table and class definition.
-Save ChangedByUserId in table and view with ShortName and LongName (also in variables for events)
-Show ChangedByUserLongname as tooltip when hover with mouse over Changed time in frmDict
-Remove InUse from status at ucSearch
-
-
-
-
-
-1.22.0.45
----------
-Starts from 1.22.0.44
-Change in modParse.FindPos 
-
-
-1.22.0.44
----------
-Starts from 1.22.0.38
-More trace in HandleWindow
-Remove spaces from patid in HandleWindow
-Don't save window position from frmDict if window state is not normal
-
-
-1.22.0.38
----------
-Starts from 1.22.0.32
-Use evironment variables in [Gru_Trace]\Filename (eg Filename=%temp%\Caretalk.log)
-New setting: [Gru_Trace]\FileGenerations gives generations of trace files
-Use array to cache Row-DictId in ucDictList to make list update faster when many dictations
-No extra CloseChoiceSelected fired when close frmDict with Close-function-key. Give right value in Text edit mode
-
-
-1.22.0.32
----------
-Starts from 1.22.0.30
-A few more exits when flag ShutDownRequest is set. Prevent runtime error when shutdown with open (new) diktation
-
-
-1.22.0.30
----------
-Starts from 1.21.0.66
-Don't CheckMandatoryData if Dict object not set. Prevent crash if fast press to red-blue buttons
-Disable Insert/Overwrite radio buttons i player when recording. User must stop before changing mode.
-Reset TopRow and LeftCol in lstDict after an update/resort
-New event handler to watch external window. OnWindow
-External system "Me" is used internal even if it is not registered in db tabel ExtSystem
-ClientAPI.Currpat and ClientAPI.RecordNew check PatName for character ¤. If included last part is KeyWord
-New system settings. Import\DefaultId, Import\DefaultName and Import\DefaultKeyWord
-
-
-1.21.0.66
----------
-Starts from 1.20.0.84
-Don't select all text when PatId or PatName in frmDict get focus
-Insert ucCloseChoice in tab order again
-Save top and left of frmDict in public variables and restore when form next load
-Change label text for cboPriority in frmDict to support shortcut
-Set Id column to type number in DictList
-Set ForwardFocus=False in ucCloseChoise to make it possible to tab to Close button
-Public method ExportListToFile in all user controls with fpList
-All fpList act on Ctrl-E for Export to file
-frmDict act on PlayerKeyWindowSize (Alt-Z)
-Allow Export on File menu for tabs: Dictlist, Stat, Hist, Admin, Logg
-Search in part of organization tree
-Search for given status
-Show number and total length of dications in list at status line
-Show user in user list even if HomeOrgId is null (only when ShowAll is checked)
-Check if user already exist before try to save new user
-Search (filter) in ucEditUsers
-Search order for drive of portable Import.DSSDrives
-Filter cboDictType and cboPriority according to selected orgunit
-Don't recreate DictList at new search or currentpat if not these folders opened
-Don't change to Current Pat folder if RecorderInUse (ClientAPI.CurrPat)
-Check for new CtCmdFile before restoring dictlist after EditExistingDictation
-New SysSetting PlayerHWcheckfreq divide timer (200 ms) to check hw change in addition to event
-
-
-1.20.0.84
-----------
-Starts from 1.10.0.237
-OrgPriority
-No default DictType or Priority for org unit force user to choose
-New tab for Organization on frmMain
-New columns for Warning and Colour in Priority table
-Priority warnings are shown with an icon i dictation list. New Column
-New column in dictation list for Transcribed Date
-Always sort dictations with warning at top
-New event ChangeWarnings(NumberOfWarnings) in ucDictList
-New roles C=Statistics; H=History; N=Unlocking; A=Auditing
-Last position for author and transcriber are saved with dictation in database
-New field for Note i dictation. Shown in dictlist as an icon. Hover text.
-Shortcuts to Volume and Speed now work
-Automatic status change when transcribing. Yellow efter 3 sek and green when <5 sek left
-Som new default values for system settings. Sound/UseImageField=Yes
-SelectAllText on all textboxes at GotFocus event
-Only show users with home org unit below current unit at Admin tab
-Set current org unit as home when creating a new user
-Check for show all at admin tab
-Word "Rights" is used instead of "Role" in Gui
-
-
-1.10.0.237
-----------
-Bug fix: ReDim Preserve mOrgDictTypeArr(mOrgDictTypeCount + 50) on right array
-Place frmMain at 50,50
-Text "För många diktat..." is now text no 1080114
-Use ShutDownRequest to make shure that opened dictations are checked in before closing application
-Remove End statements to make API work smoother
-New event declared in ini-file: OnCtCmdFile. Environment variables can be used in Path and filename
-Search button is default on Search tab. Reset button is cancel button.
-Don't store wrong soundlength of 0 to database.
-
+1.50.0.105
+--------
+Starts from 1.50.0.103
+Main purpose of this version is to increase OnWindow api to handle system KlarText

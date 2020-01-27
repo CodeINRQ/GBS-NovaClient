@@ -20,3 +20,5 @@ Public DictTypeId As Long
 Public OrgId As Long
 Public PriorityId As Long
 Public KeyWord As String
+
+Public ExtSystem As String

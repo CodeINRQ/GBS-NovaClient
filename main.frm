@@ -44,6 +44,7 @@ Begin VB.Form frmMain
       TabStop         =   0   'False
       Top             =   70
       Width           =   1215
+      Visible         =   0   'False
    End
    Begin MSComDlg.CommonDialog CDialog 
       Left            =   600
@@ -378,12 +379,9 @@ Begin VB.Form frmMain
       End
    End
    Begin DSSHEADERCTRLLibCtl.DssFileHeaderSimple DssFileHeaderSimple 
-      Height          =   375
       Left            =   720
       OleObjectBlob   =   "main.frx":43D4
-      TabIndex        =   20
       Top             =   6960
-      Width           =   375
    End
    Begin CompplusLib.MhZip MhZip 
       Left            =   8280
@@ -434,23 +432,18 @@ Begin VB.Form frmMain
          Index           =   3
       End
       Begin VB.Menu mnuHelp 
-         Caption         =   "&Kalibrera mikrofon"
+         Caption         =   "Kalibrera mikrofon"
          Enabled         =   0   'False
          Index           =   5
          Tag             =   "1000303"
       End
       Begin VB.Menu mnuHelp 
-         Caption         =   "&Utbildning"
-         Index           =   6
-         Tag             =   "1000305"
-      End
-      Begin VB.Menu mnuHelp 
          Caption         =   "-"
-         Index           =   7
+         Index           =   6
       End
       Begin VB.Menu mnuHelp 
-         Caption         =   "&Aktivera licens"
-         Index           =   8
+         Caption         =   "Aktivera licens"
+         Index           =   7
          Tag             =   "1000304"
       End
       Begin VB.Menu mnuHelp 
@@ -458,7 +451,7 @@ Begin VB.Form frmMain
          Index           =   9
       End
       Begin VB.Menu mnuHelp 
-         Caption         =   "&Om CareTalk..."
+         Caption         =   "Om CareTalk..."
          Index           =   10
          Tag             =   "1000301"
       End
@@ -517,7 +510,7 @@ Private UIStatusStack As New clsStack
 Private WithEvents mClient As clsClient
 Attribute mClient.VB_VarHelpID = -1
 
-Private WithEvents mDSSRec As CareTalkDSSRec3.DSSRecorder
+Private WithEvents mDSSRec As clsDSSRecorder
 Attribute mDSSRec.VB_VarHelpID = -1
 Private WithEvents mVx As clsVoiceXpress
 Attribute mVx.VB_VarHelpID = -1
@@ -611,26 +604,6 @@ Private Sub Form_Load()
    Set mClient = Client
    UIStatusClear
 
-   'We login just to get authenticationmethod and some settings
-   If Not Client.Server.DictationStorageOpen(StartUpServer, StartUpDatabase, "", "") Then
-      ErrorHandleExplicit "1000421", "", 1000421, "CareTalk databas kan inte öppnas", False
-      StartUpFormMainIsLoaded = 0
-      'Set mClient = Nothing
-      'Set Client = Nothing
-      Unload Me
-      End
-   End If
-   Client.SysSettings.Init "CT"
-      
-   frmMain.cmdSetHomeOrg.Visible = Client.SysSettings.UserAllowChangeHome
-   Client.CultureLanguage = Client.SysSettings.CultureDefaultLanguage
-   Client.Texts.NewLanguage Client.CultureLanguage
-
-   Client.ExtSystemMgr.Init
-   
-   GetValuesFromAutostartSection
-   GetValuesFromExportSection
-
    LoginFromExtSystem = Len(StartUpUserLoginName) > 0
    
    Msg = Client.SysSettings.ClientStopLoginMsg
@@ -651,6 +624,20 @@ Private Sub Form_Load()
       End
    End If
       
+      'We login just to get authenticationmethod and some settings
+   If Not Client.Server.DictationStorageOpen(StartUpServer, StartUpDatabase, "", "") Then
+      ErrorHandleExplicit "1000421", "", 1000421, "GrundigNova databas kan inte öppnas", False
+      StartUpFormMainIsLoaded = 0
+      'Set mClient = Nothing
+      'Set Client = Nothing
+      Unload Me
+      End
+   End If
+   
+   Client.SysSettings.Init "CT"
+   Client.CultureLanguage = Client.Server.ReadStationData("Culture", "Code", Client.SysSettings.CultureDefaultLanguage, "")
+   Client.Texts.NewLanguage Client.CultureLanguage
+   
    LoginResult = 1
    Do While LoginResult > 0 And LoginResult < 100
       LoginResult = Client.UserMgr.LoginUser(StartUpUserLoginName, StartUpPassword, StartUpExtSystem, StartUpExtPassword)
@@ -690,6 +677,17 @@ Private Sub Form_Load()
       End If
    Loop
    
+   Client.SysSettings.Init "CT"
+      
+   Me.picLogo.Visible = True
+   frmMain.cmdSetHomeOrg.Visible = Client.SysSettings.UserAllowChangeHome
+   Client.Texts.NewLanguage Client.CultureLanguage
+
+   Client.ExtSystemMgr.Init
+   
+   GetValuesFromAutostartSection
+   GetValuesFromExportSection
+   
    StatusBar.Panels(5).Text = Client.Server.Database & ":" & Client.User.LoginName
    
    Dim s As String
@@ -724,11 +722,12 @@ Private Sub Form_Load()
    ucVoiceXpress.Init mVx
    ucSearch.Init
    
+   Client.DSSRec.Initialize ""
    Client.DSSRec.GetHardWare Client.Hw
    Set mDSSRec = Client.DSSRec
    CheckHardware
    mDSSRec.CheckLicens RecordingAllowed
-   
+
    LastOrgidForNewDictation = Client.User.HomeOrgId
    LastDictTypeIdForNewDictation = -1
    
@@ -749,22 +748,12 @@ Private Sub Form_Load()
    tmrUpdateList.Enabled = True
    tmrCheckButtons.Enabled = True
    
-   LoadIndicator
-   
-   
-   EnableShowMeHelp Len(Client.SysSettings.ShowMeUrl) > 0
-   frmMain.mnuHelp(8).Visible = Client.SysSettings.LicenseActivate
-
    Exit Sub
    
 frmMain_Form_Load_Err:
    Eno = Err.Number
-   ErrorHandle "1000420", Eno, 1000420, "CareTalk kan inte startas", False
+   ErrorHandle "1000420", Eno, 1000420, "Grundig Nova kan inte startas", False
    End
-End Sub
-Private Sub EnableShowMeHelp(Value As Boolean)
-
-   frmMain.mnuHelp(6).Visible = Value
 End Sub
 Private Sub GetValuesFromAutostartSection()
 
@@ -788,18 +777,6 @@ Private Sub GetValuesFromExportSection()
    If Client.ExportSettings.ExportActive Then
       Client.ExportSettings.ExtSystem = Client.Settings.GetString(Section, "ExtSystem", "")
       Client.ExportSettings.IntervallInMinutes = Client.Settings.GetLong(Section, "IntervallInMinutes", "3")
-      
-      Client.ExportSettings.ExportDSSFileName = Client.Settings.GetString(Section, "ExportDSSFileName", "%DictId%")
-      
-      Client.ExportSettings.ExportDSSHeaderAuthor = Client.Settings.GetString(Section, "ExportDSSHeaderAuthor", "%AuthorLongName%")
-      Client.ExportSettings.ExportDSSHeaderTypist = Client.Settings.GetString(Section, "ExportDSSHeaderTypist", "%UserLongName%")
-      Client.ExportSettings.ExportDSSHeaderWorktype = Client.Settings.GetString(Section, "ExportDSSHeaderWorktype", "%ExtDictType%")
-      Client.ExportSettings.ExportDSSHeaderPriority = Client.Settings.GetString(Section, "ExportDSSHeaderPriority", "%ExtPriority%")
-      Client.ExportSettings.ExportDSSHeaderGroup = Client.Settings.GetString(Section, "ExportDSSHeaderGroup", "%ExtOrg%")
-      Client.ExportSettings.ExportValueStartSection = Client.Settings.GetString(Section, "ExportValueStartSection", "[")
-      Client.ExportSettings.ExportValueEndSection = Client.Settings.GetString(Section, "ExportValueEndSection", "]")
-      Client.ExportSettings.ExportHoursOld = Client.Settings.GetLong(Section, "ExportHoursOld", -1)
-
    End If
 End Sub
 Private Sub CheckHardware()
@@ -809,7 +786,6 @@ Private Sub CheckHardware()
    
    Client.DSSRec.GetHardWare NewValue
    If NewValue = GRU_HW_NONE And Client.Hw <> GRU_HW_NONE Then
-      TryToWakeGoneHardware
       Client.DSSRec.GetHardWare NewValue
    End If
    If Client.Hw <> NewValue Or Not NotFirst Then
@@ -832,7 +808,9 @@ Private Sub CheckHardware()
       Me.Toolbar1.Buttons(5).Visible = Client.OrgMgr.CheckUserRole(0, RTAuthor) And Client.SysSettings.ImportAllowTool
       Me.mnuFile(5).Visible = Client.OrgMgr.CheckUserRole(0, RTAuthor) And Client.SysSettings.ImportAllowMenu
    
-      VoiceXpressAllowed = Client.SysSettings.VoiceExpressActive And Client.Hw = GRU_HW_RECORD And mVx.VxInstalled
+      If Client.SysSettings.VoiceExpressActive And Client.Hw = GRU_HW_RECORD Then
+         VoiceXpressAllowed = mVx.VxInstalled
+      End If
    
       If VoiceXpressAllowed Then
          Me.Toolbar1.Buttons(3).Visible = Client.SysSettings.VoiceExpressShowInToolbar
@@ -1090,6 +1068,7 @@ Private Sub Form_Unload(Cancel As Integer)
    End If
    'On Error GoTo 0
    If Client.Server.StorageOpened And Client.User.UserId > 0 Then
+      Client.Server.WriteStationData "CT", "LastUsed", Format(Now, "YYYYMMDDHHNN") & "/" & CStr(Client.User.UserId)
       If frmMain.Tabs.TabVisible(tabHistList) Then
          Client.Server.WriteUserData "CT", "HL", ucHistList.GetSetting()
       End If
@@ -1108,6 +1087,9 @@ Private Sub Form_Unload(Cancel As Integer)
    Client.LoggMgr.Insert 1320106, LoggLevel_UserInfo, 0, Client.User.LoggData
    Unload frmCalibMic
    RestoreAudioSettings
+   
+   Client.DSSRec.Terminate
+
    Set mClient = Nothing
    Set Client = Nothing
    StartUpFormMainIsLoaded = 0
@@ -1139,7 +1121,7 @@ Private Sub mDictForm_CloseChoiceSelected(Index As Integer)
    mDictCloseChoice = Index
 End Sub
 
-Private Sub mDSSRec_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long)
+Private Sub mDSSRec_GruEvent(EventType As Gru_Event, Data As Long)
 
    'Debug.Print "GruEvent " & CInt(EventType)
    Select Case EventType
@@ -1198,7 +1180,6 @@ End Sub
 Private Sub mnuHelp_Click(Index As Integer)
 
    Dim Res As Integer
-   Dim SM As New clsShowMe
 
    Select Case Index
       Case 1
@@ -1206,11 +1187,8 @@ Private Sub mnuHelp_Click(Index As Integer)
          Res = WinHelp(frmMain.hWnd, App.HelpFile, HELP_CONTENTS, 0&)
       Case 5
          StartCalibration
-      Case 6
-         SM.ShowMeElearning mnuHelp(Index).Tag
-      Case 8
-         On Error Resume Next
-         Client.DSSRec.RegisterAndActivateLicense
+      Case 7
+         Client.DSSRec.RegisterAndActivateLicens
       Case 10
          frmAbout.Show vbModal
    End Select
@@ -1261,7 +1239,6 @@ Private Sub mVx_ChangeListening(NewValue As vxListeningEnum)
       End If
    End If
 End Sub
-
 
 Private Sub Tabs_Click(PreviousTab As Integer)
    
@@ -1354,15 +1331,11 @@ Private Sub DoExportOneOrgUnit(Org As clsOrg)
 
    Dim D As clsDict
    Dim TooMany As Boolean
-   Dim CreatedDateLimit As Date
    
-   CreatedDateLimit = DateAdd("h", -Client.ExportSettings.ExportHoursOld, Now)
    Client.DictMgr.CreateList Org.OrgId, 0, TooMany
    Do While Client.DictMgr.ListNextItem(D)
-      If D.Created < CreatedDateLimit Then
-         If Len(D.LockedByUserShortName) = 0 And D.StatusId = Recorded Then
-            DoExportOneDict D.DictId
-         End If
+      If Len(D.LockedByUserShortName) = 0 And D.StatusId = Recorded Then
+         DoExportOneDict D.DictId
       End If
    Loop
 End Sub
@@ -1370,13 +1343,10 @@ End Sub
 Private Sub DoExportOneDict(DictId As Long)
 
    Dim D As clsDict
-   Dim Fn As String
 
    If Client.DictMgr.CheckOut(D, DictId, True) = 0 Then
       SetDSSHeaderInformation D
-      
-      Fn = Client.EventMgr.CreateDictString(Client.ExportSettings.ExtSystem, 0, Client.ExportSettings.ExportDSSFileName, D)
-      If TryToCopyFile(D.LocalFilename, Client.ExportSettings.ExportDSSFilesToFolder & Fn) Then
+      If TryToCopyFile(D.LocalFilename, Client.ExportSettings.ExportDSSFilesToFolder & CStr(D.DictId) & ".dss") Then
          D.StatusId = Transcribed
          Client.DictMgr.CheckIn D, False
       Else
@@ -1389,37 +1359,28 @@ Private Sub SetDSSHeaderInformation(D As clsDict)
 
    On Error Resume Next
    frmMain.DssFileHeaderSimple.Open D.LocalFilename, 1
-   frmMain.DssFileHeaderSimple.Author = GetExportSectionFromValue(Client.EventMgr.CreateDictString(Client.ExportSettings.ExtSystem, 0, Client.ExportSettings.ExportDSSHeaderAuthor, D))
-   frmMain.DssFileHeaderSimple.Typist = GetExportSectionFromValue(Client.EventMgr.CreateDictString(Client.ExportSettings.ExtSystem, 0, Client.ExportSettings.ExportDSSHeaderTypist, D))
-   frmMain.DssFileHeaderSimple.Worktype = GetExportSectionFromValue(Client.EventMgr.CreateDictString(Client.ExportSettings.ExtSystem, 0, Client.ExportSettings.ExportDSSHeaderWorktype, D))
-   frmMain.DssFileHeaderSimple.Priority = CInt(GetExportSectionFromValue(Client.EventMgr.CreateDictString(Client.ExportSettings.ExtSystem, 0, Client.ExportSettings.ExportDSSHeaderPriority, D)))
-   frmMain.DssFileHeaderSimple.Group = GetExportSectionFromValue(Client.EventMgr.CreateDictString(Client.ExportSettings.ExtSystem, 0, Client.ExportSettings.ExportDSSHeaderGroup, D))
+   frmMain.DssFileHeaderSimple.Author = GetExtUserFromName(D.AuthorLongName)
+   frmMain.DssFileHeaderSimple.Typist = GetExtUserFromName(Client.User.LongName)
+   frmMain.DssFileHeaderSimple.Worktype = Client.ExtSystemMgr.GetExtDictType(Client.ExportSettings.ExtSystem, D.DictTypeId)
+   frmMain.DssFileHeaderSimple.Priority = CInt(Client.ExtSystemMgr.GetExtPriority(Client.ExportSettings.ExtSystem, D.PriorityId))
+   frmMain.DssFileHeaderSimple.Group = Client.ExtSystemMgr.GetExtOrg(Client.ExportSettings.ExtSystem, D.OrgId)
    frmMain.DssFileHeaderSimple.Close
 End Sub
-Private Function GetExportSectionFromValue(Value As String) As String
+Private Function GetExtUserFromName(Name As String) As String
 
    Dim P As Integer
-   Dim NewValue As String
-   Dim StartSection As String
-   Dim EndSection As String
+   Dim Author As String
    
-   NewValue = Value
-   
-   StartSection = Client.ExportSettings.ExportValueStartSection
-   If Len(StartSection) > 0 Then
-      P = InStr(Value, StartSection)
-      If P > 0 Then
-         NewValue = mId$(NewValue, P + 1)
-      End If
+   Author = Name
+   P = InStr(Name, "[")
+   If P > 0 Then
+      Author = mId$(Author, P + 1)
    End If
-   EndSection = Client.ExportSettings.ExportValueEndSection
-   If Len(EndSection) > 0 Then
-      P = InStr(NewValue, EndSection)
-      If P > 0 Then
-         NewValue = Left(NewValue, P - 1)
-      End If
+   P = InStr(Author, "]")
+   If P > 0 Then
+      Author = Left(Author, P - 1)
    End If
-   GetExportSectionFromValue = NewValue
+   GetExtUserFromName = Author
 End Function
 Private Sub tmrCheckCtCmdFiles_Timer()
 
@@ -1438,8 +1399,6 @@ Private Sub tmrUpdateList_Timer()
    Static OldUpdateInterval As Long
    Dim TickNow As Long
 
-   UpdateIndicator
-   
    If Not RecorderInUse Then
       TickNow = GetTickCount()
       If TickNow > NextTickForAction Then
@@ -1584,7 +1543,7 @@ Private Sub ucOrgTree_NewSelect(OrgId As Long, Txt As String)
 
    CurrentOrg = OrgId
    CurrentOrgText = Txt
-   Me.Caption = Client.Texts.Txt(1000417, "CareTalk") & " - " & CurrentOrgText
+   Me.Caption = Client.Texts.Txt(1000417, "Grundig Nova") & " - " & CurrentOrgText
    
    Me.ucSearch.SetNewCurrentOrg CurrentOrg, CurrentOrgText
    UpdateCurrentView
@@ -1595,6 +1554,7 @@ Private Sub UpdateCurrentView()
    Static PreviousOrg As Long
    Static AlreadyInThisUpdate As Boolean
    Dim Org As clsOrg
+   Dim ShowIndicatorNow As Boolean
    
    If AlreadyInThisUpdate Then Exit Sub
    AlreadyInThisUpdate = True
@@ -1667,6 +1627,22 @@ Private Sub UpdateCurrentView()
          Case tabDictList
             If CurrentOrg > 0 Then
                Me.ucDictList.GetData CurrentOrg
+               If CurrentOrg = 30005 Then
+                  If InStr(Client.SysSettings.IndicatorStyle, "A") > 0 Then
+                     ShowIndicatorNow = True
+                  Else
+                     If DictList_TotalNumber > 0 Then
+                         ShowIndicatorNow = True
+                     Else
+                        ShowIndicatorNow = False
+                     End If
+                  End If
+                  If ShowIndicatorNow Then
+                     ShowIndicator CStr(DictList_TotalNumber) & " " & Client.Texts.Txt(1000433, "diktat"), Client.CurrPatient.PatId
+                  Else
+                     ShowIndicator "", ""
+                  End If
+               End If
             End If
          Case tabStatList
             If CurrentOrg > 0 Then
@@ -1740,6 +1716,7 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
    
    If UseCurrPat Then
       Dict.Pat.PatId = Client.CurrPatient.PatId
+      Dict.Pat.PatId2 = Client.CurrPatient.PatId2
       Dict.Pat.PatName = Client.CurrPatient.PatName
       If Client.CurrPatient.DictTypeId > 0 Then
          Dict.DictTypeId = Client.CurrPatient.DictTypeId
@@ -1790,7 +1767,7 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
    ShowWindow Me.hWnd, SW_SHOW
    Select Case mDictCloseChoice
       Case 0
-         KillFileIgnoreError Dict.LocalFilename
+         KillLocalTempDictationFile Dict
          Dict.LocalFilename = ""
          Client.DictMgr.EmptyTempDictationInfo
       Case 1
@@ -1799,22 +1776,25 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
          Dict.StatusId = 20
          
          Client.DictMgr.SaveTempDictationInfo Dict, tdiNew
-         Client.DictMgr.CheckInNew Dict
-         Client.DictMgr.EmptyTempDictationInfo
+         If Client.DictMgr.CheckInNew(Dict) Then
+            Client.DictMgr.EmptyTempDictationInfo
+            
+            Client.EventMgr.OnDictEvent "OnNew", Dict
+            RaiseEvent OnNewDictation(Dict)
+         End If
          
-         Client.EventMgr.OnDictEvent "OnNew", Dict
-         RaiseEvent OnNewDictation(Dict)
       Case 2
          LastOrgidForNewDictation = Dict.OrgId
          LastDictTypeIdForNewDictation = Dict.DictTypeId
          Dict.StatusId = 30
          
          Client.DictMgr.SaveTempDictationInfo Dict, tdiNew
-         Client.DictMgr.CheckInNew Dict
-         Client.DictMgr.EmptyTempDictationInfo
-         
-         Client.EventMgr.OnDictEvent "OnNew", Dict
-         RaiseEvent OnNewDictation(Dict)
+         If Client.DictMgr.CheckInNew(Dict) Then
+            Client.DictMgr.EmptyTempDictationInfo
+            
+            Client.EventMgr.OnDictEvent "OnNew", Dict
+            RaiseEvent OnNewDictation(Dict)
+         End If
    End Select
    
    
@@ -1844,28 +1824,7 @@ RecordNewDictation_Err:
 End Sub
 Public Sub ShowNewCurrPat()
 
-   Dim BlankCurrPat As Boolean
-
    StatusBar.Panels(4) = Client.CurrPatient.PatId & " " & Client.CurrPatient.PatName
-   UpdateIndicator
-   
-   BlankCurrPat = Len(Client.CurrPatient.PatId) = 0 And Len(Client.CurrPatient.PatId2) = 0
-
-   If Not RecorderInUse Then
-      If Not BlankCurrPat Then
-         frmMain.ucOrgTree.PickOrgId 30005
-      Else
-         frmMain.ucOrgTree.PickOrgId Client.User.HomeOrgId
-      End If
-      frmMain.Tabs.Tab = 0
-   Else
-      On Error Resume Next
-      If FormatPatIdForStoring(mDictForm.txtPatId.Text) <> FormatPatIdForStoring(Client.CurrPatient.PatId) Then
-         mDictForm.ShowWarning Client.Texts.Txt(1030126, "Ny patient")
-      Else
-         mDictForm.ShowWarning ""
-      End If
-   End If
 End Sub
 
 Private Sub ImportNewDictation()
@@ -1920,22 +1879,24 @@ Private Sub ImportNewDictation()
          ShowWindow Me.hWnd, SW_SHOW
          Select Case mDictCloseChoice
             Case 0
-               KillFileIgnoreError Dict.LocalFilename
+               KillLocalTempDictationFile Dict
                Dict.LocalFilename = ""
             Case 1
                LastOrgidForNewDictation = Dict.OrgId
                LastDictTypeIdForNewDictation = Dict.DictTypeId
                Dict.StatusId = 20
-               Client.DictMgr.CheckInNew Dict
-               Client.EventMgr.OnDictEvent "OnNew", Dict
-               RaiseEvent OnNewDictation(Dict)
+               If Client.DictMgr.CheckInNew(Dict) Then
+                  Client.EventMgr.OnDictEvent "OnNew", Dict
+                  RaiseEvent OnNewDictation(Dict)
+               End If
             Case 2
                LastOrgidForNewDictation = Dict.OrgId
                LastDictTypeIdForNewDictation = Dict.DictTypeId
                Dict.StatusId = 30
-               Client.DictMgr.CheckInNew Dict
-               Client.EventMgr.OnDictEvent "OnNew", Dict
-               RaiseEvent OnNewDictation(Dict)
+               If Client.DictMgr.CheckInNew(Dict) Then
+                  Client.EventMgr.OnDictEvent "OnNew", Dict
+                  RaiseEvent OnNewDictation(Dict)
+               End If
          End Select
          mDictForm.SaveSettings DictFormSettings
          Unload mDictForm
@@ -2396,34 +2357,5 @@ End Function
 Private Sub KeepHardwareAlive()
 
    CheckHardware
-   
-'   Dim Adapter As ADAPTERSERVERLib.AdapterControl
-'   Dim S As String
-'
-'   On Error Resume Next
-'   Set Adapter = Client.DSSRec.Adapter
-'   If Adapter.IsOpen Then
-'      S = Adapter.ReceiveString(PCSTAT_ASK_KENNUNG)
-'      If Len(S) = 0 Then
-'         MsgBox "Borta"
-'      End If
-'   End If
-'   Set Adapter = Nothing
 End Sub
-Private Sub TryToWakeGoneHardware()
 
-   Debug.Print "TryToWakeGoneHardware"
-   'MsgWaitObj 2000
-   'Client.DSSRec.Adapter.Close
-   'MsgWaitObj 2000
-   'Client.DSSRec.Adapter.Open
-   'MsgWaitObj 2000
-
-'   Set Client.DSSRec = Nothing
-'   Set Client.DSSRecConnector = Nothing
-'
-'   Set Client.DSSRecConnector = New CareTalkDSSRec3.Connector
-'   Set Client.DSSRec = Client.DSSRecConnector.DSSRecorder
-'   Client.DSSRec.Play
-'   Client.DSSRec.Rec
-End Sub

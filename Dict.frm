@@ -16,29 +16,13 @@ Begin VB.Form frmDict
    StartUpPosition =   1  'CenterOwner
    Tag             =   "1030100"
    WhatsThisHelp   =   -1  'True
-   Begin VB.PictureBox picShowMe 
-      Appearance      =   0  'Flat
-      BorderStyle     =   0  'None
-      ForeColor       =   &H80000008&
-      Height          =   255
-      HelpContextID   =   1030000
-      Left            =   5760
-      MouseIcon       =   "Dict.frx":058A
-      MousePointer    =   99  'Custom
-      Picture         =   "Dict.frx":0894
-      ScaleHeight     =   255
-      ScaleWidth      =   255
-      TabIndex        =   40
-      Top             =   840
-      Width           =   255
-   End
    Begin VB.PictureBox picWarning 
       Height          =   735
       Left            =   240
       ScaleHeight     =   675
       ScaleWidth      =   8115
       TabIndex        =   38
-      Top             =   3200
+      Top             =   2400
       Width           =   8175
       Visible         =   0   'False
       Begin VB.Label lblWarning 
@@ -74,7 +58,7 @@ Begin VB.Form frmDict
    Begin VB.CheckBox chkChangeDict 
       Height          =   270
       Left            =   5160
-      Picture         =   "Dict.frx":0903
+      Picture         =   "Dict.frx":058A
       Style           =   1  'Graphical
       TabIndex        =   34
       Top             =   840
@@ -232,14 +216,14 @@ Begin VB.Form frmDict
    Begin VB.Image imgLess 
       Height          =   480
       Left            =   8565
-      Picture         =   "Dict.frx":0A39
+      Picture         =   "Dict.frx":06C0
       Top             =   405
       Width           =   480
    End
    Begin VB.Image imgMore 
       Height          =   480
       Left            =   8565
-      Picture         =   "Dict.frx":1303
+      Picture         =   "Dict.frx":0F8A
       Top             =   405
       Width           =   480
       Visible         =   0   'False
@@ -247,7 +231,7 @@ Begin VB.Form frmDict
    Begin VB.Image imgPinin 
       Height          =   210
       Left            =   8520
-      Picture         =   "Dict.frx":1BCD
+      Picture         =   "Dict.frx":1854
       Tag             =   "1030115"
       ToolTipText     =   "Alltid överst"
       Top             =   120
@@ -257,7 +241,7 @@ Begin VB.Form frmDict
    Begin VB.Image imgPin 
       Height          =   210
       Left            =   8520
-      Picture         =   "Dict.frx":1CA8
+      Picture         =   "Dict.frx":192F
       Tag             =   "1030114"
       ToolTipText     =   "Normalt fönster"
       Top             =   120
@@ -477,9 +461,8 @@ Public Event CloseChoiceSelected(Index As Integer)
 
 Public mForceUnload As Boolean
 
-Private WithEvents DSSRecorder As CareTalkDSSRec3.DSSRecorder
+Private WithEvents DSSRecorder As clsDSSRecorder
 Attribute DSSRecorder.VB_VarHelpID = -1
-
 Private FormFullHeight As Integer
 Private FormLowHeight As Integer
 
@@ -544,7 +527,7 @@ Private Sub SetChoiseFromChangeMode()
       ucCloseChoice.ChoiceValue = ChoiceValueBeforeCahngeMode
    End If
 End Sub
-Private Sub DSSRecorder_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long)
+Private Sub DSSRecorder_GruEvent(EventType As Gru_Event, Data As Long)
 
    Dim I As Integer
    Dim Pos As Long
@@ -589,7 +572,6 @@ End Sub
 
 Private Sub Form_Activate()
 
-   ShowWarning ""
    If LastfrmDictLeft <> 0 Or LastfrmDictTop <> 0 Then
       Me.Move LastfrmDictLeft, LastfrmDictTop
       TranslateForm Me
@@ -796,7 +778,6 @@ Private Sub Form_Load()
       
    mForceUnload = False
    
-   EnableShowMeHelp Len(Client.SysSettings.ShowMeUrl) > 0
    imgPin.Visible = Client.SysSettings.PlayerShowOnTop
    imgPinin.Visible = Client.SysSettings.PlayerShowOnTop
    imgLess.Visible = Client.SysSettings.PlayerShowSmallerWindow
@@ -1057,12 +1038,6 @@ Private Sub lblTxtTitle_Click()
    Clipboard.SetText txtTxt.Text
 End Sub
 
-Private Sub picShowMe_Click()
-
-   Dim SM As New clsShowMe
-   SM.ShowMeContextHelp picShowMe
-End Sub
-
 Private Sub txtNote_Change()
 
    If Screen.ActiveControl Is txtNote Then
@@ -1147,31 +1122,10 @@ Private Sub ucDSSRecGUI_PosChange(PosInMilliSec As Long, LengthInMilliSec As Lon
    mPos = PosInMilliSec
 End Sub
 
-Private Sub ucDSSRecGUI_WarningHighInputWhenRecording(TimeWithHighInput As Long, MinInput As Long)
-
-   Debug.Print "Warning: " & TimeWithHighInput & ":" & MinInput
-   If TimeWithHighInput > 0 Then
-      ShowWarning Client.Texts.Txt(1030125, "High input level")
-   Else
-      ShowWarning ""
-   End If
-
-End Sub
-
 Private Sub ucDSSRecGUI_WarningLowInputWhenRecording(TimeWithLowInput As Long, MaxInput As Long)
 
    Debug.Print "Warning: " & TimeWithLowInput & ":" & MaxInput
    If TimeWithLowInput > 0 Then
-      ShowWarning Client.Texts.Txt(1030124, "Low input level")
-   Else
-      ShowWarning ""
-   End If
-End Sub
-
-Public Sub ShowWarning(WarningText As String)
-
-   If Len(WarningText) > 0 Then
-      lblWarning.Caption = WarningText
       picWarning.Visible = True
       SetWindowTopMostAndForeground Me
    Else
@@ -1286,28 +1240,23 @@ Private Function CheckMandatoryData() As Boolean
 End Function
 Private Sub ShowFormCaption(Optional FormattedPos As String)
 
-   Dim S As String
+   Dim s As String
    
-   S = Client.SysSettings.PlayerCaption
-   If Len(S) = 0 Then
+   s = Client.SysSettings.PlayerCaption
+   If Len(s) = 0 Then
       Me.Caption = FormattedPos
    Else
-      S = ChangeParam(S, "PatId", mDict.Pat.PatIdFormatted)
-      S = ChangeParam(S, "PatName", mDict.Pat.PatName)
-      S = ChangeParam(S, "Pos", FormattedPos)
-      S = ChangeParam(S, "DictType", mDict.DictTypeText)
-      S = ChangeParam(S, "Priority", mDict.PriorityText)
-      S = ChangeParam(S, "Org", mDict.OrgText)
+      s = ChangeParam(s, "PatId", mDict.Pat.PatIdFormatted)
+      s = ChangeParam(s, "PatName", mDict.Pat.PatName)
+      s = ChangeParam(s, "Pos", FormattedPos)
+      s = ChangeParam(s, "DictType", mDict.DictTypeText)
+      s = ChangeParam(s, "Priority", mDict.PriorityText)
+      s = ChangeParam(s, "Org", mDict.OrgText)
       
-      Me.Caption = S
+      Me.Caption = s
    End If
 End Sub
-Private Function ChangeParam(ByVal S As String, ByVal Param As String, ByVal Value As String) As String
+Private Function ChangeParam(ByVal s As String, ByVal Param As String, ByVal Value As String) As String
 
-   ChangeParam = Replace(S, "%" & Param & "%", Value, 1, -1, vbTextCompare)
+   ChangeParam = Replace(s, "%" & Param & "%", Value, 1, -1, vbTextCompare)
 End Function
-Private Sub EnableShowMeHelp(Value As Boolean)
-
-   Me.picShowMe.Visible = Value
-End Sub
-

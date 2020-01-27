@@ -29,6 +29,7 @@ Private DictCacheTimeStampOrg(30050) As Double
 Private DictIdList(MaxNumberOfDictation) As Long
 Private DictIdListIdx As Integer
 
+Private DictListTimeStamp As Double
 Private FilterCol As Collection
 Private mSearchFilter As clsFilter
 Private mCurrPatientFilter As clsFilter
@@ -70,13 +71,8 @@ End Property
 
 Public Function CreateList(ByVal OrgId As Long, TimeStamp As Double, ByRef TooMany As Boolean) As Double
 
-   If DictCacheNumber >= Client.SysSettings.DictListCacheMax Then
-      If Client.SysSettings.DictListCacheMax > 0 Then
-         EmptyDictCache
-         TimeStamp = 0
-      End If
-   End If
-
+   DictListTimeStamp = TimeStamp
+   
    Set FilterCol = Nothing
    Set FilterCol = New Collection
    Select Case OrgId
@@ -135,19 +131,11 @@ Public Function ListNextItem(ByRef Dict As clsDict) As Boolean
    ListNextItem = False
 End Function
 
-Private Sub EmptyDictCache()
-
-   DictCacheNumber = 0
-   DictCacheIndex = 0
-   DictCacheTimeStampTot = -1
-   ClearOrgTimestamp
-End Sub
 Private Function FillCache(ByVal OrgId As Long, ByRef TooMany As Boolean) As Double
 
    Dim Dict As clsDict
    Dim MaxTimeStamp As Double
-   Static CleanNextTick As Long
-   Static ClearOrgTimeStampNextTick As Long
+   Static CleanCounter As Integer
    Dim FirstUpdate As Boolean
 
    If DictCacheTimeStampTot = 0 Then
@@ -158,7 +146,7 @@ Private Function FillCache(ByVal OrgId As Long, ByRef TooMany As Boolean) As Dou
       DictCacheTimeStampOrg(OrgId) = FillCacheFromFilter(OrgId, TooMany)
       FillCache = DictCacheTimeStampOrg(OrgId)
    Else
-      Client.Server.CreateDictList 0, 0, 0, 0, 255, DateAdd("s", -Client.SysSettings.DictListTSOverlap, CDate(DictCacheTimeStampTot))
+      Client.Server.CreateDictList 0, 0, 0, 0, 255, DictCacheTimeStampTot
       MaxTimeStamp = DictCacheTimeStampTot
       FirstUpdate = True
       Do While Client.Server.DictListGetNext(Dict)
@@ -171,28 +159,13 @@ Private Function FillCache(ByVal OrgId As Long, ByRef TooMany As Boolean) As Dou
       DictCacheTimeStampTot = MaxTimeStamp
       FillCache = MaxTimeStamp
       
-      If Client.SysSettings.DictListCacheClean > 0 Then
-         If CleanNextTick < GetTickCount() Then
-            CleanNextTick = GetTickCount() + Client.SysSettings.DictListCacheClean * 1000
-            CleanCacheFromFilter OrgId
-         End If
-      End If
-      If Client.SysSettings.DictListCacheRefresh > 0 Then
-         If ClearOrgTimeStampNextTick < GetTickCount() Then
-            ClearOrgTimeStampNextTick = GetTickCount() + Client.SysSettings.DictListCacheRefresh * 1000
-            ClearOrgTimestamp
-         End If
+      CleanCounter = CleanCounter + 1
+      If CleanCounter > 10 Then
+         CleanCounter = 0
+         CleanCacheFromFilter OrgId
       End If
    End If
 End Function
-Private Sub ClearOrgTimestamp()
-
-   Dim I As Integer
-   
-   For I = LBound(DictCacheTimeStampOrg) To UBound(DictCacheTimeStampOrg)
-      DictCacheTimeStampOrg(I) = -1
-   Next I
-End Sub
 Private Sub CleanCacheFromFilter(OrgId As Long)
 
    Dim Flt As clsFilter
@@ -488,11 +461,11 @@ Private Function CreateSQLFromFilter(Flt As clsFilter) As String
    
    CreateSQLFromFilter = Client.Server.BuildSQL(SelectClause, WhereClause, "", OrderClause)
 End Function
-Private Function RemoveDelimiters(S As String) As String
+Private Function RemoveDelimiters(s As String) As String
 
    Dim T As String
    
-   T = Trim$(S)
+   T = Trim$(s)
    T = Replace(T, "%", "")
    T = Replace(T, "'", "")
    T = Replace(T, "/", "")
@@ -595,9 +568,9 @@ Private Function FilterDictation(Dict As clsDict) As Boolean
          ElseIf Len(Flt.Pat.PatId2) = 0 Then
             FilteredByPatId = InStr(UCase$(Dict.Pat.PatId), UCase$(Flt.Pat.PatId)) > 0
          ElseIf Len(Flt.Pat.PatId) = 0 Then
-            FilteredByPatId = InStr(UCase$(Dict.Pat.PatId), UCase$(Flt.Pat.PatId2)) > 0
+            FilteredByPatId = UCase$(Dict.Pat.PatId2) = UCase$(Flt.Pat.PatId2)
          Else
-            FilteredByPatId = InStr(UCase$(Dict.Pat.PatId), UCase$(Flt.Pat.PatId)) > 0 Or InStr(UCase$(Dict.Pat.PatId), UCase$(Flt.Pat.PatId2)) > 0
+            FilteredByPatId = UCase$(Dict.Pat.PatId) = UCase$(Flt.Pat.PatId) Or UCase$(Dict.Pat.PatId) = UCase$(Flt.Pat.PatId2) Or UCase$(Dict.Pat.PatId2) = UCase$(Flt.Pat.PatId) Or Dict.Pat.PatId2 = UCase$(Flt.Pat.PatId2)
          End If
          
          If Flt.RecDateUsed Then
@@ -655,17 +628,17 @@ Private Function FilterByTxt(ByVal Dtxt As String, ByVal Ftxt As String) As Bool
    Loop
    FilterByTxt = True
 End Function
-Private Function GetWordFromString(ByRef S As String) As String
+Private Function GetWordFromString(ByRef s As String) As String
 
    Dim Pos As Integer
    
-   Pos = InStr(S, " ")
+   Pos = InStr(s, " ")
    If Pos > 0 Then
-      GetWordFromString = Trim$(Left$(S, Pos - 1))
-      S = Trim$(mId$(S, Pos + 1))
+      GetWordFromString = Trim$(Left$(s, Pos - 1))
+      s = Trim$(mId$(s, Pos + 1))
    Else
-      GetWordFromString = Trim$(S)
-      S = ""
+      GetWordFromString = Trim$(s)
+      s = ""
    End If
 End Function
 Private Sub UpdateOneDictInCache(ByVal Dict As clsDict, FirstUpdate As Boolean)
@@ -753,7 +726,7 @@ Public Function CheckIn(ByRef Dict As clsDict, ByVal DiscardChanges As Boolean) 
       MsgBox Client.Texts.Txt(1190102, "Diktatet kunde inte sparas")
    End If
    If Len(Dict.LocalFilename) > 0 Then
-      KillFileIgnoreError Dict.LocalFilename
+      KillLocalTempDictationFile Dict
       Dict.LocalFilename = ""
    End If
    CheckIn = Res
@@ -777,26 +750,26 @@ Public Function CreateNew(ByRef Dict As clsDict) As Integer
    Dict.DictTypeId = -1
    CreateNew = 0
 End Function
-Public Function CheckInNew(ByRef Dict As clsDict) As Integer
+Public Function CheckInNew(ByRef Dict As clsDict) As Boolean
 
-   Dim Res As Integer
+   Dim Res As Long
    
    AdjustDictBeforeCheckin Dict
    Res = Client.Server.CheckInNewDict(Dict)
    
-   If Res = 0 Then
+   If Res <> 0 Then
       Client.LoggMgr.Insert 1320112, LoggLevel_DictInfo, Dict.DictId, Dict.LoggData
       Client.DictAuditMgr.Insert Dict.DictId, AuditType_CheckInNew, Dict.StatusId
+      If Len(Dict.LocalFilename) Then
+         KillLocalTempDictationFile Dict
+         Dict.LocalFilename = ""
+      End If
    Else
       Client.LoggMgr.Insert 1320113, LoggLevel_DictFailure, Dict.DictId, Dict.LoggData
       MsgBox Client.Texts.Txt(1190102, "Diktatet kunde inte sparas")
    End If
    
-   If Len(Dict.LocalFilename) Then
-      KillFileIgnoreError Dict.LocalFilename
-      Dict.LocalFilename = ""
-   End If
-   CheckInNew = Res
+   CheckInNew = Res <> 0
 End Function
 
 Public Function IsThereDictations(OrgId As Long) As Boolean
@@ -814,10 +787,14 @@ End Function
 
 Private Sub Class_Initialize()
 
-   ClearOrgTimestamp
+   Dim I As Integer
+   
+   For I = LBound(DictCacheTimeStampOrg) To UBound(DictCacheTimeStampOrg)
+      DictCacheTimeStampOrg(I) = -1
+   Next I
 End Sub
 
-Public Sub SaveTempDictationInfo(D As clsDict, Mode As TempDictInfoTypeEnum)
+Public Sub SaveTempDictationInfo(D As clsDict, mode As TempDictInfoTypeEnum)
 
    Dim Fn As String
    Dim Settings As New clsSettings
@@ -827,8 +804,8 @@ Public Sub SaveTempDictationInfo(D As clsDict, Mode As TempDictInfoTypeEnum)
    Settings.IniFilePath = Fn
    
    Section = CStr(Client.User.UserId)
-   If Mode <> tdiUpdateInfo Then
-      Settings.WriteLong Section, "Mode", CLng(Mode)
+   If mode <> tdiUpdateInfo Then
+      Settings.WriteLong Section, "Mode", CLng(mode)
    End If
    Settings.WriteLong Section, "DictId", D.DictId
    Settings.WriteLong Section, "Status", D.StatusId
@@ -852,15 +829,15 @@ Public Function RestoreTempDictationInfo(D As clsDict) As TempDictInfoTypeEnum
    Dim Fn As String
    Dim Settings As New clsSettings
    Dim Section As String
-   Dim Mode As TempDictInfoTypeEnum
+   Dim mode As TempDictInfoTypeEnum
    
    Fn = CreateTempPath() & "CtRecovery.dat"
    Settings.IniFilePath = Fn
    
    Section = CStr(Client.User.UserId)
-   Mode = Settings.GetLong(Section, "Mode", tdiEmpty)
-   RestoreTempDictationInfo = Mode
-   If Mode <> tdiEmpty Then
+   mode = Settings.GetLong(Section, "Mode", tdiEmpty)
+   RestoreTempDictationInfo = mode
+   If mode <> tdiEmpty Then
       Set D = New clsDict
       D.DictId = Settings.GetLong(Section, "DictId", 0)
       D.StatusId = Settings.GetLong(Section, "Status", 0)

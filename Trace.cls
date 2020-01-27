@@ -22,8 +22,11 @@ Enum TraceLevelType
    Trace_Level_Warning = 4
    Trace_Level_FunctionCalls = 8
    Trace_Level_Events = 16
+   Trace_Level_DSSRec = 32
+   Trace_Level_Adapter = 64
    Trace_Level_Full = 255
 End Enum
+
 
 Enum TraceOutputType
    Trace_Output_None = 0
@@ -250,7 +253,7 @@ Private Function CreateEnvironString(ByVal StringWithEnvVariables As String) As 
    Loop While Pos2 > Pos1
    CreateEnvironString = StringWithEnvVariables
 End Function
-Private Function ChangeParam(ByVal S As String, ByVal Key As String, ByVal Value As String) As String
+Private Function ChangeParam(ByVal s As String, ByVal Key As String, ByVal Value As String) As String
 
-   ChangeParam = Replace(S, "%" & Key & "%", Value, 1, -1, vbTextCompare)
+   ChangeParam = Replace(s, "%" & Key & "%", Value, 1, -1, vbTextCompare)
 End Function

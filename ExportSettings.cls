@@ -17,15 +17,6 @@ Public ExportActive              As Boolean
 Public IntervallInMinutes        As Integer
 Public TimeForNextExport         As Double
 Public ExportDSSFilesToFolder    As String
-Public ExportDSSFileName         As String
-Public ExportDSSHeaderAuthor     As String
-Public ExportDSSHeaderTypist     As String
-Public ExportDSSHeaderWorktype   As String
-Public ExportDSSHeaderPriority   As String
-Public ExportDSSHeaderGroup      As String
-Public ExportValueStartSection   As String
-Public ExportValueEndSection     As String
 Public ExtSystem                 As String
-Public ExportHoursOld            As Long
 
 

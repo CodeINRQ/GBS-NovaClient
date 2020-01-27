@@ -65,12 +65,12 @@ Option Explicit
 
 Private Declare Function VCStoreIni _
     Lib "Helper.dll" _
-    Alias "_VolumeControl_StoreIni@4" (ByVal iniFileName As String) As Long
+    Alias "_VolumeControl_StoreIni@4" (ByVal IniFileName As String) As Long
 
 Private Declare Function VCPrepareSettingsForPlayer _
     Lib "Helper.dll" _
     Alias "_VolumeControl_PrepareSettingsForPlayer@8" (ByVal bWithRecorder As Long, _
-                                                       ByVal iniFileName As String) As Long
+                                                       ByVal IniFileName As String) As Long
 
 Private Declare Function VCResetSettingsForPlayer _
     Lib "Helper.dll" _
@@ -92,7 +92,7 @@ Private Declare Function VCUnShowRecordSettingsDialog _
     Lib "Helper.dll" _
     Alias "_VolumeControl_UnShowRecordSettingsDialog@0" () As Long
 
-Private WithEvents G As CareTalkDSSRec3.DSSRecorder
+Private WithEvents G As clsDSSRecorder
 Attribute G.VB_VarHelpID = -1
 Private TemFileName As String
 
@@ -158,7 +158,7 @@ Private Sub CleanUpBeforeClosing()
    KillFileIgnoreError TemFileName
    RecorderInUse = False
 End Sub
-Private Sub G_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long)
+Private Sub G_GruEvent(EventType As Gru_Event, Data As Long)
 
    On Error Resume Next
    Select Case EventType

@@ -52,15 +52,15 @@ Sub FillHistoryDemo(Days As Integer, MaxNumberPerDay As Integer, MinNumberPerDay
    Dim Rs As New ADODB.Recordset
    Dim Cr As Integer
    Dim I As Integer
-   Dim r As Integer
+   Dim R As Integer
    Dim Ex As Integer
    Dim DataB As ADODB.Connection
    
    Set DataB = Client.Server.Connection
    Rs.Open "Select * from History", DataB, adOpenDynamic, adLockPessimistic
    For Cr = 1 To Days
-      r = Int(Rnd * MaxNumberPerDay - MinNumberPerDay) + MinNumberPerDay
-      For I = 1 To r
+      R = Int(Rnd * MaxNumberPerDay - MinNumberPerDay) + MinNumberPerDay
+      For I = 1 To R
          Rs.AddNew
          Rs("DictId") = CLng(Cr) * CLng(1000) + CLng(I)
          Rs("Created") = DateAdd("d", -Cr, Now)

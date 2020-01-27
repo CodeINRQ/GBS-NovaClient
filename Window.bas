@@ -45,18 +45,28 @@ Function SaveForegroundWindow() As Long
    
    SaveForegroundWindow = LastForegroundWindow
 End Function
-Public Function FindControlOnWindow(hWnd As Long, ControlIdList As String, ByRef Caption As String, ByRef hControl As Long) As Boolean
+Public Function FindControlOnWindow(hWnd As Long, ControlStringList As String, ByRef Caption As String, ByRef hControl As Long) As Boolean
 
-   Dim ControlId As Long
+   Dim ControlString As String
+   Dim ControlId As String
+   Dim ControlCmd As String
+   Dim ControlIdLong As Long
+   Dim RectangleString As String
    Dim Hit As Boolean
+   Dim hControlHex As String
+   Dim hWndHex As String
+   Dim CurrControlId As Long
+   Dim ParentWinRect As Rect
+   Dim CurrWinRect As Rect
    
    hControl = hWnd
    Hit = False
    
-   Do While Len(ControlIdList) > 0
-      ControlId = GetLongFromList(ControlIdList, ":")
-      
-      If ControlId = 0 Then
+   Do While Len(ControlStringList) > 0
+      ControlString = ConsumeToNextChar(ControlStringList, ":")
+      SplitControlString ControlString, ControlCmd, ControlId
+     
+      If (UCase(ControlCmd) = "ID" Or ControlCmd = "") And ControlId = "0" Then
          Caption = winGetWindowText(hControl)
          FindControlOnWindow = True
          Exit Function
@@ -64,14 +74,44 @@ Public Function FindControlOnWindow(hWnd As Long, ControlIdList As String, ByRef
       
       Hit = False
       hWnd = hControl
+      hWndHex = Hex(hWnd)
+      winGetWindowRect hWnd, ParentWinRect
       hControl = 0
       Do
          hControl = winFindWindowEx(hWnd, hControl, vbNullString, vbNullString)
+         hControlHex = Hex(hControl)
          If hControl <> 0 Then
-            If winGetWindowControlId(hControl) = ControlId Then
-               Hit = True
-               Exit Do
-            End If
+            Select Case UCase(ControlCmd)
+               Case "ID", ""
+                  ControlIdLong = TryConvertLong(ControlId)
+            
+                  CurrControlId = winGetWindowControlId(hControl)
+                  If CurrControlId = ControlIdLong Then
+                     Hit = True
+                     Exit Do
+                  End If
+               Case "WR"
+                  RectangleString = GetWindowRectAsString(hControl)
+                  If ControlId = RectangleString Then
+                     Hit = True
+                     Exit Do
+                  End If
+               Case "CR"
+                  RectangleString = GetClientRectAsString(hControl)
+                  If ControlId = RectangleString Then
+                     Hit = True
+                     Exit Do
+                  End If
+               Case "RP"
+                  winGetWindowRect hControl, CurrWinRect
+                  RectangleString = GetRelativePositionAsString(ParentWinRect, CurrWinRect)
+                  If ControlId = RectangleString Then
+                     Client.Trace.AddRow Trace_Level_Events, "modWin", "FindControlOnWindow", "RP", RectangleString
+                     Hit = True
+                     Exit Do
+                  End If
+      
+            End Select
          Else
             Hit = False
          End If
@@ -89,6 +129,19 @@ Public Function FindControlOnWindow(hWnd As Long, ControlIdList As String, ByRef
       FindControlOnWindow = False
    End If
 End Function
+Private Sub SplitControlString(ControlString As String, ByRef ControlCmd As String, ByRef ControlId As String)
+
+   Dim Pos As Integer
+   
+   Pos = InStr(ControlString, "#")
+   If Pos > 0 Then
+      ControlCmd = Left(ControlString, Pos - 1)
+      ControlId = mId(ControlString, Pos + 1)
+   Else
+      ControlCmd = ""
+      ControlId = ControlString
+   End If
+End Sub
 Public Function GetWindowRectAsString(hWnd As Long) As String
 
    Dim Rectangle As Rect
@@ -110,6 +163,14 @@ Public Function GetClientRectAsString(hWnd As Long) As String
    End If
 End Function
 
+Public Function GetRelativePositionAsString(ParentRect As Rect, ThisRect As Rect) As String
+
+   GetRelativePositionAsString = FormatPositionAsString(ThisRect.Left - ParentRect.Left, ThisRect.Top - ParentRect.Top)
+End Function
+Public Function FormatPositionAsString(Left As Long, Top As Long) As String
+
+   FormatPositionAsString = CStr(Left) & "," & CStr(Top)
+End Function
 Public Function FormatRectAsString(Rect As Rect) As String
 
    FormatRectAsString = CStr(Rect.Left) & "," & CStr(Rect.Top) & "," & CStr(Rect.Right) & "," & CStr(Rect.Bottom)
@@ -147,27 +208,27 @@ Sub WindowNotFloating(F As Form)
    Call SetWindowPos(F.hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE Or SWP_NOMOVE)
 End Sub
 
-Sub WindowSetPositionFromString(F As Form, S)
+Sub WindowSetPositionFromString(F As Form, s)
 
    Dim P As Integer
    Dim WinState As Integer
 
    On Error Resume Next
-   If S <> "" Then
-      P = InStr(S, ",")
-      WinState = CLng(Left(S, P - 1))
-      S = mId$(S, P + 1)
-      P = InStr(S, ",")
-      F.Top = CLng(Left(S, P - 1))
-      S = mId$(S, P + 1)
-      P = InStr(S, ",")
-      F.Left = CLng(Left(S, P - 1))
-      S = mId$(S, P + 1)
-      P = InStr(S, ",")
-      F.Height = CLng(Left(S, P - 1))
-      S = mId$(S, P + 1)
-      P = InStr(S, ",")
-      F.Width = CLng(S)
+   If s <> "" Then
+      P = InStr(s, ",")
+      WinState = CLng(Left(s, P - 1))
+      s = mId$(s, P + 1)
+      P = InStr(s, ",")
+      F.Top = CLng(Left(s, P - 1))
+      s = mId$(s, P + 1)
+      P = InStr(s, ",")
+      F.Left = CLng(Left(s, P - 1))
+      s = mId$(s, P + 1)
+      P = InStr(s, ",")
+      F.Height = CLng(Left(s, P - 1))
+      s = mId$(s, P + 1)
+      P = InStr(s, ",")
+      F.Width = CLng(s)
       F.WindowState = WinState
    Else
       F.Left = (Screen.Width - F.Width) / 2
@@ -247,8 +308,13 @@ Public Function ForceForegroundWindow(ByVal hWnd As Long) As Boolean
       ForceForegroundWindow = CBool(nRet)
    End If
 End Function
-Private Function GetLongFromList(ByRef S As String, Delimit As String) As Long
+Private Function GetLongFromList(ByRef s As String, Delimit As String) As Long
 
    On Error Resume Next
-   GetLongFromList = CLng(ConsumeToNextChar(S, Delimit))
+   GetLongFromList = CLng(ConsumeToNextChar(s, Delimit))
+End Function
+Private Function TryConvertLong(s As String) As Long
+
+   On Error Resume Next
+   TryConvertLong = CLng(s)
 End Function

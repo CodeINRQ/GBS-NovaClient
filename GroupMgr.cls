@@ -19,6 +19,10 @@ Public Sub DeleteOneUserGroup(UserId As Long, GroupId As Long)
 
    Client.Server.DeleteOneUserGroup UserId, GroupId
 End Sub
+Public Sub DeleteAllUserGroup(UserId As Long)
+
+   Client.Server.DeleteAllUserGroup UserId
+End Sub
 Public Sub SaveUserGroup(UserId As Long, GroupId As Long)
 
    Dim Eno As Long

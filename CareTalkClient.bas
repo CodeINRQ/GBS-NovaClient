@@ -84,15 +84,15 @@ Public Const KeyAsciiExportList = 5
 Public Function GetDigtaDSSFolder() As String
 
    Dim DigtaDrive As String
-   Dim S As String
+   Dim s As String
     
    DigtaDrive = ""   'First try
    Do While GetNextPossibleDrive(DigtaDrive)
-      S = ""
+      s = ""
       On Error Resume Next
-      S = Dir(DigtaDrive & ":\DSS", vbDirectory)
+      s = Dir(DigtaDrive & ":\DSS", vbDirectory)
       On Error GoTo 0
-      If S = "DSS" Then
+      If s = "DSS" Then
          GetDigtaDSSFolder = DigtaDrive & ":\DSS\"
          Exit Function
       End If
@@ -101,11 +101,11 @@ End Function
 Private Function GetNextPossibleDrive(ByRef DriveLetter As String) As Boolean
 
    Dim DriveType As Long
-   Dim S As String
+   Dim s As String
    Dim Pos As Integer
    
-   S = Client.SysSettings.ImportDSSDrives
-   If Len(S) = 0 Then
+   s = Client.SysSettings.ImportDSSDrives
+   If Len(s) = 0 Then
       If Len(DriveLetter) = 0 Then
          DriveLetter = "C"    'skip A and B, they are probably diskette drives, I think...
       Else
@@ -124,13 +124,13 @@ Private Function GetNextPossibleDrive(ByRef DriveLetter As String) As Boolean
       If Len(DriveLetter) = 0 Then
          Pos = 1
       Else
-         Pos = InStr(S, DriveLetter)
+         Pos = InStr(s, DriveLetter)
          Pos = Pos + 1
       End If
-      If Pos > Len(S) Then
+      If Pos > Len(s) Then
          GetNextPossibleDrive = False
       Else
-         DriveLetter = mId$(S, Pos, 1)
+         DriveLetter = mId$(s, Pos, 1)
          GetNextPossibleDrive = True
       End If
    End If
@@ -160,24 +160,30 @@ Public Function CreateTempPath() As String
     lngResult = GetTempPath(MAX_BUFFER_LENGTH, strBufferString)
     CreateTempPath = mId(strBufferString, 1, lngResult)
 End Function
+Public Sub KillLocalTempDictationFile(Dict As clsDict)
+
+   If Client.SysSettings.DeleteTemp = 0 Then
+      KillFileIgnoreError Dict.LocalFilename
+   End If
+End Sub
 Public Sub KillFileIgnoreError(FileName As String)
 
    On Error Resume Next
    Kill FileName
 End Sub
-Public Function StringReplace(ByVal Str As String, SubStrToReplace As String, InsertInstead As String) As String
+Public Function StringReplace(ByVal str As String, SubStrToReplace As String, InsertInstead As String) As String
 
    Dim Pos As Integer
    
-   Pos = InStr(Str, SubStrToReplace)
+   Pos = InStr(str, SubStrToReplace)
    Do While Pos > 0
-      Str = Left$(Str, Pos - 1) & InsertInstead & mId$(Str, Pos + Len(SubStrToReplace))
+      str = Left$(str, Pos - 1) & InsertInstead & mId$(str, Pos + Len(SubStrToReplace))
       'Pos = 0
       On Error Resume Next
-      Pos = InStr(Pos + Len(InsertInstead), Str, SubStrToReplace)
+      Pos = InStr(Pos + Len(InsertInstead), str, SubStrToReplace)
       On Error GoTo 0
    Loop
-   StringReplace = Str
+   StringReplace = str
 End Function
 Public Function CheckPatId(ByVal PatId As String) As Boolean
 
@@ -272,39 +278,54 @@ Public Function FormatLength(Sec As Long) As String
    Dim Mins As Integer
    Dim Hours As Integer
    Dim Secs As Integer
-   Dim S As String
+   Dim s As String
 
    Secs = Sec Mod 60
    Mins = (Sec \ 60) Mod 60
    Hours = (Sec \ 60) \ 60
    If Hours <> 0 Then
-      S = Format$(Hours, "0") & ":"
+      s = Format$(Hours, "0") & ":"
    End If
-   FormatLength = S & Format$(Mins, "00") & ":" & Format$(Secs, "00")
+   FormatLength = s & Format$(Mins, "00") & ":" & Format$(Secs, "00")
 End Function
-Public Function WriteStringToTempFile(S As String) As String
+Public Function WriteStringToTempFile(s As String) As String
 
    Dim Pathname As String
-   Dim F As Integer
    
    Pathname = CreateTempFileName("tmp")
-   F = FreeFile
-   Open Pathname For Binary Access Write As #F
-   Put #F, , S
-   Close #F
+   WriteStringToFile s, Pathname
    WriteStringToTempFile = Pathname
 End Function
-Public Function ReadStringFromTempFile(Pathname As String) As String
+Public Sub WriteStringToFile(s As String, Pathname As String, Optional Append As Boolean)
 
    Dim F As Integer
-   Dim S As String
    
-   S = Space$(FileLen(Pathname))
+   F = FreeFile
+   Open Pathname For Binary Access Write As #F
+   If Append Then
+      Seek #F, LOF(F) + 1
+   End If
+   Put #F, , s
+   Close #F
+End Sub
+Public Function ReadStringFromTempFile(Pathname As String, Optional MaxLength As Long = 0, Optional Offset As Long = 0) As String
+
+   Dim F As Integer
+   Dim s As String
+   
+   If MaxLength <= 0 Then
+      MaxLength = FileLen(Pathname)
+   End If
+   s = Space$(MaxLength)
    F = FreeFile
    Open Pathname For Binary Access Read As #F
-   Get #F, , S
+   If Offset > 0 Then
+      Get #F, Offset, s
+   Else
+      Get #F, , s
+   End If
    Close #F
-   ReadStringFromTempFile = S
+   ReadStringFromTempFile = s
 End Function
 
 
@@ -326,16 +347,16 @@ End Function
 Public Function CommandValue(KeyWithoutSlash As String, Default As String) As String
 
    Dim CommandLine As String
-   Dim S As String
+   Dim s As String
 
    CommandLine = GlobalCommandLine
-   S = CommandString(CommandLine)
-   Do While S <> ""
-      If UCase$(S) = "/" & UCase$(KeyWithoutSlash) Then
+   s = CommandString(CommandLine)
+   Do While s <> ""
+      If UCase$(s) = "/" & UCase$(KeyWithoutSlash) Then
          CommandValue = CommandString(CommandLine)
          Exit Function
       End If
-      S = CommandString(CommandLine)
+      s = CommandString(CommandLine)
    Loop
    CommandValue = Default
 End Function
@@ -404,11 +425,11 @@ Sub Main()
 End Sub
 Public Function GetStationName() As String
    
-   Dim S As String
+   Dim s As String
    
-   S = Space(512)
-   GetComputerName S, Len(S)
-   GetStationName = Trim$(S)
+   s = Space(512)
+   GetComputerName s, Len(s)
+   GetStationName = Environ("USERDOMAIN") & "\" & Trim$(s)
 End Function
 
 Public Function MsgWaitObj(Interval As Long, _
@@ -534,14 +555,54 @@ TryToCopyFile_Err:
    TryToCopyFile = False
    Exit Function
 End Function
-Public Function FormatPatIdForStoring(ByVal S As String) As String
+Public Function FormatPatIdForStoring(ByVal s As String) As String
 
-   S = StringReplace(S, "-", "")
-   S = StringReplace(S, "/", "")
-   S = StringReplace(S, "\", "")
-   S = StringReplace(S, ".", "")
-   S = StringReplace(S, ",", "")
-   S = StringReplace(S, "+", "")
-   FormatPatIdForStoring = S
+   s = StringReplace(s, "-", "")
+   s = StringReplace(s, "/", "")
+   s = StringReplace(s, "\", "")
+   s = StringReplace(s, ".", "")
+   s = StringReplace(s, ",", "")
+   s = StringReplace(s, "+", "")
+   FormatPatIdForStoring = s
+End Function
+Public Function RC4(ByVal Expression As String, ByVal Password As String) As String
+   On Error Resume Next
+   Dim RB(0 To 255) As Integer, x As Long, y As Long, Z As Long, Key() As Byte, ByteArray() As Byte, Temp As Byte
+   If Len(Password) = 0 Then
+       Exit Function
+   End If
+   If Len(Expression) = 0 Then
+       Exit Function
+   End If
+   If Len(Password) > 256 Then
+       Key() = StrConv(Left$(Password, 256), vbFromUnicode)
+   Else
+       Key() = StrConv(Password, vbFromUnicode)
+   End If
+   For x = 0 To 255
+       RB(x) = x
+   Next x
+   x = 0
+   y = 0
+   Z = 0
+   For x = 0 To 255
+       y = (y + RB(x) + Key(x Mod Len(Password))) Mod 256
+       Temp = RB(x)
+       RB(x) = RB(y)
+       RB(y) = Temp
+   Next x
+   x = 0
+   y = 0
+   Z = 0
+   ByteArray() = StrConv(Expression, vbFromUnicode)
+   For x = 0 To Len(Expression)
+       y = (y + 1) Mod 256
+       Z = (Z + RB(y)) Mod 256
+       Temp = RB(y)
+       RB(y) = RB(Z)
+       RB(Z) = Temp
+       ByteArray(x) = ByteArray(x) Xor (RB((RB(y) + RB(Z)) Mod 256))
+   Next x
+   RC4 = StrConv(ByteArray, vbUnicode)
 End Function
 

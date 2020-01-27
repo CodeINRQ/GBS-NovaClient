@@ -208,7 +208,7 @@ Private Function CreateEnvironString(Delimit As Integer, ByVal C As String) As S
    Loop While Pos2 > Pos1
    CreateEnvironString = C
 End Function
-Private Function ChangeParam(ByVal S As String, ByVal Delimit As Integer, ByVal Param As String, ByVal Value As String) As String
+Private Function ChangeParam(ByVal s As String, ByVal Delimit As Integer, ByVal Param As String, ByVal Value As String) As String
 
    Dim Pos As Integer
    
@@ -217,7 +217,7 @@ Private Function ChangeParam(ByVal S As String, ByVal Delimit As Integer, ByVal 
       Value = Chr(Delimit) & Value & Chr(Delimit)
    End If
       
-   ChangeParam = Replace(S, "%" & Param & "%", Value, 1, -1, vbTextCompare)
+   ChangeParam = Replace(s, "%" & Param & "%", Value, 1, -1, vbTextCompare)
 End Function
 Public Sub Init()
 
@@ -315,40 +315,19 @@ Private Sub GetWatchWindowFromSettings(ExtSystem As String, EventName As String)
          E.WindowIdentClassName = UCase$(Client.Settings.GetString(EId, "IdentClassName", ""))
          E.WindowIdentCaption = UCase$(Client.Settings.GetString(EId, "IdentCaption", ""))
          E.WindowIdentParse = UCase$(Client.Settings.GetString(EId, "IdentParse", ""))
+         
          E.WindowIdentWindowRectangle = UCase$(Client.Settings.GetString(EId, "IdentWindowRectangle", ""))
          E.WindowIdentClientRectangle = UCase$(Client.Settings.GetString(EId, "IdentClientRectangle", ""))
          
-         E.WindowIdControlId = Client.Settings.GetString(EId, "IdControlId", "")
-         If Len(E.WindowIdControlId) > 0 Then
-            E.WindowIdParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "IdParse", "")))
-         End If
+         E.IdCheckCompatibility = Client.Settings.GetBool(EId, "IdCheckCompatibility", True)
          
-         E.WindowNameControlId = Client.Settings.GetString(EId, "NameControlId", "")
-         If Len(E.WindowNameControlId) > 0 Then
-            E.WindowNameParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "NameParse", "")))
-         End If
-         
-         E.WindowKeywordControlId = Client.Settings.GetString(EId, "KeywordControlId", "")
-         If Len(E.WindowKeywordControlId) > 0 Then
-            E.WindowKeywordParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "KeywordParse", "")))
-         End If
-         
-         E.WindowOrgControlId = Client.Settings.GetString(EId, "OrgControlId", "")
-         If Len(E.WindowOrgControlId) > 0 Then
-            E.WindowOrgParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "OrgParse", "")))
-         End If
-         
-         E.WindowPriControlId = Client.Settings.GetString(EId, "PriControlId", "")
-         If Len(E.WindowPriControlId) > 0 Then
-            E.WindowPriParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "PriParse", "")))
-         End If
-         
-         E.WindowDictTypeControlId = Client.Settings.GetString(EId, "DictTypeControlId", "")
-         If Len(E.WindowDictTypeControlId) > 0 Then
-            E.WindowDictTypeParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "DictTypeParse", "")))
-         End If
-         
-         E.WindowTipControlId = Client.Settings.GetString(EId, "TipControlId", "")
+         GetWatchWindowForOneControl EId, ExtSystem, "Id", E.IdControl
+         GetWatchWindowForOneControl EId, ExtSystem, "Name", E.NameControl
+         GetWatchWindowForOneControl EId, ExtSystem, "Keyword", E.KeywordControl
+         GetWatchWindowForOneControl EId, ExtSystem, "Org", E.OrgControl
+         GetWatchWindowForOneControl EId, ExtSystem, "Pri", E.PriControl
+         GetWatchWindowForOneControl EId, ExtSystem, "DictType", E.DictTypeControl
+         GetWatchWindowForOneControl EId, ExtSystem, "Tip", E.TipControl
    
          EventCol.Add E
          ThereAreWindowsToWatch = True
@@ -358,6 +337,17 @@ Private Sub GetWatchWindowFromSettings(ExtSystem As String, EventName As String)
       End If
    Else
       Set E = Nothing
+   End If
+End Sub
+Private Sub GetWatchWindowForOneControl(EId As String, ExtSystem As String, ControlName As String, EWC As clsEventWindowControl)
+
+   EWC.ControlId = Client.Settings.GetString(EId, ControlName & "ControlId", "")
+   If Len(EWC.ControlId) > 0 Then
+      EWC.Parse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, ControlName & "Parse", "")))
+      EWC.CheckFormat = Client.Settings.GetBool(EId, ControlName & "CheckFormat", False)
+      EWC.CheckMinLength = Client.Settings.GetLong(EId, ControlName & "CheckMinLength", 0)
+      EWC.CheckMaxLength = Client.Settings.GetLong(EId, ControlName & "CheckMaxLength", 100)
+      EWC.CheckFirstNum = Client.Settings.GetBool(EId, ControlName & "CheckFirstNum", False)
    End If
 End Sub
 Private Function CheckFileExistForEventId(ExtSystem As String, EventId As String) As Boolean
@@ -538,16 +528,16 @@ Private Sub HandleWatchOneWindow(E As clsEvent)
    Dim Pri As String
    Dim DictType As String
    
-   If Len(E.WindowTipControlId) > 0 Then
-      Client.WindowHandleForIndicator = GetHandleToTipControl(E.WindowHndl, E.WindowTipControlId)
+   If Len(E.TipControl.ControlId) > 0 Then
+      Client.WindowHandleForIndicator = GetHandleToTipControl(E.WindowHndl, E.TipControl.ControlId)
    End If
-   PatId = RemoveWhiteSpaceFromString(HandleWatchWindowField(E.WindowHndl, E.WindowIdControlId, E.WindowIdParse))
-   If IsValidPatientId(PatId) Then
-      PatName = HandleWatchWindowField(E.WindowHndl, E.WindowNameControlId, E.WindowNameParse)
-      KeyWord = HandleWatchWindowField(E.WindowHndl, E.WindowKeywordControlId, E.WindowKeywordParse)
-      Org = HandleWatchWindowField(E.WindowHndl, E.WindowOrgControlId, E.WindowOrgParse)
-      Pri = HandleWatchWindowField(E.WindowHndl, E.WindowPriControlId, E.WindowPriParse)
-      DictType = HandleWatchWindowField(E.WindowHndl, E.WindowDictTypeControlId, E.WindowDictTypeParse)
+   PatId = RemoveWhiteSpaceFromString(HandleWatchWindowField(E.WindowHndl, E.IdControl))
+   If IsValidPatientId(PatId, E) Then
+      PatName = HandleWatchWindowField(E.WindowHndl, E.NameControl)
+      KeyWord = HandleWatchWindowField(E.WindowHndl, E.KeywordControl)
+      Org = HandleWatchWindowField(E.WindowHndl, E.OrgControl)
+      Pri = HandleWatchWindowField(E.WindowHndl, E.PriControl)
+      DictType = HandleWatchWindowField(E.WindowHndl, E.DictTypeControl)
       
       If PatId <> E.WindowLastPatid Or PatName <> E.WindowLastName Or KeyWord <> E.WindowLastKeyword Or _
            Org <> E.WindowLastOrg Or Pri <> E.WindowLastPri Or DictType <> E.WindowLastDictType Then
@@ -565,12 +555,16 @@ Private Sub HandleWatchOneWindow(E As clsEvent)
       End If
    End If
 End Sub
-Private Function IsValidPatientId(PatId As String) As Boolean
+Private Function IsValidPatientId(PatId As String, E As clsEvent) As Boolean
 
    Dim FirstChar As String
 
-   FirstChar = Left$(PatId, 1)
-   IsValidPatientId = Len(PatId) >= 10 And FirstChar >= "0" And FirstChar <= "9"
+   If E.IdCheckCompatibility Then
+      FirstChar = Left$(PatId, 1)
+      IsValidPatientId = Len(PatId) >= 10 And FirstChar >= "0" And FirstChar <= "9"
+   Else
+      IsValidPatientId = True
+   End If
 End Function
 Private Function GetHandleToTipControl(hWnd As Long, ControlIdList As String) As Long
 
@@ -580,7 +574,7 @@ Private Function GetHandleToTipControl(hWnd As Long, ControlIdList As String) As
    FindControlOnWindow hWnd, ControlIdList, Caption, hControl
    GetHandleToTipControl = hControl
 End Function
-Private Function HandleWatchWindowField(hWnd As Long, ControlIdList As String, Parse As String) As String
+Private Function HandleWatchWindowField(hWnd As Long, EWC As clsEventWindowControl) As String
 
    Dim Caption As String
    Static LastCaption As String
@@ -588,16 +582,44 @@ Private Function HandleWatchWindowField(hWnd As Long, ControlIdList As String, P
    Dim hControl As Long
    Dim Ret As String
    
-   If Len(ControlIdList) > 0 Then
-      FindControlOnWindow hWnd, ControlIdList, Caption, hControl
-      Ret = FindString(Caption, Parse)
+   If Len(EWC.ControlId) > 0 Then
+      FindControlOnWindow hWnd, EWC.ControlId, Caption, hControl
+      Ret = FindString(Caption, EWC.Parse)
       If Caption <> LastCaption Then
          LastCaption = Caption
          Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, "HandleWatchWindowField", "Caption", Caption, Ret
       End If
+      Ret = AdjustValue(Ret, EWC)
       HandleWatchWindowField = Ret
    End If
 End Function
+Private Function AdjustValue(Value As String, EWC As clsEventWindowControl) As String
+
+   Dim FirstChar As String
+   Dim Ret As Boolean
+   Dim ValueLen As Integer
+
+   Ret = True 'asume ok until not
+   If EWC.CheckFormat Then
+      ValueLen = Len(Value)
+      If ValueLen < EWC.CheckMinLength Or ValueLen > EWC.CheckMaxLength Then
+         Ret = False
+      End If
+      FirstChar = Left$(Value, 1)
+      If EWC.CheckFirstNum Then
+         If FirstChar < "0" Or FirstChar > "9" Then
+            Ret = False
+         End If
+      End If
+   End If
+   
+   If Ret Then
+      AdjustValue = Value
+   Else
+      AdjustValue = ""
+   End If
+End Function
+
 Private Function EventId(ExtSystem As String, EventName As String) As String
 
    EventId = ExtSystem & " " & EventName
@@ -605,12 +627,12 @@ End Function
 Private Function GetString(Section As String, Entry As String, Default As String, IniFilePath As String) As String
 
    Dim I As Integer
-   Dim S As String * 1024
+   Dim s As String * 1024
    Dim Värde As String
 
    If Len(IniFilePath) > 0 Then
-      I = GetPrivateProfileString(Section, Entry, Default, S, Len(S), IniFilePath)
-      Värde = Left$(S, I)
+      I = GetPrivateProfileString(Section, Entry, Default, s, Len(s), IniFilePath)
+      Värde = Left$(s, I)
    Else
       Värde = Default
    End If
@@ -626,14 +648,14 @@ Private Sub Class_Terminate()
    frmMain.tmrCheckCtCmdFiles.Enabled = False
    Set EventCol = Nothing
 End Sub
-Private Function RemoveWhiteSpaceFromString(S As String) As String
+Private Function RemoveWhiteSpaceFromString(s As String) As String
 
    Dim I As Integer
    Dim Res As String
    Dim C As String
 
-   For I = 1 To Len(S)
-      C = mId$(S, I, 1)
+   For I = 1 To Len(s)
+      C = mId$(s, I, 1)
       If C > " " Then
          Res = Res & C
       End If

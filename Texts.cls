@@ -19,6 +19,12 @@ Private IdTable(TEXTS_MAX) As Long
 Private TextTable(TEXTS_MAX) As String
 Private ToolTipTable(TEXTS_MAX) As String
 Private NumberOfTexts As Integer
+Private mCtfpath As String
+
+Public Property Let Ctfpath(ByVal Path As String)
+
+   mCtfpath = Path
+End Property
 
 Private Sub ChangeHelpFile(LanguageCode As String)
 
@@ -44,27 +50,26 @@ Public Sub NewLanguage(Språkkod As String)
    Dim L As Integer
    Dim Id As String
    Dim S As String
-   Dim Filename As String
+   Dim FileName As String
    Dim Path As String
 
 
    ChangeHelpFile Språkkod
    Path = CreateTempPath()
-   Filename = Path & "Texts." & Språkkod
+   FileName = Path & "Texts." & Språkkod
 
    On Error Resume Next
 
-   Kill Filename
+   Kill FileName
    
-   frmMain.MhZip.QUnZip = "-s1qa2ws3ed """ & App.Path & "\txts.ctf"" texts." & Språkkod & " """ & Path & """"
-   'frmMain.MhZip.QUnZip = App.Path & "\txts.ctf"" texts." & Språkkod & " """ & App.Path & """"
+   frmMain.MhZip.QUnZip = "-s1qa2ws3ed """ & mCtfpath & """ texts." & Språkkod & " """ & Path & """"
 
    On Error GoTo 0
 
    NumberOfTexts = 0
    Fil = FreeFile
    On Error Resume Next
-   Open Filename For Input As Fil
+   Open FileName For Input As Fil
    If Err = 0 Then
    
       Do While Not EOF(Fil)
@@ -95,7 +100,7 @@ Public Sub NewLanguage(Språkkod As String)
       Close Fil
    End If
    On Error Resume Next
-   Kill Filename
+   Kill FileName
    On Error GoTo 0
 
    SortTextTable
@@ -199,3 +204,7 @@ Public Function ToolTip(Id As Long, ByVal Def As String) As String
 End Function
 
 
+Private Sub Class_Initialize()
+
+   mCtfpath = App.EXEName & "\txts.ctf"
+End Sub
