@@ -21,4 +21,5 @@ Public DictStatus    As Integer
 Public UserId        As Integer
 Public UserShortName As String
 Public StationId     As String
+Public Patient       As String
 

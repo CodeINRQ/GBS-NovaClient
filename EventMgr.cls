@@ -131,6 +131,8 @@ Private Function CreateDictString(ExtSystem As String, Delimit As Integer, ByVal
    C = ChangeParam(C, Delimit, "StatusText", D.StatusText)
    C = ChangeParam(C, Delimit, "Created", Format$(D.Created, "ddddd ttttt"))
    C = ChangeParam(C, Delimit, "Changed", Format$(D.Changed, "ddddd ttttt"))
+   C = ChangeParam(C, Delimit, "ChangedByUserShortName", D.ChangedByUserShortName)
+   C = ChangeParam(C, Delimit, "ChangedByUserLongName", D.ChangedByUserLongName)
    
    C = ChangeParam(C, Delimit, "DictTypeId", D.DictTypeId)
    C = ChangeParam(C, Delimit, "DictTypeText", D.DictTypeText)

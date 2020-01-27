@@ -274,7 +274,11 @@ Private Sub UpdateRowInList(Row As Integer, Usr As clsUser)
       .Row = Row
       .Col = -1
       .ForeColor = 0
-      .FontItalic = False
+      If Usr.InactivatedTime <> 0 Then
+         .FontItalic = True
+      Else
+         .FontItalic = False
+      End If
       
       C = 0:     SetCellValue Row, C, Usr.UserId
       C = C + 1: SetCellValue Row, C, Usr.LoginName

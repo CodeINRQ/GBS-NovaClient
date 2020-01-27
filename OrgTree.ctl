@@ -112,6 +112,8 @@ End Property
 
 Private Sub tvOrgTree_NodeClick(ByVal Node As MSComctlLib.Node)
 
+   Dim SelectedKey As String
+
    If Len(Node.Tag) > 0 Then
       If Node.Selected Then
          If Not LastNodeClicked Is Nothing Then
@@ -119,7 +121,9 @@ Private Sub tvOrgTree_NodeClick(ByVal Node As MSComctlLib.Node)
          End If
          Set LastNodeClicked = Node
          Node.Bold = True
-         RaiseEvent NewSelect(CLng(mId$(Node.Key, 2)), Node.Text)
+         SelectedKey = mId$(Node.Key, 2)
+         'tvOrgTree.ToolTipText = SelectedKey
+         RaiseEvent NewSelect(CLng(SelectedKey), Node.Text)
       End If
    Else
       If Not LastNodeClicked Is Nothing Then
@@ -172,3 +176,4 @@ Public Sub Clear()
    Level1Id = 0
    Set LastNodeClicked = Nothing
 End Sub
+

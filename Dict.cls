@@ -49,6 +49,9 @@ Public Pat              As clsPat
 
 Public Created          As Date
 Public Changed          As Date
+Public ChangedByUserId  As Long
+Public ChangedByUserShortName As String
+Public ChangedByUserLongName  As String
 Public SoundDeleted     As Date
 
 Public OrgId           As Long

@@ -180,10 +180,10 @@ Public Function CheckUserAllowListening(ByVal OrgId As Long) As Boolean
    Dim I As Integer
    Dim Org As clsOrg
    
-   If OrgId > 0 Then
+   If OrgId > 0 And OrgId < 30000 Then
       GetOrgFromId Org, OrgId
       If Not Org Is Nothing Then
-         If Org.Roles.GetOneRole(RTList) Then
+         If Org.Roles.Listen Then
             CheckUserAllowListening = True
          End If
       End If

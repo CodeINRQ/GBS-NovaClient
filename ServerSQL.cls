@@ -294,8 +294,8 @@ Public Sub SaveUser(Usr As clsUser)
    Else
       Rs("HomeOrgId") = Null
    End If
-   Rs("LoginFailureCount") = 0
-   Rs("UserLockedUntil") = Null
+   Rs("InactivatedByUserId") = SaveNullIfZero(Usr.InactivatedByUserId)
+   Rs("InactivatedTime") = SaveDate(Usr.InactivatedTime)
    Rs.Update
    Usr.UserId = Rs("UserId")
    CloseRecordset Rs
@@ -341,27 +341,8 @@ Public Sub DeleteUser(Usr As clsUser)
    OpenRecordset Rs, SQL
    
    If Not Rs.EOF Then
-      Rs.Delete
-   End If
-   Rs.Update
-   CloseRecordset Rs
-End Sub
-Public Sub UnlockUser(UserId As Long)
-
-   Dim Rs As ADODB.Recordset
-   Dim SQL As String
-   
-   SQL = BuildSQL("Select * from Users", "UserId=" & CStr(UserId), "", "")
-   
-   Set Rs = New ADODB.Recordset
-   Rs.CursorLocation = adUseClient
-   Rs.CursorType = adOpenDynamic
-   Rs.LockType = adLockPessimistic
-   OpenRecordset Rs, SQL
-   
-   If Not Rs.EOF Then
-      Rs("LoginFailureCount") = 0
-      Rs("UserLockedUntil") = Null
+      Rs("InactivatedByUserId") = Client.User.UserId
+      Rs("InactivatedTime") = Now
    End If
    Rs.Update
    CloseRecordset Rs
@@ -625,7 +606,7 @@ Public Function UserLogin(User As clsUser, _
    End If
    
    If mAuthMethod < 2 Then
-      SQL = BuildSQL("SELECT * FROM Users", "LoginName='" & UCase$(LoginName) & "'", "", "")
+      SQL = BuildSQL("SELECT * FROM Users", "LoginName='" & UCase$(LoginName) & "' AND InactivatedTime IS NULL", "", "")
       OpenRecordset Rs, SQL
       If Not Rs.EOF Then
          RightPassword = Rs("Password")
@@ -787,6 +768,40 @@ Private Sub ConvertDictAuditRsToClass(ByRef Rs As ADODB.Recordset, ByRef Audit A
       .DictStatus = Rs("DictStatus")
       .UserId = nvl(Rs("UserId"), 0)
       .UserShortName = nvl(Rs("UserShortName"), "")
+      .StationId = nvl(Rs("StationId"), "")
+   End With
+End Sub
+Public Sub CreateDictAuditForUserList(UserId As Long)
+
+   Dim Cmd As New ADODB.Command
+   
+   Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , UserId)
+   OpenStoredProcWithRsResultAndCommand RsDictAudit, "s_DictAudit_GetByUserId", Cmd
+End Sub
+Public Function DictAuditForUserGetNext(ByRef Audit As clsDictAudit) As Boolean
+
+   If RsDictAudit.EOF Then
+      RsDictAudit.Close
+      Set RsDictAudit = Nothing
+      DictAuditForUserGetNext = False
+      Exit Function
+   Else
+      ConvertDictAuditForUserRsToClass RsDictAudit, Audit
+      RsDictAudit.MoveNext
+      DictAuditForUserGetNext = True
+      Exit Function
+   End If
+End Function
+Private Sub ConvertDictAuditForUserRsToClass(ByRef Rs As ADODB.Recordset, ByRef Audit As clsDictAudit)
+
+   Set Audit = New clsDictAudit
+   With Audit
+      .Id = Rs("Id")
+      .DictId = Rs("DictId")
+      .AuditTime = Rs("AuditTime")
+      .AuditType = Rs("AuditType")
+      .DictStatus = Rs("DictStatus")
+      .Patient = nvl(Rs("PatId"), "") & "; " & nvl(Rs("PatName"), "")
       .StationId = nvl(Rs("StationId"), "")
    End With
 End Sub
@@ -953,7 +968,7 @@ Public Function OrgListGetNext(ByRef Org As clsOrg) As Boolean
       Else
          ConvertOrgRsToClass RsOrgList, Org
          RsOrgList.MoveNext
-         If Len(Org.Roles.Roles) > 0 Then
+         If Org.Roles.AnyAllowRoles() Then
             OrgListGetNext = True
             Exit Function
          End If
@@ -978,7 +993,7 @@ Private Sub ConvertOrgRsToClass(ByRef Rs As ADODB.Recordset, ByRef Org As clsOrg
       Set RolesFromParent = New clsRoles
       GetRolesFromOrgParent RolesFromParent, .OrgParent
       AddRole .Roles, RolesFromParent
-      If Len(RolesFromParent.Roles) = 0 Then
+      If Not RolesFromParent.AnyAllowRoles Then
          .OrgParent = 0
       End If
    End With
@@ -1097,6 +1112,9 @@ Private Sub ConvertDictRsToClass(ByRef Rs As ADODB.Recordset, ByRef Dict As clsD
    Dict.Pat.PatName = nvl(Rs("PatName"), "")
    Dict.Created = Rs("Created")
    Dict.Changed = nvl(Rs("Changed"), 0)
+   Dict.ChangedByUserId = nvl(Rs("ChangedByUserId"), 0)
+   Dict.ChangedByUserShortName = nvl(Rs("ChangedByUserShortName"), 0)
+   Dict.ChangedByUserLongName = nvl(Rs("ChangedByUserLongName"), 0)
    Dict.SoundLength = nvl(Rs("SoundLength"), 0)
    Dict.OrgId = Rs("OrgId")
    Dict.OrgText = Rs("OrgText")
@@ -1348,10 +1366,12 @@ Private Sub ConvertUsersRsToClass(ByRef Rs As ADODB.Recordset, ByRef Usr As clsU
    Usr.ShortName = Rs("ShortName")
    Usr.LongName = Rs("LongName")
    Usr.HomeOrgId = nvl(Rs("HomeOrgId"), 0)
+   Usr.InactivatedByUserId = nvl(Rs("InactivatedByUserId"), 0)
+   Usr.InactivatedTime = nvl(Rs("InactivatedTime"), 0)
 End Sub
 Public Sub CreatePriorityList()
 
-   OpenDisconnectedRecordset RsPriorityList, "SELECT * FROM Priority", "", "", "Days ASC"
+   OpenDisconnectedRecordset RsPriorityList, "SELECT * FROM Priority", "", "", "PriorityText ASC"
 End Sub
 Public Function PriorityListGetNext(Priority As clsPriority) As Boolean
 
@@ -1727,6 +1747,7 @@ Public Function CheckInDict(ByRef Dict As clsDict, DiscardChanges As Boolean)
                
                If Dirty Or Dict.SoundDirty Then
                   Dict.Changed = Now
+                  Dict.ChangedByUserId = Client.User.UserId
                End If
             'End If
             Client.Trace.AddRow Trace_Level_Full, "CID", "CIDI", "", CStr(Dict.DictId), CStr(Dict.StatusId)
@@ -1789,6 +1810,7 @@ Private Function CheckInDictInternal(ByRef Dict As clsDict) As Integer
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 20, SaveNullZeroLength(Dict.Pat.PatId2, 20))
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 50, SaveNullZeroLength(Dict.Pat.PatName, 50))
    Cmd.Parameters.Append Cmd.CreateParameter(, adDBTimeStamp, adParamInput, , SaveDate(Dict.Changed))
+   Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , SaveNullIfZero(Dict.ChangedByUserId))
    Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , Dict.OrgId)
    Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , Dict.DictTypeId)
    Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , Dict.AuthorId)
@@ -1806,7 +1828,7 @@ Private Function CheckInDictInternal(ByRef Dict As clsDict) As Integer
    Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , Dict.TranscriberPos)
 
    Client.Trace.AddRow Trace_Level_Full, "CIDI", "CIDIB", "", CStr(Dict.DictId), CStr(Dict.StatusId)
-   OpenStoredProcWithCommand "s_Dictation_CheckIn2", Cmd
+   OpenStoredProcWithCommand "s_Dictation_CheckIn3", Cmd
    Client.Trace.AddRow Trace_Level_Full, "CIDI", "CIDIC", "", CStr(Dict.DictId), CStr(Dict.StatusId)
    Dict.DictId = Cmd(0)
    Client.Trace.AddRow Trace_Level_Full, "CIDI", "CIDID", "", CStr(Dict.DictId), CStr(Dict.StatusId)
@@ -1840,6 +1862,8 @@ Private Sub AddRole(SumRoles As clsRoles, ByVal Roles2 As clsRoles)
 
    Dim I As Integer
    Dim Letter As String
+   Dim UcaseLetter As String
+   Dim UcaseSumRoles As String
    Dim R2 As String
    Dim DoWeAlreadyHaveARole As Boolean
    
@@ -1848,10 +1872,12 @@ Private Sub AddRole(SumRoles As clsRoles, ByVal Roles2 As clsRoles)
    
    DoWeAlreadyHaveARole = Len(SumRoles.Roles) > 0
    
-   R2 = UCase$(Roles2.Roles)
+   R2 = Roles2.Roles
    For I = 1 To Len(R2)
       Letter = mId$(R2, I, 1)
-      If InStr(SumRoles.Roles, Letter) = 0 Then
+      UcaseLetter = UCase(Letter)
+      UcaseSumRoles = UCase(SumRoles.Roles)
+      If InStr(UcaseSumRoles, UcaseLetter) = 0 Then
          SumRoles.Roles = SumRoles.Roles & Letter
       End If
    Next I

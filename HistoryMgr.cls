@@ -22,8 +22,6 @@ Public Enum HistTypeEnum
    htDaysFromCreated = 5
    htDaysFromExpiry = 6
    htAuthor = 7
-   htminutesFromCreated = 8
-   htminutesFromExpiry = 9
 End Enum
 
 Private mHistyear As Integer

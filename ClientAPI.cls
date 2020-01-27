@@ -183,8 +183,8 @@ Public Function CurrPat(PatId1 As String, _
    
    CurrPatFilter.StatusStart = Client.SysSettings.DictListCurrStatusStart
    CurrPatFilter.StatusEnd = Client.SysSettings.DictListCurrStatusEnd
-   CurrPatFilter.Pat.PatId = PatId1
-   CurrPatFilter.Pat.PatId2 = PatId2
+   CurrPatFilter.Pat.PatId = StringReplace(StringReplace(PatId1, "-", ""), "/", "")
+   CurrPatFilter.Pat.PatId2 = StringReplace(StringReplace(PatId2, "-", ""), "/", "")
    
    frmMain.ShowNewCurrPat
    

@@ -129,9 +129,9 @@ Private Sub cmdDemo_Click()
    DaysHist = CInt(txtDaysInHistory.Text)
    MaxPerDay = CInt(txtMaxPerDay.Text)
    MinPerDay = CInt(txtMinPerDay.Text)
-   On Error GoTo 0
+   'On Error GoTo 0
       
-
+   
    If MsgBox(Client.Texts.Txt(1070104, "Om du fortsätter kommer alla befinliga diktat och all historik att raderas!"), vbOKCancel) = vbOK Then
       RaiseEvent UIStatusSet(Client.Texts.Txt(1070105, "Generering av demo"), True)
       

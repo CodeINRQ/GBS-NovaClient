@@ -887,12 +887,13 @@ Private Sub InitPlayerBeforeUse()
    DSSRec.SetRecordMode GRU_OVERWRITE
    optInsert(1).Value = True
    
-   DSSRec.SetWindingSpeed 8000
+   DSSRec.SetWindingSpeed Client.SysSettings.PlayerWindingSpeed
    If Client.Hw = GRU_HW_RECORD Then
       DSSRec.SetBackspace 0
    Else
       DSSRec.SetBackspace mAutoRewind
    End If
+   
    DSSRec.GetPlaySpeed Speed
    sldSpeed.Value = Speed / 10 - 50
    

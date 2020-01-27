@@ -33,12 +33,14 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Public DictId As Long
+Public UserId As Long
 
 Private Sub Form_Load()
 
    CenterAndTranslateForm Me, frmMain
-   ucAuditList.RestoreSettings ""
    ucAuditList.DictId = DictId
+   ucAuditList.UserId = UserId
+   ucAuditList.RestoreSettings ""
    ucAuditList.GetDataNow
 End Sub
 

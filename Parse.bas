@@ -148,4 +148,3 @@ Private Function ConsumeToNextChar(ByRef S As String, C As String) As String
       S = ""
    End If
 End Function
-

@@ -48,9 +48,8 @@ Begin VB.Form frmPopup
       Caption         =   "UserList"
       Index           =   2
       Begin VB.Menu mnuUserList 
-         Caption         =   "Lås upp"
-         Index           =   20
-         Tag             =   "1340101"
+         Caption         =   "Spårning..."
+         Index           =   10
       End
    End
 End

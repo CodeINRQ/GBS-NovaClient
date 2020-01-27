@@ -243,7 +243,7 @@ End Sub
 
 Private Sub cmdSave_Click()
 
-   Dim R As Integer
+   Dim r As Integer
    Dim E As Boolean
    Dim D As Boolean
 
@@ -251,16 +251,16 @@ Private Sub cmdSave_Click()
    With lstOrgPriority
       Client.PriorityMgr.DeleteOrgPriorityByOrgId CurrOrgId
       
-      For R = 1 To .MaxRows
-         .Row = R
+      For r = 1 To .MaxRows
+         .Row = r
          .Col = 1: Debug.Print .Value
          .Col = 2: E = .Value
          .Col = 3: D = .Value
       
          If E Then
-            Client.PriorityMgr.SaveOrgPriority CurrOrgId, CInt(.GetRowItemData(R)), D
+            Client.PriorityMgr.SaveOrgPriority CurrOrgId, CInt(.GetRowItemData(r)), D
          End If
-      Next R
+      Next r
    End With
    Client.PriorityMgr.Init
    ShowPriorityForOrg

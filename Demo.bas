@@ -10,8 +10,8 @@ Sub FillDemoDictation(NumberOfDictations As Long)
       DoEvents
       Set D = New clsDict
       
-      D.Pat.PatId = Client.Custom.RndPatId()
-      D.Pat.PatName = Client.Custom.RndPatName()
+      D.Pat.PatId = RndPatid()
+      D.Pat.PatName = RndPatNamn()
       D.StatusId = RndStatus()
       If D.StatusId < Transcribed Then
          D.Created = rndDate(6)
@@ -52,15 +52,15 @@ Sub FillHistoryDemo(Days As Integer, MaxNumberPerDay As Integer, MinNumberPerDay
    Dim Rs As New ADODB.Recordset
    Dim Cr As Integer
    Dim I As Integer
-   Dim r As Integer
+   Dim R As Integer
    Dim Ex As Integer
    Dim DataB As ADODB.Connection
    
    Set DataB = Client.Server.Connection
    Rs.Open "Select * from History", DataB, adOpenDynamic, adLockPessimistic
    For Cr = 1 To Days
-      r = Int(Rnd * MaxNumberPerDay - MinNumberPerDay) + MinNumberPerDay
-      For I = 1 To r
+      R = Int(Rnd * MaxNumberPerDay - MinNumberPerDay) + MinNumberPerDay
+      For I = 1 To R
          Rs.AddNew
          Rs("DictId") = CLng(Cr) * CLng(1000) + CLng(I)
          Rs("Created") = DateAdd("d", -Cr, Now)
@@ -93,6 +93,101 @@ Function RndDictFile() As String
    TFn = CreateTempFileName("")
    FileCopy App.Path & "\DemoDict\" & CStr(Int((Rnd * 4) + 1)) & ".dss", TFn
    RndDictFile = TFn
+End Function
+Function RndPatid() As String
+
+   Dim S As String
+   Dim I As Integer
+   
+   If Rnd > 0.9 Then
+      S = "20" & Format$(Int(Rnd * 5), "00")
+   Else
+      S = "19" & Format$(Int(Rnd * 100), "00")
+   End If
+   S = S & Format$(Int(Rnd * 12) + 1, "00")
+   S = S & Format$(Int(Rnd * 28) + 1, "00")
+   S = S & Format$(Int(Rnd * 1000), "000")
+   For I = 0 To 9
+      If CheckPatId(S & Chr$(Asc("0") + I)) Then
+         RndPatid = S & Chr$(Asc("0") + I)
+         Exit Function
+      End If
+   Next I
+   RndPatid = S & "0"
+   
+'   S = Format$(Int(Rnd * 28) + 1, "00")
+'   S = S & Format$(Int(Rnd * 12) + 1, "00")
+'   If Rnd > 0.9 Then
+'      S = S & Format$(Int(Rnd * 5), "00")
+'   Else
+'      S = S & Format$(Int(Rnd * 100), "00")
+'   End If
+'   S = S & Format$(Int(Rnd * 100000), "00000")
+'   RndPatid = S
+End Function
+Function RndFörnamn() As String
+
+   Dim I As Integer
+   
+   I = Int(Rnd * 21)
+   
+   Select Case I
+      Case 0:  RndFörnamn = "Jenny"
+      Case 1:  RndFörnamn = "Lars"
+      Case 2:  RndFörnamn = "Eva"
+      Case 3:  RndFörnamn = "Frida"
+      Case 4:  RndFörnamn = "Sven"
+      Case 5:  RndFörnamn = "Per"
+      Case 6:  RndFörnamn = "Björn"
+      Case 7:  RndFörnamn = "Olof"
+      Case 8:  RndFörnamn = "Matilda"
+      Case 9:  RndFörnamn = "Sverker"
+      Case 10: RndFörnamn = "Ulf"
+      Case 11: RndFörnamn = "Ture"
+      Case 12: RndFörnamn = "Charlotte"
+      Case 13: RndFörnamn = "Pelle"
+      Case 14: RndFörnamn = "Ludvig"
+      Case 15: RndFörnamn = "Adam"
+      Case 16: RndFörnamn = "Svante"
+      Case 17: RndFörnamn = "Lotta"
+      Case 18: RndFörnamn = "Lena"
+      Case 19: RndFörnamn = "Emma"
+      Case 20: RndFörnamn = "Josephin"
+   End Select
+End Function
+Function RndEfternamn() As String
+
+   Dim I As Integer
+   
+   I = Int(Rnd * 21)
+   
+   Select Case I
+      Case 0:  RndEfternamn = "Andersson"
+      Case 1:  RndEfternamn = "Petersson"
+      Case 2:  RndEfternamn = "Larsson"
+      Case 3:  RndEfternamn = "Blomgren"
+      Case 4:  RndEfternamn = "Svensson"
+      Case 5:  RndEfternamn = "Persson"
+      Case 6:  RndEfternamn = "Lindström"
+      Case 7:  RndEfternamn = "Hålgersson"
+      Case 8:  RndEfternamn = "Lundström"
+      Case 9:  RndEfternamn = "Zetterström"
+      Case 10: RndEfternamn = "Green"
+      Case 11: RndEfternamn = "Hagberg"
+      Case 12: RndEfternamn = "Grip"
+      Case 13: RndEfternamn = "Storm"
+      Case 14: RndEfternamn = "Johansson"
+      Case 15: RndEfternamn = "Ringqvist"
+      Case 16: RndEfternamn = "Carlsson"
+      Case 17: RndEfternamn = "Stolpe"
+      Case 18: RndEfternamn = "Fransson"
+      Case 19: RndEfternamn = "Nilssson"
+      Case 20: RndEfternamn = "Petersson"
+   End Select
+End Function
+Function RndPatNamn() As String
+
+   RndPatNamn = RndFörnamn() & " " & RndEfternamn()
 End Function
 Function RndOrg() As Long
 

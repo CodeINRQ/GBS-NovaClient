@@ -16,7 +16,7 @@ Begin VB.Form frmEditUser
    StartUpPosition =   1  'CenterOwner
    Tag             =   "1050100"
    Begin VB.CommandButton cmdDelete 
-      Caption         =   "Ta bort"
+      Caption         =   "Inaktivera"
       Height          =   375
       Left            =   3360
       TabIndex        =   14
@@ -38,8 +38,8 @@ Begin VB.Form frmEditUser
       TabIndex        =   1
       Top             =   360
       Width           =   3135
-      _extentx        =   5530
-      _extenty        =   7435
+      _ExtentX        =   5530
+      _ExtentY        =   7435
    End
    Begin VB.TextBox txtLongName 
       Height          =   285
@@ -286,7 +286,7 @@ Private Sub SetEnabled()
    Enbl = Enbl And LCase$(UserToEdit.ShortName) <> "sa"
    'Enbl = Enbl And lstUserGroup.SelCount > 0
    cmdSave.Enabled = Enbl
-   cmdDelete.Enabled = UserToEdit.UserId > 0
+   cmdDelete.Enabled = UserToEdit.UserId > 0 And UserToEdit.InactivatedTime = 0
 End Sub
 
 Private Sub Form_Load()

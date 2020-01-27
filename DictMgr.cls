@@ -290,11 +290,6 @@ Private Function IsDictIdInDictIdList(DictId As Long) As Boolean
    Dim L As Long
    Dim I As Long
    
-   If DictIdListIdx = 0 Then        'Take care of strange behaviour if no match, better not to take away
-      IsDictIdInDictIdList = True
-      Exit Function
-   End If
-   
    H = DictIdListIdx - 1
    L = 0
    Do

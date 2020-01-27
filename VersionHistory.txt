@@ -1,45 +1,35 @@
-1.23.0.58
+1.30.0.41
 ---------
-Starts from 1.23.0.55
-New SysSetting History/ShowMinutes default False
-Don't show MinuteHistory if not SysSetting.historyShowMinutes
-
-New function FormatPatIdForStoring in clsCustom (moved from clsPat)
-Use FormatPatIdForStoring before search (cmdSearch)
-Use FormatPatIdForStoring in CheckPatId (clsCustom_CheckPatId) (Standard and Dk)
-
-Initial check in clsDictMgr.IsDictIdInDictIdList for DictIdListIdx=0
-
-Diasable frmMain when initializing Client object (DSSRec takes time)
-
-1.23.0.55
----------
-History type 8 and 9 added for Hilleröd, together with update för stored procedure
+Starts from 1.22.0.39
+Clear Note label in ucDictList when user change tree folder.
+New SysSetting Plyer/WindingSpeed default 6000
 
 
-1.23.0.53
----------
-Nytt språk NL
-
-
-1.23.0.52
+1.30.0.39
 ---------
 Starts from 1.22.0.45
-Make clsCurrPat to a private class
-New SysSettings.UserShowHome and SysSettings.UserHomeAsDefault
-New SysSettings.CustomStyle
-clsCustom new abstract class with implementations clsCusom_Standard and clsCustom_Dk
-Tag for cmdSetHomeUnit
-New function clsServer.UnlockUser
-New function clsUserMgr.UnlockUser
-Rightclick in user list for unlock
-Alway unlock user account when saving user values. (clsServer.SaveUser)
-Always set ShutdownRequest in frmMain.Unload
-New SysSetting.UserAutoLogoffMinutes
-Call frmMain_Resize in load event after changing controls
-Don't check MandatoryData at Index button. We check later at Unload event
-Init DSSRec.AutoRewind to 0 when recording hardware is connected
+Show dictation audit sorted by user. Pick user in users list.
+	Add patient to clsDictAudit
+	Change DictAuditMgr.CreateList to accept UserId as parameter
+	Add clsServerSQL.CreateDictAuditForUserList, DictAuditForUserGetNext
+	Change ucDictAuditList
+	Take care of rightclick in ucEditUser
+	Add item in popup menu
+Change parse function in HandleWindow 
+Calculate List and Listen rights from other rights. Prevents only admins from list or listen
 Only set TransciberId and create history when new status is WaitForSign or Transcribed
+Make clsCurrPat to a private class
+Init DSSRec.AutoRewind to 0 when recording hardware is connected
+Sort priorities by PriorityText in stead of Days
+Add lblNote at bottom of ucDictList where clsDict.Note is displayed
+Inactivate users instead of delete. InactivatedByUserId and inactivatedTime added to both table and class definition.
+Save ChangedByUserId in table and view with ShortName and LongName (also in variables for events)
+Show ChangedByUserLongname as tooltip when hover with mouse over Changed time in frmDict
+Remove InUse from status at ucSearch
+
+
+
+
 
 1.22.0.45
 ---------

@@ -22,9 +22,7 @@ Public Sub SaveRoles(Roles As clsRoles)
    Dim Eno As Long
 
    On Error GoTo SaveRoles_Err
-   If Len(Roles.Roles) > 0 Then
-      Roles.List = True
-   End If
+   
    Client.Server.SaveRoles Roles
    Client.LoggMgr.Insert 1320110, LoggLevel_SysAdmin, 0, Roles.LoggData
    Exit Sub

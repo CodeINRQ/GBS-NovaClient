@@ -47,6 +47,7 @@ Const Yellow = &HC0FFFF
 Const Gray = &HC0C0C0
 
 Public DictId        As Long
+Public UserId        As Long
 
 Private Sub lstAudit_KeyPress(KeyAscii As Integer)
 
@@ -157,7 +158,11 @@ Private Sub SetupSheet(Spread As fpSpread)
       Col = Col + 1: SetupColumn Spread, 1, Col, Client.Texts.Txt(1350101, "Tid"), TypeHAlignLeft, 15, White
       Col = Col + 1: SetupColumn Spread, 1, Col, Client.Texts.Txt(1350102, "Text"), TypeHAlignLeft, 15, White
       Col = Col + 1: SetupColumn Spread, 1, Col, Client.Texts.Txt(1350103, "Status"), TypeHAlignLeft, 15, White
-      Col = Col + 1: SetupColumn Spread, 1, Col, Client.Texts.Txt(1350104, "Användare"), TypeHAlignLeft, 12, White
+      If DictId <> 0 Then
+         Col = Col + 1: SetupColumn Spread, 1, Col, Client.Texts.Txt(1350104, "Användare"), TypeHAlignLeft, 12, White
+      Else
+         Col = Col + 1: SetupColumn Spread, 1, Col, Client.Texts.Txt(1350107, "Patient"), TypeHAlignLeft, 12, White
+      End If
       Col = Col + 1: SetupColumn Spread, 1, Col, Client.Texts.Txt(1350105, "Station"), TypeHAlignLeft, 12, White
       .MaxCols = Col
       
@@ -196,13 +201,17 @@ Public Sub GetDataNow()
    
    ClearWorkBook lstAudit
    Row = 1
-   Client.DictAuditMgr.CreateList DictId
+   Client.DictAuditMgr.CreateList DictId, UserId
    Do While Client.DictAuditMgr.GetNext(Audit)
       Col = 0
       Col = Col + 1: SetCellValue Row, Col, Format$(Audit.AuditTime, "ddddd ttttt")
       Col = Col + 1: SetCellValue Row, Col, Client.Texts.Txt(1370100 + Audit.AuditType, CStr(Audit.AuditType))
       Col = Col + 1: SetCellValue Row, Col, Client.Texts.Txt(1250100 + Audit.DictStatus, CStr(Audit.DictStatus))
-      Col = Col + 1: SetCellValue Row, Col, Audit.UserShortName
+      If DictId <> 0 Then
+         Col = Col + 1: SetCellValue Row, Col, Audit.UserShortName
+      Else
+         Col = Col + 1: SetCellValue Row, Col, Audit.Patient
+      End If
       Col = Col + 1: SetCellValue Row, Col, Audit.StationId
       Row = Row + 1
    Loop

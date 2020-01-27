@@ -27,6 +27,8 @@ Public Enum AuditTypeEnum
    AuditType_SoundDeleted = 90
 End Enum
 
+Private ListFromUser As Boolean
+
 Public Sub Insert(DictId As Long, AuditType As Integer, DictStatus As Integer)
 
    If Client.SysSettings.DictationAuditEnable Then
@@ -43,11 +45,21 @@ Public Sub Insert(DictId As Long, AuditType As Integer, DictStatus As Integer)
       Set A = Nothing
    End If
 End Sub
-Public Sub CreateList(DictId As Long)
+Public Sub CreateList(DictId As Long, UserId As Long)
 
-   Client.Server.CreateDictAuditList DictId
+   If DictId <> 0 Then
+      Client.Server.CreateDictAuditList DictId
+      ListFromUser = False
+   Else
+      Client.Server.CreateDictAuditForUserList UserId
+      ListFromUser = True
+   End If
 End Sub
 Public Function GetNext(Audit As clsDictAudit) As Boolean
 
-   GetNext = Client.Server.DictAuditGetNext(Audit)
+   If Not ListFromUser Then
+      GetNext = Client.Server.DictAuditGetNext(Audit)
+   Else
+      GetNext = Client.Server.DictAuditForUserGetNext(Audit)
+   End If
 End Function

@@ -13,11 +13,13 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Public UserId        As Long
-Public LoginName     As String
-Public Password      As String
-Public ShortName     As String
-Public LongName      As String
+Public UserId              As Long
+Public LoginName           As String
+Public Password            As String
+Public ShortName           As String
+Public LongName            As String
+Public InactivatedByUserId As Long
+Public InactivatedTime     As Date
 
 Public HomeOrgId     As Long
 

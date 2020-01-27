@@ -159,10 +159,10 @@ Public Function CreateTempPath() As String
     lngResult = GetTempPath(MAX_BUFFER_LENGTH, strBufferString)
     CreateTempPath = mId(strBufferString, 1, lngResult)
 End Function
-Public Sub KillFileIgnoreError(FileName As String)
+Public Sub KillFileIgnoreError(Filename As String)
 
    On Error Resume Next
-   Kill FileName
+   Kill Filename
 End Sub
 Public Function StringReplace(ByVal Str As String, SubStrToReplace As String, InsertInstead As String) As String
 
@@ -178,7 +178,94 @@ Public Function StringReplace(ByVal Str As String, SubStrToReplace As String, In
    Loop
    StringReplace = Str
 End Function
+Public Function CheckPatId(ByVal PatId As String) As Boolean
 
+   'Returns true for a Correct number, else false
+   Dim Siffra(9) As Integer
+   Dim Resultat As Integer
+   Dim I As Integer
+   Dim Century As String
+   
+   If Not Client.SysSettings.DictInfoMandatoryPatId And Len(PatId) = 0 Then
+      CheckPatId = True
+      Exit Function
+   End If
+   
+   If Client.SysSettings.DictInfoAlfaInPatid Then
+      If Client.SysSettings.DictInfoMandatoryPatId Then
+         CheckPatId = Len(PatId) > 0
+         Exit Function
+      Else
+         CheckPatId = True
+         Exit Function
+      End If
+   End If
+   
+   'Remove "-" if there is one
+   PatId = StringReplace(PatId, "-", "")
+   
+   If Client.SysSettings.DictInfoMandatoryPatIdCentury Then
+      'check length
+      If Len(PatId) <> 12 Then
+         CheckPatId = False
+         Exit Function
+      End If
+   End If
+   
+   If Len(PatId) = 12 Then
+      Century = Left$(PatId, 2)
+      PatId = mId$(PatId, 3)
+      If (Century <> "19" And Century <> "20") Then
+         CheckPatId = False
+         Exit Function
+      End If
+   Else
+      If Len(PatId) <> 10 Then
+         CheckPatId = False
+         Exit Function
+      End If
+   End If
+   
+   If Not Client.SysSettings.DictInfoPatIdChecksum Then
+      CheckPatId = True
+      Exit Function
+   End If
+   
+   'split in strings
+   For I = 1 To 9
+      Siffra(I) = CInt(mId(PatId, I, 1))
+   Next
+   
+   'double number in odd positions
+   For I = 0 To 9 Step 2
+      Siffra(I + 1) = Siffra(I + 1) * 2
+   Next
+   
+   'add to digits strings and add strings
+   For I = 1 To 9
+      If Siffra(I) >= 10 Then
+         Resultat = Resultat + Siffra(I) - 9
+      Else
+         Resultat = Resultat + Siffra(I)
+      End If
+   Next
+    
+   I = CInt(mId(PatId, Len(PatId), 1))
+
+   If (10 - Resultat Mod 10) Mod 10 = I Then
+      CheckPatId = True
+   Else
+      CheckPatId = False
+   End If
+End Function
+Public Function CheckPatname(PName As String) As Boolean
+
+   If Client.SysSettings.DictInfoMandatoryPatName Then
+      CheckPatname = Len(PName) > 0
+   Else
+      CheckPatname = True
+   End If
+End Function
 Public Function FormatLength(Sec As Long) As String
 
    Dim Mins As Integer
@@ -415,7 +502,7 @@ Public Function GetExportFileName(DefFileName As String) As String
    Filter = Filter & Client.Texts.Txt(1000904, "Xml-filer") & " (*.xml)|*.xml|"
    Filter = Filter & Client.Texts.Txt(1000902, "Alla filer") & " (*.*)|*.*"
    
-   frmMain.CDialog.FileName = DefFileName
+   frmMain.CDialog.Filename = DefFileName
    frmMain.CDialog.InitDir = ""
    frmMain.CDialog.CancelError = True
    frmMain.CDialog.DefaultExt = "xls"
@@ -433,6 +520,6 @@ Public Function GetExportFileName(DefFileName As String) As String
    End If
    On Error GoTo 0
 
-   GetExportFileName = frmMain.CDialog.FileName
+   GetExportFileName = frmMain.CDialog.Filename
 End Function
 

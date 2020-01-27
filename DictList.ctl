@@ -1,11 +1,11 @@
 VERSION 5.00
 Object = "{F856EC8B-F03C-4515-BDC6-64CBD617566A}#7.0#0"; "FPSPR70.ocx"
 Begin VB.UserControl ucDictList 
-   ClientHeight    =   4575
+   ClientHeight    =   4800
    ClientLeft      =   0
    ClientTop       =   0
    ClientWidth     =   9495
-   ScaleHeight     =   4575
+   ScaleHeight     =   4800
    ScaleWidth      =   9495
    Begin FPSpreadADO.fpSpread lstDict 
       Height          =   4575
@@ -32,6 +32,14 @@ Begin VB.UserControl ucDictList
       MaxCols         =   1
       MaxRows         =   0
       SpreadDesigner  =   "DictList.ctx":0000
+   End
+   Begin VB.Label lblNote 
+      BackStyle       =   0  'Transparent
+      Height          =   255
+      Left            =   0
+      TabIndex        =   1
+      Top             =   4560
+      Width           =   9375
    End
    Begin VB.Image imgIcon 
       Height          =   480
@@ -212,6 +220,17 @@ Private Sub lstDict_AfterUserSort(ByVal Col As Long)
    lstDict.Sort -1, -1, -1, -1, SortByRow, Sortkeys, SortKeyOrder
 End Sub
 
+
+Private Sub lstDict_BlockSelected(ByVal BlockCol As Long, ByVal BlockRow As Long, ByVal BlockCol2 As Long, ByVal BlockRow2 As Long)
+
+   DisplayNoteInLabelControl
+End Sub
+
+Private Sub lstDict_Click(ByVal Col As Long, ByVal Row As Long)
+
+   DisplayNoteInLabelControl
+End Sub
+
 Private Sub lstDict_ColWidthChange(ByVal Col1 As Long, ByVal Col2 As Long)
 
    Dim PicCol As Integer
@@ -234,6 +253,7 @@ End Sub
 
 Private Sub lstDict_DblClick(ByVal Col As Long, ByVal Row As Long)
 
+   DisplayNoteInLabelControl
    If Row > 0 Then
       RaiseEvent DblClick(CLng(lstDict.GetRowItemData(Row)))
    End If
@@ -243,6 +263,7 @@ Private Sub lstDict_KeyPress(KeyAscii As Integer)
 
    Dim Fn As String
 
+   DisplayNoteInLabelControl
    Select Case KeyAscii
       Case 13
          RaiseEvent DblClick(CLng(lstDict.GetRowItemData(lstDict.ActiveRow)))
@@ -253,16 +274,28 @@ Private Sub lstDict_KeyPress(KeyAscii As Integer)
    End Select
 End Sub
 
+Private Sub lstDict_KeyUp(KeyCode As Integer, Shift As Integer)
+
+   DisplayNoteInLabelControl
+End Sub
+
 Private Sub lstDict_RightClick(ByVal ClickType As Integer, ByVal Col As Long, ByVal Row As Long, ByVal MouseX As Long, ByVal MouseY As Long)
 
+   DisplayNoteInLabelControl
    If Row > 0 Then
       RaiseEvent RightClick(CLng(lstDict.GetRowItemData(Row)))
    End If
 End Sub
 
+Private Sub lstDict_SelChange(ByVal BlockCol As Long, ByVal BlockRow As Long, ByVal BlockCol2 As Long, ByVal BlockRow2 As Long, ByVal CurCol As Long, ByVal CurRow As Long)
+
+   DisplayNoteInLabelControl
+End Sub
+
 Private Sub UserControl_Resize()
 
-   lstDict.Move 0, 0, UserControl.ScaleWidth, UserControl.ScaleHeight
+   lstDict.Move 0, 0, UserControl.ScaleWidth, UserControl.ScaleHeight - lblNote.Height
+   lblNote.Move 0, UserControl.ScaleHeight - lblNote.Height + 3, UserControl.ScaleWidth
 End Sub
 Public Sub RestoreSettings(Settings As String, Ver As String)
 
@@ -421,6 +454,7 @@ Public Sub GetData(OrgId As Long)
          lstDict.LeftCol = LeftCol
       End If
    Else
+      ClearNoteInLabelControl
       NewSearchFilter = False
       NewCurrPatientFilter = False
       CurrentOrgId = OrgId
@@ -620,3 +654,14 @@ Private Function FindRowFromRowDictIdCache(DictId As Long) As Long
    Next Row
 End Function
 
+Private Sub DisplayNoteInLabelControl()
+
+   Debug.Print Now & " " & lstDict.ActiveRow
+   lstDict.Row = lstDict.ActiveRow
+   lstDict.Col = lstDict.GetColFromID("3")
+   lblNote.Caption = lstDict.Text
+End Sub
+Private Sub ClearNoteInLabelControl()
+
+   lblNote.Caption = ""
+End Sub

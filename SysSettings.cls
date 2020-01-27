@@ -44,14 +44,13 @@ Public DictInfoPatIdChecksum As Boolean
 Public DictInfoUseNoPat As Boolean
 Public DictInfoUseKeyWords As Boolean
 
-Public HistoryShowMinutes As Boolean
-
 Public LoginMaxRetries As Long
 Public LoginLockoutMinutes As Long
 Public LoginPasswordMinLength As Long
 Public LoginPasswordCaseSensitive As Boolean
 Public LoginAllowChangePassword As Boolean
 
+Public PlayerWindingSpeed As Long
 Public PlayerHWcheckfreq As Integer
 Public PlayerCaption As String
 Public PlayerForceMicCalib As Boolean
@@ -90,12 +89,7 @@ Public PlayerKeyWindowSize As Integer
 Public DemoAllowGenerate As Boolean
 Public DemoShowTab As Boolean
 
-Public UserAllowSetCurrentPatient As Boolean
-Public UserBlankCurrentPatientAfterNew As Boolean
 Public UserAllowChangeHome As Boolean
-Public UserShowHome As Boolean
-Public UserHomeAsDefault As Boolean
-Public UserAutoLogoffMinutes As Integer
 
 Public ClientStopLoginMsg As String
 Public ClientForceLogoffMsg As String
@@ -106,8 +100,6 @@ Public SoundChunkSize As Long
 
 Public CultureDefaultLanguage As String
 Public CultureAllowChange As Boolean
-
-Public CustomStyle As String
 
 Public LoggEnable As Boolean
 Public LoggFilter As String
@@ -181,8 +173,6 @@ Public Sub Init(Ty As String)
    DictInfoUseNoPat = mSysSettings.GetBool("DictInfo", "UseNoPat", True)
    DictInfoUseKeyWords = mSysSettings.GetBool("DictInfo", "UseKeyWords", True)
    
-   HistoryShowMinutes = mSysSettings.GetBool("History", "ShowMinutes", False)
-   
    LoginMaxRetries = mSysSettings.GetLong("Login", "MaxRetries", 5)
    LoginLockoutMinutes = mSysSettings.GetLong("Login", "LockoutMinutes", 5)
    LoginPasswordMinLength = mSysSettings.GetLong("Login", "PasswordMinLength", 5)
@@ -193,6 +183,7 @@ Public Sub Init(Ty As String)
    ClientForceLogoffMsg = mSysSettings.GetString("Client", "ForceLogoffMsg", "")
    ClientMinVersion = mSysSettings.GetString("Client", "MinVersion", "")
    
+   PlayerWindingSpeed = mSysSettings.GetLong("Player", "WindingSpeed", 6000)
    PlayerHWcheckfreq = mSysSettings.GetLong("Player", "HWcheckfreq", 10)
    PlayerCaption = mSysSettings.GetString("Player", "Caption", "")
    PlayerForceMicCalib = mSysSettings.GetBool("Player", "ForceMicCalib", True)
@@ -230,20 +221,14 @@ Public Sub Init(Ty As String)
    DemoAllowGenerate = mSysSettings.GetBool("Demo", "AllowGenerate", False)
    DemoShowTab = mSysSettings.GetBool("Demo", "ShowTab", False)
    
-   UserAllowSetCurrentPatient = mSysSettings.GetBool("User", "AllowSetCurrentPatient", False)
-   UserBlankCurrentPatientAfterNew = mSysSettings.GetBool("User", "BlankCurrentPatientAfterNew", False)
    UserAllowChangeHome = mSysSettings.GetBool("User", "AllowChangeHome", False)
-   UserShowHome = mSysSettings.GetBool("User", "ShowHome", True)
-   UserHomeAsDefault = mSysSettings.GetBool("User", "HomeAsDefault", True)
-   UserAutoLogoffMinutes = mSysSettings.GetLong("User", "AutoLogoffMinutes", 0)
+   
    
    SoundUseImageField = mSysSettings.GetBool("Sound", "UseImageField", True)
    SoundChunkSize = mSysSettings.GetLong("Sound", "ChunkSize", 8192)
    
    CultureDefaultLanguage = mSysSettings.GetString("Culture", "DefaultLanguage", "SE")
    CultureAllowChange = mSysSettings.GetBool("Culture", "AllowChange", True)
-   
-   CustomStyle = mSysSettings.GetString("Custom", "Style", "Standard")
    
    LoggEnable = mSysSettings.GetBool("Logg", "Enable", True)
    LoggFilter = mSysSettings.GetString("Logg", "Filter", "")

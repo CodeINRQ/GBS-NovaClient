@@ -146,10 +146,6 @@ Public Sub Init()
    cboType.AddItem Client.Texts.Txt(1140122, "Medel dagar efter intalande")
    cboType.AddItem Client.Texts.Txt(1140123, "Medel dagar efter skriv senast")
    cboType.AddItem Client.Texts.Txt(1140124, "Intalare")
-   If Client.SysSettings.HistoryShowMinutes Then
-      cboType.AddItem Client.Texts.Txt(1140125, "Medel minuter efter intalande")
-      cboType.AddItem Client.Texts.Txt(1140126, "Medel minuter efter skriv senast")
-   End If
    cboType.ListIndex = 0
    HistType = 0
    
@@ -342,7 +338,7 @@ Private Sub GetDataNow()
       ClearWorkBook lstHist
       ClearTotals
       Row = 1
-      NumberAndLength = Not (CurrentHistType = htDaysFromCreated Or CurrentHistType = htDaysFromExpiry Or CurrentHistType = htminutesFromCreated Or CurrentHistType = htminutesFromExpiry)
+      NumberAndLength = Not (CurrentHistType = htDaysFromCreated Or CurrentHistType = htDaysFromExpiry)
       If NumberAndLength Then
          lstHist.TabStripPolicy = TabStripPolicyAlways
       Else
@@ -356,26 +352,22 @@ Private Sub GetDataNow()
          Select Case HistType
             Case htPrio
                RowHeader = Client.PriorityMgr.TextFromId(Hist.Rowid)
-            
             Case htDictType
                RowHeader = Client.DictTypeMgr.TextFromId(Hist.Rowid)
-            
             Case htOrg
                RowHeader = Client.OrgMgr.TextFromId(Hist.Rowid)
-            
             Case htTranscriber, htAuthor
                If Client.UserMgr.GetUserFromId(Usr, Hist.Rowid) Then
                   RowHeader = Usr.ShortName
                Else
                   RowHeader = ""
                End If
-            
             Case htTranscriberOrg
                RowHeader = Client.OrgMgr.TextFromId(Hist.Rowid)
-            
-            Case htDaysFromCreated, htDaysFromExpiry, htminutesFromCreated, htminutesFromExpiry
+            Case htDaysFromCreated
                RowHeader = Client.PriorityMgr.TextFromId(Hist.Rowid)
-            
+            Case htDaysFromExpiry
+               RowHeader = Client.PriorityMgr.TextFromId(Hist.Rowid)
             Case Else
                RowHeader = ""
          End Select

@@ -133,7 +133,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   46137345
+      Format          =   16842753
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -149,7 +149,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   46137345
+      Format          =   16842753
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -165,7 +165,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   46137345
+      Format          =   16842753
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -181,7 +181,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   46137345
+      Format          =   16842753
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -369,9 +369,6 @@ Public Sub Init()
    cboStatus.AddItem Client.Texts.Txt(1250100 + 30, ""), Idx
    cboStatus.ItemData(Idx) = 30
    Idx = Idx + 1
-   cboStatus.AddItem Client.Texts.Txt(1250100 + 40, ""), Idx
-   cboStatus.ItemData(Idx) = 40
-   Idx = Idx + 1
    cboStatus.AddItem Client.Texts.Txt(1250100 + 50, ""), Idx
    cboStatus.ItemData(Idx) = 50
    If Client.SysSettings.UseAuthorsSign Then
@@ -424,7 +421,7 @@ Private Sub cmdSearch_Click()
    
    mFilter.FilterFromSearch = True
    
-   mFilter.Pat.PatId = Client.Custom.FormatPatIdForStoring(txtPatId.Text)
+   mFilter.Pat.PatId = StringReplace(txtPatId.Text, "-", "")
    mFilter.Pat.PatName = txtPatName.Text
    
    mFilter.RecDateUsed = chkRecDate.Value = Checked

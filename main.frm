@@ -25,11 +25,10 @@ Begin VB.Form frmMain
       Caption         =   "S&ätt hemenhet"
       Height          =   255
       Left            =   120
-      TabIndex        =   21
+      TabIndex        =   18
       Tag             =   "1000430"
       Top             =   9600
       Width           =   2175
-      Visible         =   0   'False
    End
    Begin VB.PictureBox picLogo 
       Appearance      =   0  'Flat
@@ -40,7 +39,7 @@ Begin VB.Form frmMain
       Picture         =   "main.frx":030A
       ScaleHeight     =   285
       ScaleWidth      =   1215
-      TabIndex        =   19
+      TabIndex        =   16
       TabStop         =   0   'False
       Top             =   70
       Width           =   1215
@@ -55,7 +54,7 @@ Begin VB.Form frmMain
    Begin MSComctlLib.ProgressBar ProgressBar 
       Height          =   255
       Left            =   3480
-      TabIndex        =   18
+      TabIndex        =   15
       Top             =   8280
       Width           =   1575
       _ExtentX        =   2778
@@ -67,7 +66,7 @@ Begin VB.Form frmMain
       Align           =   2  'Align Bottom
       Height          =   255
       Left            =   0
-      TabIndex        =   17
+      TabIndex        =   14
       Top             =   9945
       Width           =   13410
       _ExtentX        =   23654
@@ -91,31 +90,31 @@ Begin VB.Form frmMain
    Begin CareTalk.ucOrgTree ucOrgTree 
       Height          =   9135
       Left            =   120
-      TabIndex        =   6
+      TabIndex        =   3
       Top             =   480
       Width           =   2175
       _ExtentX        =   3836
       _ExtentY        =   16113
    End
    Begin TabDlg.SSTab Tabs 
-      Height          =   8895
+      Height          =   9375
       Left            =   2400
-      TabIndex        =   7
-      Top             =   960
+      TabIndex        =   4
+      Top             =   480
       Width           =   10815
       Visible         =   0   'False
       _ExtentX        =   19076
-      _ExtentY        =   15690
+      _ExtentY        =   16536
       _Version        =   393216
       Style           =   1
       Tabs            =   10
-      Tab             =   6
       TabsPerRow      =   10
       TabHeight       =   520
       TabCaption(0)   =   "Diktat"
       TabPicture(0)   =   "main.frx":06E0
-      Tab(0).ControlEnabled=   0   'False
+      Tab(0).ControlEnabled=   -1  'True
       Tab(0).Control(0)=   "ucDictList"
+      Tab(0).Control(0).Enabled=   0   'False
       Tab(0).ControlCount=   1
       TabCaption(1)   =   "Statistik"
       TabPicture(1)   =   "main.frx":06FC
@@ -146,10 +145,10 @@ Begin VB.Form frmMain
       Tab(5).ControlCount=   3
       TabCaption(6)   =   "Systeminställningar"
       TabPicture(6)   =   "main.frx":0788
-      Tab(6).ControlEnabled=   -1  'True
-      Tab(6).Control(0)=   "ucEditGroup"
+      Tab(6).ControlEnabled=   0   'False
+      Tab(6).Control(0)=   "ucEditSysSettings"
       Tab(6).Control(0).Enabled=   0   'False
-      Tab(6).Control(1)=   "ucEditSysSettings"
+      Tab(6).Control(1)=   "ucEditGroup"
       Tab(6).Control(1).Enabled=   0   'False
       Tab(6).ControlCount=   2
       TabCaption(7)   =   "Tab 6"
@@ -170,7 +169,7 @@ Begin VB.Form frmMain
       Begin CareTalk.ucDemo ucDemo1 
          Height          =   3975
          Left            =   -74880
-         TabIndex        =   16
+         TabIndex        =   13
          Top             =   360
          Width           =   8535
          _ExtentX        =   15055
@@ -180,47 +179,47 @@ Begin VB.Form frmMain
          Height          =   4095
          HelpContextID   =   1170000
          Left            =   -74880
-         TabIndex        =   15
+         TabIndex        =   12
          Top             =   480
          Width           =   8535
          _ExtentX        =   15055
          _ExtentY        =   7223
       End
       Begin CareTalk.ucEditSysSettings ucEditSysSettings 
-         Height          =   4935
+         Height          =   4575
          HelpContextID   =   1100000
-         Left            =   120
-         TabIndex        =   14
-         Top             =   4320
+         Left            =   -74880
+         TabIndex        =   11
+         Top             =   4560
          Width           =   8175
          _ExtentX        =   14420
-         _ExtentY        =   8705
+         _ExtentY        =   8070
       End
       Begin CareTalk.ucEditUser ucEditUser 
          Height          =   6735
          HelpContextID   =   1040000
          Left            =   -74880
-         TabIndex        =   13
+         TabIndex        =   10
          Top             =   480
          Width           =   10575
          _ExtentX        =   15055
          _ExtentY        =   4048
       End
       Begin CareTalk.ucEditGroup ucEditGroup 
-         Height          =   3855
+         Height          =   4095
          HelpContextID   =   1100000
-         Left            =   120
-         TabIndex        =   12
+         Left            =   -74880
+         TabIndex        =   9
          Top             =   480
          Width           =   8175
          _ExtentX        =   14420
-         _ExtentY        =   6800
+         _ExtentY        =   7223
       End
       Begin CareTalk.ucStatList ucStatList 
          Height          =   6735
          HelpContextID   =   1160000
          Left            =   -74880
-         TabIndex        =   10
+         TabIndex        =   7
          Top             =   480
          Width           =   7815
          _ExtentX        =   13785
@@ -229,8 +228,8 @@ Begin VB.Form frmMain
       Begin CareTalk.ucDictList ucDictList 
          Height          =   6735
          HelpContextID   =   1080000
-         Left            =   -74880
-         TabIndex        =   9
+         Left            =   120
+         TabIndex        =   6
          Top             =   480
          Width           =   7815
          _ExtentX        =   13785
@@ -240,7 +239,7 @@ Begin VB.Form frmMain
          Height          =   7095
          HelpContextID   =   1150000
          Left            =   -74880
-         TabIndex        =   11
+         TabIndex        =   8
          Top             =   480
          Width           =   4935
          _ExtentX        =   8705
@@ -250,7 +249,7 @@ Begin VB.Form frmMain
          Height          =   6735
          HelpContextID   =   1140000
          Left            =   -74880
-         TabIndex        =   20
+         TabIndex        =   17
          Top             =   480
          Width           =   7815
          _ExtentX        =   13785
@@ -260,7 +259,7 @@ Begin VB.Form frmMain
          Height          =   1815
          HelpContextID   =   1100000
          Left            =   -74880
-         TabIndex        =   3
+         TabIndex        =   0
          Top             =   480
          Width           =   8535
          _ExtentX        =   15055
@@ -269,7 +268,7 @@ Begin VB.Form frmMain
       Begin CareTalk.ucOrgPriority ucOrgPriority 
          Height          =   3015
          Left            =   -74880
-         TabIndex        =   5
+         TabIndex        =   2
          Top             =   5280
          Width           =   8295
          _ExtentX        =   14631
@@ -278,7 +277,7 @@ Begin VB.Form frmMain
       Begin CareTalk.ucOrgDictType ucOrgDictType 
          Height          =   3015
          Left            =   -74880
-         TabIndex        =   4
+         TabIndex        =   1
          Top             =   2280
          Width           =   8295
          _ExtentX        =   14631
@@ -288,7 +287,7 @@ Begin VB.Form frmMain
          Height          =   6735
          HelpContextID   =   1330000
          Left            =   -74880
-         TabIndex        =   22
+         TabIndex        =   19
          Top             =   360
          Width           =   7815
          _ExtentX        =   13785
@@ -299,7 +298,7 @@ Begin VB.Form frmMain
       Align           =   1  'Align Top
       Height          =   420
       Left            =   0
-      TabIndex        =   8
+      TabIndex        =   5
       Top             =   0
       Width           =   13410
       _ExtentX        =   23654
@@ -379,33 +378,6 @@ Begin VB.Form frmMain
          EndProperty
       End
    End
-   Begin VB.TextBox txtCurrentPatient 
-      Height          =   285
-      Left            =   3840
-      TabIndex        =   1
-      Top             =   480
-      Width           =   1575
-      Visible         =   0   'False
-   End
-   Begin VB.CommandButton cmdCurrentPatient 
-      Caption         =   "Hämta diktat"
-      Default         =   -1  'True
-      Enabled         =   0   'False
-      Height          =   255
-      Left            =   5520
-      TabIndex        =   2
-      Tag             =   "1000433"
-      Top             =   500
-      Width           =   2175
-      Visible         =   0   'False
-   End
-   Begin VB.Line linCurrentPatient 
-      Visible         =   0   'False
-      X1              =   2400
-      X2              =   13200
-      Y1              =   780
-      Y2              =   780
-   End
    Begin CompplusLib.MhZip MhZip 
       Left            =   8280
       Top             =   7920
@@ -415,16 +387,6 @@ Begin VB.Form frmMain
       _StockProps     =   0
       Overwrite       =   1
       Prompts         =   0   'False
-   End
-   Begin VB.Label lblCurrentPatient 
-      Caption         =   "&Aktuell patient:"
-      Height          =   255
-      Left            =   2400
-      TabIndex        =   0
-      Tag             =   "1000432"
-      Top             =   520
-      Width           =   1335
-      Visible         =   0   'False
    End
    Begin VB.Menu mnuMain 
       Caption         =   "Arkiv"
@@ -565,37 +527,12 @@ Private DictList_TotalNumber As Long
 Private DictList_NumberOfWarnings As Long
 Private DictList_TotalLength As Long
 
-Private LastActivity As Double
-
 Private Declare Function SetParent Lib "user32" _
   (ByVal hWndChild As Long, _
    ByVal hWndNewParent As Long) As Long
    
-Private Sub cmdCurrentPatient_Click()
-
-   If Client.Custom.CheckCurrentPatientBeforeUse(txtCurrentPatient.Text) Then
-      SetCurrentPatientFromTextbox
-   End If
-End Sub
-Private Sub SetCurrentPatientFromTextbox()
-
-   Dim C As New ClientAPI
-
-   SetActivity
-   txtCurrentPatient.Text = Client.Custom.FormatPatId(txtCurrentPatient.Text)
-   On Error Resume Next
-   C.Init "Me", API_ACCESS_CODE
-   C.CurrPat txtCurrentPatient.Text, "", "", "", "", ""
-   Set C = Nothing
-End Sub
-Private Sub BlankCurrentPatient()
-
-   frmMain.txtCurrentPatient.Text = ""
-   SetCurrentPatientFromTextbox
-End Sub
 Private Sub cmdSetHomeOrg_Click()
 
-   SetActivity
    Client.User.HomeOrgId = CurrentOrg
    Client.UserMgr.SaveUserHomeOrg Client.User
    ShowOrgTree False, True
@@ -618,7 +555,6 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
             RecordNewDictation Dict, True
          End If
    End Select
-   SetActivity
 End Sub
 
 Private Sub Form_Load()
@@ -643,16 +579,13 @@ Private Sub Form_Load()
 
    Debug.Print App.StartMode
    
-   SetActivity
    
    SetUpStatusBar
    
    Me.Show
    
-   UIStatusSet "Init", True
    Set Client = New clsClient
    Set mClient = Client
-   UIStatusClear
 
    'We login just to get authenticationmethod and some settings
    If Not Client.Server.DictationStorageOpen(StartUpServer, StartUpDatabase, "", "") Then
@@ -664,16 +597,8 @@ Private Sub Form_Load()
       End
    End If
    Client.SysSettings.Init "CT"
-   InitCheck
       
    frmMain.cmdSetHomeOrg.Visible = Client.SysSettings.UserAllowChangeHome
-   
-   frmMain.lblCurrentPatient.Visible = Client.SysSettings.UserAllowSetCurrentPatient
-   frmMain.txtCurrentPatient.Visible = Client.SysSettings.UserAllowSetCurrentPatient
-   frmMain.cmdCurrentPatient.Visible = Client.SysSettings.UserAllowSetCurrentPatient
-   frmMain.linCurrentPatient.Visible = Client.SysSettings.UserAllowSetCurrentPatient
-   Form_Resize
-   
    Client.CultureLanguage = Client.SysSettings.CultureDefaultLanguage
    Client.Texts.NewLanguage Client.CultureLanguage
 
@@ -778,9 +703,7 @@ Private Sub Form_Load()
    CheckHardware
    mDSSRec.CheckLicens RecordingAllowed
 
-   If Client.SysSettings.UserHomeAsDefault Then
-      LastOrgidForNewDictation = Client.User.HomeOrgId
-   End If
+   LastOrgidForNewDictation = Client.User.HomeOrgId
    
    SetVisibleTabs
    frmMain.Tabs.Visible = True
@@ -796,17 +719,8 @@ Private Sub Form_Load()
    
    DictRecoveryMode = Client.DictMgr.RestoreTempDictationInfo(DictRecovery)
    
-   If txtCurrentPatient.Visible Then
-      On Error Resume Next
-      txtCurrentPatient.SetFocus
-      On Error GoTo 0
-   End If
-   
-   
    tmrUpdateList.Enabled = True
    tmrCheckButtons.Enabled = True
-   
-   SetActivity
    
    Exit Sub
    
@@ -814,15 +728,6 @@ frmMain_Form_Load_Err:
    Eno = Err.Number
    ErrorHandle "1000420", Eno, 1000420, "CareTalk kan inte startas", False
    End
-End Sub
-Private Sub InitCheck()
-
-   Select Case LCase(Client.SysSettings.CustomStyle)
-      Case "dk"
-         Set Client.Custom = New clsCustom_Dk
-      Case Else
-         Set Client.Custom = New clsCustom_Standard
-   End Select
 End Sub
 Private Sub CheckHardware()
 
@@ -995,7 +900,7 @@ Private Sub ShowOrgTree(ShowAll As Boolean, ShowVirtual As Boolean, Optional Use
          If Org.ShowBelow Or Org.DictContainer Or ShowAll Then
             EnabledDueToRights = Client.OrgMgr.CheckUserRole(Org.OrgId, UserRights)
             If EnabledDueToRights Then
-               If Org.OrgId = Client.User.HomeOrgId And Client.SysSettings.UserShowHome Then
+               If Org.OrgId = Client.User.HomeOrgId Then
                   ucOrgTree.AddNode Org.OrgId, Org.ShowParent, Org.OrgText, 7, True
                Else
                   ucOrgTree.AddNode Org.OrgId, Org.ShowParent, Org.OrgText, 1, True
@@ -1040,7 +945,6 @@ Private Sub Form_Resize()
 
    Dim OrgHeight As Integer
 
-   SetActivity
    If Me.WindowState <> vbMinimized Then
       If Me.Width < 6200 Then
          Me.Width = 6200
@@ -1052,18 +956,13 @@ Private Sub Form_Resize()
          Me.ucLoggList.Width = Me.Tabs.Width - 1 * 240
          Me.ucEditUser.Width = Me.Tabs.Width - 1 * 240
          Me.picLogo.Left = Me.Width - Me.picLogo.Width - 300
-         Me.linCurrentPatient.X2 = Me.Width - 300
+         'Me.imgLogo.Left = Me.Width - Me.imgLogo.Width - 300
+         'Me.Toolbar1.Width = Me.imgLogo.Left - 200
       End If
       If Me.Height < 5200 Then
          Me.Height = 5200
       Else
-         If Me.txtCurrentPatient.Visible Then
-            Me.Tabs.Top = 820
-            Me.Tabs.Height = Me.Height - 5 * 240 - Me.StatusBar.Height - 380
-         Else
-            Me.Tabs.Top = 460
-            Me.Tabs.Height = Me.Height - 5 * 240 - Me.StatusBar.Height
-         End If
+         Me.Tabs.Height = Me.Height - 5 * 240 - Me.StatusBar.Height
          Me.ucDictList.Height = Me.Tabs.Height - 3 * 240
          Me.ucStatList.Height = Me.Tabs.Height - 3 * 240
          Me.ucHistList.Height = Me.Tabs.Height - 3 * 240
@@ -1094,16 +993,12 @@ Private Sub Form_Unload(Cancel As Integer)
    On Error Resume Next
    StartUpFormMainIsLoaded = 1
    
-   ShutDownRequest = True
-   
    If IsLoaded("frmDict") Then
+      ShutDownRequest = True
       mDictForm.ForceUnload
       Cancel = True        'Let code first check in dictation and then unload
       Exit Sub
    End If
-
-   tmrUpdateList.Enabled = False
-   tmrCheckButtons.Enabled = False
 
    Res = WinHelp(frmMain.hWnd, App.HelpFile, HELP_QUIT, 0&)
    
@@ -1157,13 +1052,12 @@ End Sub
 
 Private Sub mDictForm_CloseChoiceSelected(Index As Integer)
 
-   SetActivity
    mDictCloseChoice = Index
 End Sub
 
 Private Sub mDSSRec_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long)
 
-   SetActivity
+   'Debug.Print "GruEvent " & CInt(EventType)
    Select Case EventType
       Case GRU_BUTTONPRESS
          Select Case Data
@@ -1196,7 +1090,6 @@ Private Sub mnuFile_Click(Index As Integer)
    Dim Fn As String
    Dim Uc As UserControl
 
-   SetActivity
    Select Case Index
       Case 5
          ImportNewDictation
@@ -1222,7 +1115,6 @@ Private Sub mnuHelp_Click(Index As Integer)
 
    Dim Res As Integer
 
-   SetActivity
    Select Case Index
       Case 1
          On Error Resume Next
@@ -1236,7 +1128,6 @@ End Sub
 
 Private Sub mPopupForm_Choise(MenuIndex As Integer, ItemIndex As Integer, Id As Long)
 
-   SetActivity
    Select Case MenuIndex
       Case 0
          Select Case ItemIndex
@@ -1244,13 +1135,15 @@ Private Sub mPopupForm_Choise(MenuIndex As Integer, ItemIndex As Integer, Id As 
                Client.DictMgr.UnlockDict Id
             Case 20
                frmDictAudit.DictId = Id
+               frmDictAudit.UserId = 0
                frmDictAudit.Show vbModal
          End Select
       Case 2
          Select Case ItemIndex
-            Case 20
-               Client.UserMgr.UnlockUser Id
-               MsgBox Client.Texts.Txt(1000431, "Användaren upplåst"), vbInformation
+            Case 10
+               frmDictAudit.DictId = 0
+               frmDictAudit.UserId = Id
+               frmDictAudit.Show vbModal
          End Select
    End Select
 End Sub
@@ -1281,7 +1174,6 @@ End Sub
 
 Private Sub Tabs_Click(PreviousTab As Integer)
    
-   SetActivity
    SetTabEnabled Tabs.Tab, True, Tabs.TabVisible(Tabs.Tab)
    SetTabEnabled PreviousTab, False, Tabs.TabVisible(PreviousTab)
    UpdateCurrentView
@@ -1291,8 +1183,6 @@ Private Sub tmrCheckButtons_Timer()
 
    Dim Dict As clsDict
    Static Freq As Integer
-   
-   TestForAutoLogoff
    
    If DictRecoveryMode = tdiNew Then
       DictRecoveryMode = tdiEmpty
@@ -1385,7 +1275,6 @@ Private Sub Toolbar1_ButtonClick(ByVal Button As MSComctlLib.Button)
 
    Dim Dict As clsDict
    
-   SetActivity
    Select Case Button.Index
       Case 1
          Set Dict = New clsDict
@@ -1396,26 +1285,6 @@ Private Sub Toolbar1_ButtonClick(ByVal Button As MSComctlLib.Button)
       Case 5
          ImportNewDictation
    End Select
-End Sub
-
-Private Sub txtCurrentPatient_Change()
-
-   SetActivity
-   cmdCurrentPatient.Enabled = Client.Custom.CheckCurrentPatientTextbox(txtCurrentPatient.Text)
-End Sub
-
-Private Sub txtCurrentPatient_GotFocus()
-
-   SelectAllText ActiveControl
-End Sub
-
-Private Sub txtCurrentPatient_KeyPress(KeyAscii As Integer)
-
-   If Not Client.SysSettings.DictInfoAlfaInPatid Then
-      If Not ((KeyAscii >= 48 And KeyAscii <= 57) Or KeyAscii < 32 Or KeyAscii = 45) Then
-         KeyAscii = 0
-      End If
-   End If
 End Sub
 
 Private Sub ucDemo1_UIStatusClear()
@@ -1445,9 +1314,12 @@ Private Sub ucDictList_ChangeNumberInList(TotalNumber As Long, NumberOfWarnings 
    DictList_TotalLength = TotalLength
    UIStatusShowNumberIfNoOtherStatus
 End Sub
+
 Private Sub ucDictList_DblClick(DictId As Long)
 
-   EditExistingDictation DictId
+   If Client.OrgMgr.CheckUserAllowListening(CurrentOrg) Then
+      EditExistingDictation DictId
+   End If
 End Sub
 
 Private Sub ucDictList_RightClick(DictId As Long)
@@ -1478,10 +1350,28 @@ Private Sub ucDictList_RightClick(DictId As Long)
       PopupMenu mPopupForm.mnuPopup(0)
    End If
 End Sub
+Private Sub ucEditUser_RightClick(UserId As Long)
+
+   Dim ShowPopupAudit As Boolean
+
+   If Client.OrgMgr.CheckUserRole(0, RTSysAdmin) Then
+      ShowPopupAudit = True
+   Else
+      If Client.OrgMgr.CheckUserRole(0, RTAuditing) Then
+         ShowPopupAudit = True
+      End If
+   End If
+   If ShowPopupAudit Then
+      On Error Resume Next
+      Debug.Print UserId
+      mPopupForm.Id = UserId
+      mPopupForm.mnuUserList(10).Visible = ShowPopupAudit
+      PopupMenu mPopupForm.mnuPopup(2)
+   End If
+End Sub
 
 Private Sub ucEditOrg_OrgSaved(Org As clsOrg)
 
-   SetActivity
    'double call to make shure an update
    ShowOrgTree False, False, RTSysAdmin
    ShowOrgTree True, False, RTSysAdmin
@@ -1491,22 +1381,13 @@ End Sub
 
 Private Sub ucEditSysSettings_SaveClicked(Settings As clsStringStore)
 
-   SetActivity
    Set Client.SysSettings.Store = Settings
    Client.SysSettings.Save "CT"
    Client.SysSettings.Init "CT"
 End Sub
 
-Private Sub ucEditUser_RightClick(UserId As Long)
-
-   mPopupForm.Id = UserId
-   mPopupForm.mnuUserList(20).Visible = True
-   PopupMenu mPopupForm.mnuPopup(2)
-End Sub
-
 Private Sub ucOrgTree_NewSelect(OrgId As Long, Txt As String)
 
-   SetActivity
    CurrentOrg = OrgId
    CurrentOrgText = Txt
    Me.Caption = Client.Texts.Txt(1000417, "CareTalk") & " - " & CurrentOrgText
@@ -1625,8 +1506,6 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
    Dim ThereIsALocalFile As Boolean
    Dim Eno As Long
 
-   SetActivity
-
    On Error GoTo RecordNewDictation_Err
    WaitForUIBusy
    If AllreadyStarted Then Exit Sub
@@ -1725,10 +1604,6 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
          
          Client.EventMgr.OnDictEvent "OnNew", Dict
          RaiseEvent OnNewDictation(Dict)
-      
-         If Client.SysSettings.UserBlankCurrentPatientAfterNew Then
-            BlankCurrentPatient
-         End If
       Case 2
          LastOrgidForNewDictation = Dict.OrgId
          Dict.StatusId = 30
@@ -1739,10 +1614,6 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
          
          Client.EventMgr.OnDictEvent "OnNew", Dict
          RaiseEvent OnNewDictation(Dict)
-   
-         If Client.SysSettings.UserBlankCurrentPatientAfterNew Then
-            BlankCurrentPatient
-         End If
    End Select
    
    
@@ -1781,8 +1652,6 @@ Private Sub ImportNewDictation()
    Static AllreadyStarted As Boolean
    Dim ImportFileName As String
 
-   SetActivity
-   
    WaitForUIBusy
    If AllreadyStarted Then Exit Sub
    If RecorderInUse Then Exit Sub
@@ -1837,18 +1706,12 @@ Private Sub ImportNewDictation()
                Client.DictMgr.CheckInNew Dict
                Client.EventMgr.OnDictEvent "OnNew", Dict
                RaiseEvent OnNewDictation(Dict)
-               If Client.SysSettings.UserBlankCurrentPatientAfterNew Then
-                  BlankCurrentPatient
-               End If
             Case 2
                LastOrgidForNewDictation = Dict.OrgId
                Dict.StatusId = 30
                Client.DictMgr.CheckInNew Dict
                Client.EventMgr.OnDictEvent "OnNew", Dict
                RaiseEvent OnNewDictation(Dict)
-               If Client.SysSettings.UserBlankCurrentPatientAfterNew Then
-                  BlankCurrentPatient
-               End If
          End Select
          mDictForm.SaveSettings DictFormSettings
          Unload mDictForm
@@ -1863,7 +1726,6 @@ Private Sub ImportNewDictation()
       End If
       
    End If
-   SetActivity
    RecorderInUse = False
    AllreadyStarted = False
 End Sub
@@ -1875,8 +1737,6 @@ Public Sub EditExistingDictation(DictId As Long)
    Dim IsUserAuthor As Boolean
    Dim Eno As Long
    Dim SavedCurrentOrg As Long
-   
-   SetActivity
    
    On Error GoTo EditExistingDictation_Err
    If RecorderInUse Then Exit Sub
@@ -2032,7 +1892,6 @@ Public Sub EditExistingDictation(DictId As Long)
       End If
 
    End If
-   SetActivity
    RecorderInUse = False
    Exit Sub
    
@@ -2085,8 +1944,6 @@ End Function
 
 Private Sub ucSearch_NewSearch(SearchFilter As clsFilter)
 
-   SetActivity
-   
    UIStatusSet Client.Texts.Txt(1000427, "Sökning sker..."), True
 
       LastSearchOrg = SearchFilter.OrgId
@@ -2345,22 +2202,4 @@ Private Sub TryToWakeGoneHardware()
 '   Set Client.DSSRec = Client.DSSRecConnector.DSSRecorder
 '   Client.DSSRec.Play
 '   Client.DSSRec.Rec
-End Sub
-Private Sub SetActivity()
-
-   LastActivity = Now
-End Sub
-Private Sub TestForAutoLogoff()
-
-   If Not ShutDownRequest And Not RecorderInUse Then
-      If Client.SysSettings.UserAutoLogoffMinutes > 0 Then
-         If Now > DateAdd("n", Client.SysSettings.UserAutoLogoffMinutes, LastActivity) Then
-            AutoLogoff
-         End If
-      End If
-   End If
-End Sub
-Private Sub AutoLogoff()
-
-   Unload Me
 End Sub
