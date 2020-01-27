@@ -283,16 +283,16 @@ End Sub
 Private Sub SetOneRoleAllow(ByVal r As RoleTypeEnum)
 
    Dim Pos As Integer
-   Dim S As String
+   Dim s As String
    
-   S = MakeStringFromEnum(r)
+   s = MakeStringFromEnum(r)
    
-   Pos = InStr(mRoles, S)
+   Pos = InStr(mRoles, s)
    If Pos = 0 Then
-      mRoles = mRoles & S
+      mRoles = mRoles & s
    End If
    
-   Pos = InStr(mRoles, LCase(S))
+   Pos = InStr(mRoles, LCase(s))
    If Pos > 0 Then
       mRoles = Left$(mRoles, Pos - 1) & mId$(mRoles, Pos + 1)
    End If
@@ -300,16 +300,16 @@ End Sub
 Private Sub SetOneRoleDeny(ByVal r As RoleTypeEnum)
 
    Dim Pos As Integer
-   Dim S As String
+   Dim s As String
    
-   S = MakeStringFromEnum(r)
+   s = MakeStringFromEnum(r)
    
-   Pos = InStr(mRoles, LCase(S))
+   Pos = InStr(mRoles, LCase(s))
    If Pos = 0 Then
-      mRoles = mRoles & LCase(S)
+      mRoles = mRoles & LCase(s)
    End If
    
-   Pos = InStr(mRoles, S)
+   Pos = InStr(mRoles, s)
    If Pos > 0 Then
       mRoles = Left$(mRoles, Pos - 1) & mId$(mRoles, Pos + 1)
    End If
@@ -317,16 +317,16 @@ End Sub
 Private Sub SetOneRoleInherit(ByVal r As RoleTypeEnum)
 
    Dim Pos As Integer
-   Dim S As String
+   Dim s As String
    
-   S = MakeStringFromEnum(r)
+   s = MakeStringFromEnum(r)
    
-   Pos = InStr(mRoles, LCase(S))
+   Pos = InStr(mRoles, LCase(s))
    If Pos > 0 Then
       mRoles = Left$(mRoles, Pos - 1) & mId$(mRoles, Pos + 1)
    End If
    
-   Pos = InStr(mRoles, S)
+   Pos = InStr(mRoles, s)
    If Pos > 0 Then
       mRoles = Left$(mRoles, Pos - 1) & mId$(mRoles, Pos + 1)
    End If
@@ -334,7 +334,7 @@ End Sub
 
 Public Function GetOneRole(ByVal r As RoleTypeEnum) As Boolean
 
-   Dim S As String
+   Dim s As String
    
    If InStr(mRoles, "I") > 0 Then
       GetOneRole = True
@@ -342,20 +342,20 @@ Public Function GetOneRole(ByVal r As RoleTypeEnum) As Boolean
       If r = RTList Then
          GetOneRole = Me.List
       Else
-         S = MakeStringFromEnum(r)
-         GetOneRole = InStr(mRoles, S) > 0
+         s = MakeStringFromEnum(r)
+         GetOneRole = InStr(mRoles, s) > 0
       End If
    End If
 End Function
 Private Function GetOneRoleInherit(ByVal r As RoleTypeEnum) As Boolean
 
-   Dim S As String
+   Dim s As String
    
-   S = MakeStringFromEnum(r)
-   If InStr(mRoles, S) > 0 Then
+   s = MakeStringFromEnum(r)
+   If InStr(mRoles, s) > 0 Then
       GetOneRoleInherit = False
    Else
-      If InStr(mRoles, LCase(S)) > 0 Then
+      If InStr(mRoles, LCase(s)) > 0 Then
          GetOneRoleInherit = False
       Else
          GetOneRoleInherit = True

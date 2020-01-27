@@ -60,15 +60,15 @@ Public Property Let PatId2(PId As String)
    mPatId2 = FormatPatIdForStoring(PId)
 End Property
 
-Private Function FormatPatIdForStoring(ByVal S As String) As String
+Private Function FormatPatIdForStoring(ByVal s As String) As String
 
-   S = StringReplace(S, "-", "")
-   S = StringReplace(S, "/", "")
-   S = StringReplace(S, "\", "")
-   S = StringReplace(S, ".", "")
-   S = StringReplace(S, ",", "")
-   S = StringReplace(S, "+", "")
-   FormatPatIdForStoring = S
+   s = StringReplace(s, "-", "")
+   s = StringReplace(s, "/", "")
+   s = StringReplace(s, "\", "")
+   s = StringReplace(s, ".", "")
+   s = StringReplace(s, ",", "")
+   s = StringReplace(s, "+", "")
+   FormatPatIdForStoring = s
 End Function
 
 

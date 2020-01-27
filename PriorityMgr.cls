@@ -39,27 +39,27 @@ Public Sub Init()
       End If
    Loop
 End Sub
-Public Sub DeleteOrgPriorityByOrgId(Orgid As Long)
+Public Sub DeleteOrgPriorityByOrgId(OrgId As Long)
 
-   Client.Server.DeleteOrgPriorityByOrgId Orgid
+   Client.Server.DeleteOrgPriorityByOrgId OrgId
 End Sub
-Public Sub SaveOrgPriority(Orgid As Long, PriorityId As Integer, PriorityDefault As Boolean)
+Public Sub SaveOrgPriority(OrgId As Long, PriorityId As Integer, PriorityDefault As Boolean)
 
-   Client.Server.SaveOrgPriority Orgid, PriorityId, PriorityDefault
+   Client.Server.SaveOrgPriority OrgId, PriorityId, PriorityDefault
 End Sub
-Public Sub GetOrgPriorityFromId(OrgPriority As clsOrgPriority, Orgid As Long, PriorityId As Integer)
+Public Sub GetOrgPriorityFromId(OrgPriority As clsOrgPriority, OrgId As Long, PriorityId As Integer)
 
    Dim I As Integer
    
    Set OrgPriority = Nothing
    For I = 0 To mOrgPriorityCount - 1
-      If mOrgPriorityArr(I).PriorityId = PriorityId And mOrgPriorityArr(I).Orgid = Orgid Then
+      If mOrgPriorityArr(I).PriorityId = PriorityId And mOrgPriorityArr(I).OrgId = OrgId Then
          Set OrgPriority = mOrgPriorityArr(I)
          Exit Sub
       End If
    Next I
 End Sub
-Public Sub FillCombo(Cbo As ComboBox, ByVal Orgid As Long, SelectedId As Integer, SetDefault As Boolean)
+Public Sub FillCombo(Cbo As ComboBox, ByVal OrgId As Long, SelectedId As Integer, SetDefault As Boolean)
 
    Dim I As Integer
    Dim NewIdx As Integer
@@ -69,13 +69,13 @@ Public Sub FillCombo(Cbo As ComboBox, ByVal Orgid As Long, SelectedId As Integer
    Dim Org As clsOrg
    
    Cbo.Clear
-   If Orgid > 0 Then
+   If OrgId > 0 Then
       Do
-         Client.OrgMgr.GetOrgFromId Org, Orgid
+         Client.OrgMgr.GetOrgFromId Org, OrgId
          If Not Org Is Nothing Then
             FillComboForOrg Cbo, Org, SelectedId, SetDefault
-            Orgid = Org.OrgParent
-            If Orgid <= 0 Then
+            OrgId = Org.OrgParent
+            If OrgId <= 0 Then
                Exit Do
             End If
          Else
@@ -128,7 +128,7 @@ Public Sub FillComboForOrg(Cbo As ComboBox, Org As clsOrg, SelectedId As Integer
    DefaultIndex = -1
    
    For I = 0 To mOrgPriorityCount - 1
-      If mOrgPriorityArr(I).Orgid = Org.Orgid Then
+      If mOrgPriorityArr(I).OrgId = Org.OrgId Then
          CurrId = mOrgPriorityArr(I).PriorityId
          For J = 0 To mPriorityCount - 1
             If CurrId = mPriorityArr(J).PriorityId Then
@@ -215,21 +215,21 @@ Public Property Get Count() As Integer
 
    Count = mPriorityCount
 End Property
-Public Function DefPriorityIdForOrg(Orgid As Long) As Long
+Public Function DefPriorityIdForOrg(OrgId As Long) As Long
 
    Dim Res As Long
    Dim Org As clsOrg
 
    Res = -1
-   Do While Orgid >= 0
-      Client.OrgMgr.GetOrgFromId Org, Orgid
+   Do While OrgId >= 0
+      Client.OrgMgr.GetOrgFromId Org, OrgId
       If Not Org Is Nothing Then
-         Res = DefPriorityIdForOrgInt(Orgid)
+         Res = DefPriorityIdForOrgInt(OrgId)
          If Res >= 0 Then
             Exit Do
          End If
-         Orgid = Org.OrgParent
-         If Orgid <= 0 Then
+         OrgId = Org.OrgParent
+         If OrgId <= 0 Then
             Exit Do
          End If
       Else
@@ -240,14 +240,14 @@ Public Function DefPriorityIdForOrg(Orgid As Long) As Long
    DefPriorityIdForOrg = Res
 End Function
 
-Private Function DefPriorityIdForOrgInt(Orgid As Long) As Long
+Private Function DefPriorityIdForOrgInt(OrgId As Long) As Long
 
    Dim I As Integer
    Dim Res As Long
    
    Res = -1
    For I = 0 To mOrgPriorityCount - 1
-      If mOrgPriorityArr(I).Orgid = Orgid Then
+      If mOrgPriorityArr(I).OrgId = OrgId Then
          Res = mOrgPriorityArr(I).PriorityId
          If mOrgPriorityArr(I).Def Then Exit For
       End If

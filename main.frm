@@ -1,6 +1,6 @@
 VERSION 5.00
-Object = "{B93A8074-3A0D-49E0-AB7B-55BC0E6D3452}#1.1#0"; "DSSHEA~1.DLL"
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
+Object = "{B93A8074-3A0D-49E0-AB7B-55BC0E6D3452}#1.2#0"; "DSSHEA~1.DLL"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
 Object = "{BDC217C8-ED16-11CD-956C-0000C04E4C0A}#1.1#0"; "TABCTL32.OCX"
 Object = "{A455B2A1-A33C-11D1-A8BD-002078104456}#1.0#0"; "cp5ocx32.ocx"
 Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "COMDLG32.OCX"
@@ -16,6 +16,21 @@ Begin VB.Form frmMain
    LinkTopic       =   "Form1"
    ScaleHeight     =   10200
    ScaleWidth      =   13455
+   Begin VB.PictureBox PicLogoLegalTalk 
+      Appearance      =   0  'Flat
+      BorderStyle     =   0  'None
+      ForeColor       =   &H80000008&
+      Height          =   280
+      Left            =   12120
+      Picture         =   "main.frx":030A
+      ScaleHeight     =   285
+      ScaleWidth      =   1215
+      TabIndex        =   20
+      TabStop         =   0   'False
+      Top             =   0
+      Width           =   1215
+      Visible         =   0   'False
+   End
    Begin VB.Timer tmrCheckCtCmdFiles 
       Enabled         =   0   'False
       Interval        =   1000
@@ -37,7 +52,7 @@ Begin VB.Form frmMain
       ForeColor       =   &H80000008&
       Height          =   280
       Left            =   9240
-      Picture         =   "main.frx":030A
+      Picture         =   "main.frx":070C
       ScaleHeight     =   285
       ScaleWidth      =   1215
       TabIndex        =   16
@@ -95,8 +110,8 @@ Begin VB.Form frmMain
       TabIndex        =   3
       Top             =   480
       Width           =   2175
-      _ExtentX        =   3836
-      _ExtentY        =   16113
+      _extentx        =   3836
+      _extenty        =   16113
    End
    Begin TabDlg.SSTab Tabs 
       Height          =   9375
@@ -113,56 +128,56 @@ Begin VB.Form frmMain
       TabsPerRow      =   10
       TabHeight       =   520
       TabCaption(0)   =   "Diktat"
-      TabPicture(0)   =   "main.frx":06E0
+      TabPicture(0)   =   "main.frx":0AE2
       Tab(0).ControlEnabled=   -1  'True
       Tab(0).Control(0)=   "ucDictList"
       Tab(0).Control(0).Enabled=   0   'False
       Tab(0).ControlCount=   1
       TabCaption(1)   =   "Statistik"
-      TabPicture(1)   =   "main.frx":06FC
+      TabPicture(1)   =   "main.frx":0AFE
       Tab(1).ControlEnabled=   0   'False
       Tab(1).Control(0)=   "ucStatList"
       Tab(1).ControlCount=   1
       TabCaption(2)   =   "Historik"
-      TabPicture(2)   =   "main.frx":0718
+      TabPicture(2)   =   "main.frx":0B1A
       Tab(2).ControlEnabled=   0   'False
       Tab(2).Control(0)=   "ucHistList"
       Tab(2).ControlCount=   1
       TabCaption(3)   =   "Sök"
-      TabPicture(3)   =   "main.frx":0734
+      TabPicture(3)   =   "main.frx":0B36
       Tab(3).ControlEnabled=   0   'False
       Tab(3).Control(0)=   "ucSearch"
       Tab(3).ControlCount=   1
       TabCaption(4)   =   "Administration"
-      TabPicture(4)   =   "main.frx":0750
+      TabPicture(4)   =   "main.frx":0B52
       Tab(4).ControlEnabled=   0   'False
       Tab(4).Control(0)=   "ucEditUser"
       Tab(4).ControlCount=   1
       TabCaption(5)   =   "Organisation"
-      TabPicture(5)   =   "main.frx":076C
+      TabPicture(5)   =   "main.frx":0B6E
       Tab(5).ControlEnabled=   0   'False
-      Tab(5).Control(0)=   "ucEditOrg"
+      Tab(5).Control(0)=   "ucOrgDictType"
       Tab(5).Control(1)=   "ucOrgPriority"
-      Tab(5).Control(2)=   "ucOrgDictType"
+      Tab(5).Control(2)=   "ucEditOrg"
       Tab(5).ControlCount=   3
       TabCaption(6)   =   "Systeminställningar"
-      TabPicture(6)   =   "main.frx":0788
+      TabPicture(6)   =   "main.frx":0B8A
       Tab(6).ControlEnabled=   0   'False
-      Tab(6).Control(0)=   "ucEditSysSettings"
-      Tab(6).Control(1)=   "ucEditGroup"
+      Tab(6).Control(0)=   "ucEditGroup"
+      Tab(6).Control(1)=   "ucEditSysSettings"
       Tab(6).ControlCount=   2
       TabCaption(7)   =   "Tab 6"
-      TabPicture(7)   =   "main.frx":07A4
+      TabPicture(7)   =   "main.frx":0BA6
       Tab(7).ControlEnabled=   0   'False
       Tab(7).Control(0)=   "ucVoiceXpress"
       Tab(7).ControlCount=   1
       TabCaption(8)   =   "Demo"
-      TabPicture(8)   =   "main.frx":0D06
+      TabPicture(8)   =   "main.frx":1108
       Tab(8).ControlEnabled=   0   'False
       Tab(8).Control(0)=   "ucDemo1"
       Tab(8).ControlCount=   1
       TabCaption(9)   =   "Logg"
-      TabPicture(9)   =   "main.frx":0D22
+      TabPicture(9)   =   "main.frx":1124
       Tab(9).ControlEnabled=   0   'False
       Tab(9).Control(0)=   "ucLoggList"
       Tab(9).ControlCount=   1
@@ -172,8 +187,8 @@ Begin VB.Form frmMain
          TabIndex        =   13
          Top             =   360
          Width           =   8535
-         _ExtentX        =   15055
-         _ExtentY        =   7011
+         _extentx        =   15055
+         _extenty        =   7011
       End
       Begin CareTalk.ucVoiceXpress ucVoiceXpress 
          Height          =   4095
@@ -182,8 +197,8 @@ Begin VB.Form frmMain
          TabIndex        =   12
          Top             =   480
          Width           =   8535
-         _ExtentX        =   15055
-         _ExtentY        =   7223
+         _extentx        =   15055
+         _extenty        =   7223
       End
       Begin CareTalk.ucEditSysSettings ucEditSysSettings 
          Height          =   4575
@@ -192,8 +207,8 @@ Begin VB.Form frmMain
          TabIndex        =   11
          Top             =   4560
          Width           =   8175
-         _ExtentX        =   14420
-         _ExtentY        =   8070
+         _extentx        =   14420
+         _extenty        =   8070
       End
       Begin CareTalk.ucEditUser ucEditUser 
          Height          =   6735
@@ -202,8 +217,8 @@ Begin VB.Form frmMain
          TabIndex        =   10
          Top             =   480
          Width           =   10575
-         _ExtentX        =   15055
-         _ExtentY        =   4048
+         _extentx        =   15055
+         _extenty        =   4048
       End
       Begin CareTalk.ucEditGroup ucEditGroup 
          Height          =   4095
@@ -212,8 +227,8 @@ Begin VB.Form frmMain
          TabIndex        =   9
          Top             =   480
          Width           =   8175
-         _ExtentX        =   14420
-         _ExtentY        =   7223
+         _extentx        =   14420
+         _extenty        =   7223
       End
       Begin CareTalk.ucStatList ucStatList 
          Height          =   6735
@@ -222,8 +237,8 @@ Begin VB.Form frmMain
          TabIndex        =   7
          Top             =   480
          Width           =   7815
-         _ExtentX        =   13785
-         _ExtentY        =   11880
+         _extentx        =   13785
+         _extenty        =   11880
       End
       Begin CareTalk.ucDictList ucDictList 
          Height          =   6735
@@ -232,8 +247,8 @@ Begin VB.Form frmMain
          TabIndex        =   6
          Top             =   480
          Width           =   7815
-         _ExtentX        =   13785
-         _ExtentY        =   11880
+         _extentx        =   13785
+         _extenty        =   11880
       End
       Begin CareTalk.ucSearch ucSearch 
          Height          =   7095
@@ -242,8 +257,8 @@ Begin VB.Form frmMain
          TabIndex        =   8
          Top             =   480
          Width           =   4935
-         _ExtentX        =   8705
-         _ExtentY        =   12515
+         _extentx        =   8705
+         _extenty        =   12515
       End
       Begin CareTalk.ucHistList ucHistList 
          Height          =   6735
@@ -252,8 +267,8 @@ Begin VB.Form frmMain
          TabIndex        =   17
          Top             =   480
          Width           =   7815
-         _ExtentX        =   13785
-         _ExtentY        =   11880
+         _extentx        =   13785
+         _extenty        =   11880
       End
       Begin CareTalk.ucEditOrg ucEditOrg 
          Height          =   1815
@@ -262,8 +277,8 @@ Begin VB.Form frmMain
          TabIndex        =   0
          Top             =   480
          Width           =   8535
-         _ExtentX        =   15055
-         _ExtentY        =   2566
+         _extentx        =   15055
+         _extenty        =   2566
       End
       Begin CareTalk.ucOrgPriority ucOrgPriority 
          Height          =   3015
@@ -271,8 +286,8 @@ Begin VB.Form frmMain
          TabIndex        =   2
          Top             =   5280
          Width           =   8295
-         _ExtentX        =   14631
-         _ExtentY        =   4048
+         _extentx        =   14631
+         _extenty        =   4048
       End
       Begin CareTalk.ucOrgDictType ucOrgDictType 
          Height          =   3015
@@ -280,8 +295,8 @@ Begin VB.Form frmMain
          TabIndex        =   1
          Top             =   2280
          Width           =   8295
-         _ExtentX        =   14631
-         _ExtentY        =   5318
+         _extentx        =   14631
+         _extenty        =   5318
       End
       Begin CareTalk.ucLoggList ucLoggList 
          Height          =   6735
@@ -290,8 +305,8 @@ Begin VB.Form frmMain
          TabIndex        =   19
          Top             =   360
          Width           =   7815
-         _ExtentX        =   13785
-         _ExtentY        =   11880
+         _extentx        =   13785
+         _extenty        =   11880
       End
    End
    Begin MSComctlLib.Toolbar Toolbar1 
@@ -354,35 +369,35 @@ Begin VB.Form frmMain
          BeginProperty Images {2C247F25-8591-11D1-B16A-00C0F0283628} 
             NumListImages   =   8
             BeginProperty ListImage1 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":0D3E
+               Picture         =   "main.frx":1140
                Key             =   ""
             EndProperty
             BeginProperty ListImage2 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":1240
+               Picture         =   "main.frx":1642
                Key             =   ""
             EndProperty
             BeginProperty ListImage3 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":39F2
+               Picture         =   "main.frx":3DF4
                Key             =   ""
             EndProperty
             BeginProperty ListImage4 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":3B04
+               Picture         =   "main.frx":3F06
                Key             =   ""
             EndProperty
             BeginProperty ListImage5 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":3C16
+               Picture         =   "main.frx":4018
                Key             =   ""
             EndProperty
             BeginProperty ListImage6 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":3D28
+               Picture         =   "main.frx":412A
                Key             =   ""
             EndProperty
             BeginProperty ListImage7 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":3E3A
+               Picture         =   "main.frx":423C
                Key             =   ""
             EndProperty
             BeginProperty ListImage8 {2C247F27-8591-11D1-B16A-00C0F0283628} 
-               Picture         =   "main.frx":43D4
+               Picture         =   "main.frx":47D6
                Key             =   ""
             EndProperty
          EndProperty
@@ -390,17 +405,17 @@ Begin VB.Form frmMain
    End
    Begin DSSHEADERCTRLLibCtl.DssDigtaConfEx DssDigtaConfEx1 
       Left            =   13320
-      OleObjectBlob   =   "main.frx":44CE
+      OleObjectBlob   =   "main.frx":48D0
       Top             =   1080
    End
    Begin DSSHEADERCTRLLibCtl.DssDigtaConf DssDigtaConf1 
       Left            =   13320
-      OleObjectBlob   =   "main.frx":44F2
+      OleObjectBlob   =   "main.frx":48F4
       Top             =   600
    End
    Begin DSSHEADERCTRLLibCtl.DssFileHeaderSimple DssFileHeaderSimple 
       Left            =   720
-      OleObjectBlob   =   "main.frx":4516
+      OleObjectBlob   =   "main.frx":4918
       Top             =   6960
    End
    Begin CompplusLib.MhZip MhZip 
@@ -508,7 +523,7 @@ Public Event OnCreateDictation()
 Public Event OnLogon()
 Public Event OnLogout()
 Public Event OnOrgChanged()
-
+ 
 Private Const tabDictList = 0
 Private Const tabStatList = 1
 Private Const tabHistList = 2
@@ -620,6 +635,9 @@ Private Sub Form_Load()
    UIStatusSet "Init", True
    Set Client = New clsClient
    Set mClient = Client
+   If Client.ClientType = ClientType_LegalTalk Then
+      Me.picLogo.Picture = Me.PicLogoLegalTalk.Picture
+   End If
    UIStatusClear
 
    LoginFromExtSystem = Len(StartUpUserLoginName) > 0
@@ -776,6 +794,10 @@ frmMain_Form_Load_Err:
    Eno = Err.Number
    ErrorHandle "1000420", Eno, 1000420, "Grundig Nova kan inte startas", False
    End
+End Sub
+Private Sub SetClientSetting()
+
+   
 End Sub
 Private Sub GetValuesFromAutostartSection()
 

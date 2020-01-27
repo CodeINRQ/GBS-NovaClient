@@ -1,3 +1,14 @@
+1.70.0.2
+--------
+Starts from 1.70.0.1
+CreateTempFile now uses both Timer and Rnd for unique file name. Also call Kill before use.
+
+
+1.70.0.1
+--------
+CareTalk, LegalTalk and GrundigNova has now the same source
+
+
 1.50.0.113
 --------
 Starts from 1.50.0.112

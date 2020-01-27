@@ -281,7 +281,7 @@ Public Property Get Connection() As ADODB.Connection
    Set Connection = Db
 End Property
 
-Public Sub OpenDisconnectedRecordset(ByRef RS As ADODB.Recordset, ByVal SelectFrom As String, ByVal WhereClause As String, ByVal GroupByClause As String, ByVal OrderClause As String)
+Public Sub OpenDisconnectedRecordset(ByRef Rs As ADODB.Recordset, ByVal SelectFrom As String, ByVal WhereClause As String, ByVal GroupByClause As String, ByVal OrderClause As String)
 
    Dim s As String
    Dim Fn As String
@@ -295,18 +295,18 @@ OpenDisconnectedRecordset_Start:
    On Error GoTo OpenDisconnectedRecordset_err
    Db_PrepareConnection
    
-   CloseRecordset RS
-   Set RS = New ADODB.Recordset
-   Set RS.ActiveConnection = Db
-   RS.CursorLocation = adUseClient
-   RS.CursorType = adOpenForwardOnly
+   CloseRecordset Rs
+   Set Rs = New ADODB.Recordset
+   Set Rs.ActiveConnection = Db
+   Rs.CursorLocation = adUseClient
+   Rs.CursorType = adOpenForwardOnly
    'RS.LockType = adLockReadOnly
    SQL = BuildSQL(SelectFrom, WhereClause, GroupByClause, OrderClause)
    T = Timer
    
    s = CallWS(wsOpenDisconnectedRecordset, SQL)
    Fn = WriteStringToTempFile(s)
-   RS.Open Fn, , , , adCmdFile
+   Rs.Open Fn, , , , adCmdFile
    KillFileIgnoreError Fn
    
    Debug.Print SQL, Format$(Timer - T, "0.00")
@@ -322,9 +322,9 @@ OpenDisconnectedRecordset_err:
       Error ErrVal
    End If
 End Sub
-Public Sub OpenRecordset(ByRef RS As ADODB.Recordset, ByRef SQL As String)
+Public Sub OpenRecordset(ByRef Rs As ADODB.Recordset, ByRef SQL As String)
 
-   OpenDisconnectedRecordset RS, SQL, "", "", ""
+   OpenDisconnectedRecordset Rs, SQL, "", "", ""
 End Sub
 Public Function DictationStorageOpen(Server As String, _
                                      Database As String, _
@@ -438,7 +438,7 @@ ExecuteCommand_err:
       Error ErrVal
    End If
 End Function
-Public Sub ExecuteCommandWithRsResult(ByRef RS As ADODB.Recordset, ByRef Cmd As ADODB.Command)
+Public Sub ExecuteCommandWithRsResult(ByRef Rs As ADODB.Recordset, ByRef Cmd As ADODB.Command)
       
    Dim Fn As String
    Dim T As Double
@@ -451,16 +451,16 @@ ExecuteCommandWithRsResult_Start:
    On Error GoTo ExecuteCommandWithRsResult_err
    Db_PrepareConnection
    
-   Set RS = Nothing
-   Set RS = New ADODB.Recordset
+   Set Rs = Nothing
+   Set Rs = New ADODB.Recordset
    'Rs.CursorLocation = adUseClient
-   RS.CursorType = adOpenForwardOnly
-   RS.LockType = adLockOptimistic
+   Rs.CursorType = adOpenForwardOnly
+   Rs.LockType = adLockOptimistic
    
    T = Timer
    s = CallWS(wsExecuteCommandWithRsResult, BuildStringFromCommand(Cmd))
    Fn = WriteStringToTempFile(s)
-   RS.Open Fn, , , , adCmdFile
+   Rs.Open Fn, , , , adCmdFile
    KillFileIgnoreError Fn
    
    Debug.Print Cmd.CommandText, Format$(Timer - T, "0.00")
@@ -523,11 +523,11 @@ End Function
 Private Function Db_GetAppInfo() As Boolean
 
 End Function
-Public Sub CloseRecordset(RS As ADODB.Recordset)
+Public Sub CloseRecordset(Rs As ADODB.Recordset)
 
    On Error Resume Next
-   RS.Close
-   Set RS = Nothing
+   Rs.Close
+   Set Rs = Nothing
 End Sub
 
 Private Sub Class_Terminate()

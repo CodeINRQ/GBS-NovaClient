@@ -15,15 +15,15 @@ Option Explicit
 Private Declare Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As Any, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Long, ByVal lpFileName As String) As Long
 Private Declare Function WritePrivateProfileString Lib "kernel32" Alias "WritePrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As Any, ByVal lpString As Any, ByVal lpFileName As String) As Long
 
-Private mIniFilepath As String
+Private mIniFilePath As String
 
 Public Property Let IniFilePath(ByVal Path As String)
 
-   mIniFilepath = Path
+   mIniFilePath = Path
 End Property
 Public Property Get IniFilePath() As String
 
-   IniFilePath = mIniFilepath
+   IniFilePath = mIniFilePath
 End Property
 
 Function GetBool(Section As String, Entry As String, Default As Boolean) As Boolean
@@ -33,8 +33,8 @@ Function GetBool(Section As String, Entry As String, Default As Boolean) As Bool
    Dim I As Integer
    Dim Värde As Boolean
 
-   If Len(mIniFilepath) > 0 Then
-      I = GetPrivateProfileString(Section, Entry, "", s, Len(s), mIniFilepath)
+   If Len(mIniFilePath) > 0 Then
+      I = GetPrivateProfileString(Section, Entry, "", s, Len(s), mIniFilePath)
       Tmp = Left$(s, I)
    End If
    If Tmp = "" Then
@@ -55,8 +55,8 @@ Function GetLong(Section As String, Entry As String, Default As Long) As Long
    Dim Tmp As String
    Dim Värde As Long
 
-   If Len(mIniFilepath) > 0 Then
-      I = GetPrivateProfileString(Section, Entry, "", s, Len(s), mIniFilepath)
+   If Len(mIniFilePath) > 0 Then
+      I = GetPrivateProfileString(Section, Entry, "", s, Len(s), mIniFilePath)
       Tmp = Left$(s, I)
    End If
    Värde = Default
@@ -89,8 +89,8 @@ Function GetString(Section As String, Entry As String, Default As String) As Str
    Dim s As String * 1024
    Dim Värde As String
 
-   If Len(mIniFilepath) > 0 Then
-      I = GetPrivateProfileString(Section, Entry, Default, s, Len(s), mIniFilepath)
+   If Len(mIniFilePath) > 0 Then
+      I = GetPrivateProfileString(Section, Entry, Default, s, Len(s), mIniFilePath)
       Värde = Left$(s, I)
    Else
       Värde = Default
@@ -124,8 +124,8 @@ Sub WriteString(Section As String, Entry As String, Value As String)
    Dim Eno As Long
 
    On Error GoTo WriteString_Err
-   If Len(mIniFilepath) > 0 Then
-      I = WritePrivateProfileString(Section, Entry, Value, mIniFilepath)
+   If Len(mIniFilePath) > 0 Then
+      I = WritePrivateProfileString(Section, Entry, Value, mIniFilePath)
    End If
    Exit Sub
    

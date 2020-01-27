@@ -160,7 +160,7 @@ Public Sub Init(Ty As String)
 
    Client.Server.CreateSysSettingsList Ty
    Do While Client.Server.SysSettingsListGetNext(Se, Ke, Va)
-      mSysSettings.AddString Se, Ke, Va
+      mSysSettings.AddString Se, Ke, Va, False
    Loop
    
    mUseAuthorsSign = mSysSettings.GetBool("WorkFlow", "UseAuthorsSign", False)

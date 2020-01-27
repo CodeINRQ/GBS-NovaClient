@@ -66,7 +66,7 @@ Public Property Get Connection() As ADODB.Connection
    Set Connection = Db
 End Property
 
-Public Sub OpenDisconnectedRecordset(ByRef RS As ADODB.Recordset, ByVal SelectFrom As String, ByVal WhereClause As String, ByVal GroupByClause As String, ByVal OrderClause As String)
+Public Sub OpenDisconnectedRecordset(ByRef Rs As ADODB.Recordset, ByVal SelectFrom As String, ByVal WhereClause As String, ByVal GroupByClause As String, ByVal OrderClause As String)
 
    Dim T As Double
    Dim SQL As String
@@ -78,17 +78,17 @@ OpenDisconnectedRecordset_Start:
    On Error GoTo OpenDisconnectedRecordset_err
    Db_PrepareConnection
    
-   CloseRecordset RS
-   Set RS = New ADODB.Recordset
-   Set RS.ActiveConnection = Db
-   RS.CursorLocation = adUseClient
-   RS.CursorType = adOpenForwardOnly
-   RS.LockType = adLockReadOnly
+   CloseRecordset Rs
+   Set Rs = New ADODB.Recordset
+   Set Rs.ActiveConnection = Db
+   Rs.CursorLocation = adUseClient
+   Rs.CursorType = adOpenForwardOnly
+   Rs.LockType = adLockReadOnly
    SQL = BuildSQL(SelectFrom, WhereClause, GroupByClause, OrderClause)
    T = Timer
-   RS.Open SQL
+   Rs.Open SQL
    Debug.Print SQL, Format$(Timer - T, "0.00")
-   Set RS.ActiveConnection = Nothing
+   Set Rs.ActiveConnection = Nothing
    Exit Sub
    
 OpenDisconnectedRecordset_err:
@@ -101,7 +101,7 @@ OpenDisconnectedRecordset_err:
       Error ErrVal
    End If
 End Sub
-Public Sub OpenRecordset(ByRef RS As ADODB.Recordset, ByRef SQL As String)
+Public Sub OpenRecordset(ByRef Rs As ADODB.Recordset, ByRef SQL As String)
 
    Dim T As Double
    Dim NumberOfTries As Integer
@@ -112,12 +112,12 @@ OpenRecordset_Start:
    On Error GoTo OpenRecordset_err
    Db_PrepareConnection
    
-   If RS Is Nothing Then
-      Set RS = New ADODB.Recordset
+   If Rs Is Nothing Then
+      Set Rs = New ADODB.Recordset
    End If
    
    T = Timer
-   RS.Open SQL, Db, adOpenDynamic, adLockOptimistic
+   Rs.Open SQL, Db, adOpenDynamic, adLockOptimistic
    Debug.Print SQL, Format$(Timer - T, "0.00")
    Exit Sub
    
@@ -137,7 +137,7 @@ Public Function DictationStorageOpen(Server As String, _
                                      UserId As String, _
                                      Password As String) As Boolean
 
-   Dim RS As New ADODB.Recordset
+   Dim Rs As New ADODB.Recordset
    Dim CS As String
    Dim Provider As String
    Dim Cred As String
@@ -220,7 +220,7 @@ ExecuteCommand_err:
       Error ErrVal
    End If
 End Sub
-Public Sub ExecuteCommandWithRsResult(ByRef RS As ADODB.Recordset, ByRef Cmd As ADODB.Command)
+Public Sub ExecuteCommandWithRsResult(ByRef Rs As ADODB.Recordset, ByRef Cmd As ADODB.Command)
 
    Dim T As Double
    Dim NumberOfTries As Integer
@@ -232,16 +232,16 @@ ExecuteCommandWithRsResult_Start:
    Db_PrepareConnection
    
    Cmd.ActiveConnection = Db
-   Set RS = Nothing
-   Set RS = New ADODB.Recordset
+   Set Rs = Nothing
+   Set Rs = New ADODB.Recordset
    'Rs.CursorLocation = adUseClient
-   RS.CursorType = adOpenForwardOnly
-   RS.LockType = adLockOptimistic
+   Rs.CursorType = adOpenForwardOnly
+   Rs.LockType = adLockOptimistic
    
    Debug.Print Cmd.ActiveConnection.State
    'If Cmd.ActiveConnection.State <> adStateOpen Then Stop '!!!
    T = Timer
-   Set RS = Cmd.Execute
+   Set Rs = Cmd.Execute
    Debug.Print Cmd.CommandText, Format$(Timer - T, "0.00")
    Exit Sub
    
@@ -330,7 +330,7 @@ ActivateAppRole_Err:
 End Function
 Private Function Db_GetAppInfo() As Boolean
 
-   Dim RS As ADODB.Recordset
+   Dim Rs As ADODB.Recordset
    Dim Cmd As ADODB.Command
    
    Set Cmd = New ADODB.Command
@@ -338,34 +338,23 @@ Private Function Db_GetAppInfo() As Boolean
    Cmd.CommandType = adCmdStoredProc
 
    On Error GoTo GetAppInfo_Err
-   ExecuteCommandWithRsResult RS, Cmd
-   If Not RS.EOF Then
-      mCryptoAppRolePassword = nvl(RS("AppPw"), "")
+   ExecuteCommandWithRsResult Rs, Cmd
+   If Not Rs.EOF Then
+      mCryptoAppRolePassword = nvl(Rs("AppPw"), "")
    End If
-   CloseRecordset RS
+   CloseRecordset Rs
    Db_GetAppInfo = True
    Exit Function
    
 GetAppInfo_Err:
    Db_GetAppInfo = False
-   CloseRecordset RS
+   CloseRecordset Rs
    Exit Function
 End Function
-Public Sub CloseRecordset(RS As ADODB.Recordset)
+Public Sub CloseRecordset(Rs As ADODB.Recordset)
 
    On Error Resume Next
-   RS.Close
-   Set RS = Nothing
+   Rs.Close
+   Set Rs = Nothing
 End Sub
 
-Private Sub Class_Initialize()
-
-'   Set Settings = New clsSettings
-   
-'   Settings.IniFilePath = App.Path & "\" & CommandValue("Profile", "CareTalk") & ".ini"
-End Sub
-
-Private Sub Class_Terminate()
-
-   'Set Settings = Nothing
-End Sub

@@ -21,7 +21,7 @@ Private ToolTipTable(TEXTS_MAX) As String
 Private NumberOfTexts As Integer
 Private mCtfpath As String
 
-Public Property Let Ctfpath(ByVal Path As String)
+Public Property Let CTFPath(ByVal Path As String)
 
    mCtfpath = Path
 End Property
@@ -49,7 +49,7 @@ Public Sub NewLanguage(Språkkod As String)
    Dim Pos2 As Integer
    Dim L As Integer
    Dim Id As String
-   Dim S As String
+   Dim s As String
    Dim FileName As String
    Dim Path As String
 
@@ -73,10 +73,10 @@ Public Sub NewLanguage(Språkkod As String)
    If Err = 0 Then
    
       Do While Not EOF(Fil)
-         Line Input #Fil, S
-         Pos1 = InStr(S, Chr$(9))
-         If Pos1 > 1 And Left$(S, 1) <= "9" Then
-            Pos2 = InStr(Pos1 + 1, S, Chr$(9))
+         Line Input #Fil, s
+         Pos1 = InStr(s, Chr$(9))
+         If Pos1 > 1 And Left$(s, 1) <= "9" Then
+            Pos2 = InStr(Pos1 + 1, s, Chr$(9))
             If Pos2 > 0 Then
                L = Pos2 - Pos1 - 1
             Else
@@ -84,11 +84,11 @@ Public Sub NewLanguage(Språkkod As String)
             End If
             If NumberOfTexts <= UBound(IdTable) Then
                On Error Resume Next
-               IdTable(NumberOfTexts) = CLng(Left$(S, Pos1 - 1))
+               IdTable(NumberOfTexts) = CLng(Left$(s, Pos1 - 1))
                If Err = 0 Then
-                  TextTable(NumberOfTexts) = StringReplace(mId$(S, Pos1 + 1, L), Chr$(133), "...")
+                  TextTable(NumberOfTexts) = StringReplace(mId$(s, Pos1 + 1, L), Chr$(133), "...")
                   If Pos2 > 0 Then
-                     ToolTipTable(NumberOfTexts) = StringReplace(mId$(S, Pos2 + 1), Chr$(133), "...")
+                     ToolTipTable(NumberOfTexts) = StringReplace(mId$(s, Pos2 + 1), Chr$(133), "...")
                   End If
                   NumberOfTexts = NumberOfTexts + 1
                End If
@@ -141,7 +141,7 @@ Public Sub ApplyToOneForm(F As Form)
 
    Dim I As Integer
    Dim C As Control
-   Dim S As String
+   Dim s As String
 
    On Error Resume Next
    F.Caption = Txt(CLng(F.Tag), F.Caption)
@@ -203,8 +203,3 @@ Public Function ToolTip(Id As Long, ByVal Def As String) As String
    End If
 End Function
 
-
-Private Sub Class_Initialize()
-
-   mCtfpath = App.EXEName & "\txts.ctf"
-End Sub
