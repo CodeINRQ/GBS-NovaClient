@@ -20,6 +20,7 @@ Private Const ModuleName = "EventMgr"
 Private EventCol As Collection
 Private ThereAreCtCmdFilesToWatch As Boolean
 Private ThereAreWindowsToWatch As Boolean
+Private MarkSignEnviron As String
 
 Public Sub OnAppEvent(EventName As String)
 
@@ -197,8 +198,6 @@ Private Function CreateVariableString(ByVal ExtSystem As String, Delimit As Inte
 End Function
 Private Function CreateEnvironString(Delimit As Integer, ByVal C As String) As String
 
-   Const MarkSignEnviron As String = "£"
-
    Dim Pos1 As Integer
    Dim Pos2 As Integer
    Dim Key As String
@@ -239,6 +238,8 @@ End Function
 Public Sub Init()
 
    Dim I As Integer
+   
+   MarkSignEnviron = Client.Settings.GetString("EventMgr", "MarkSignEnviron", "%")
    
    For I = 0 To Client.ExtSystemMgr.Count - 1
       GetEventFromSettings Client.ExtSystemMgr.ExtSystemName(I), "OnOpen"

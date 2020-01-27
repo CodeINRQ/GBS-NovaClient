@@ -249,7 +249,7 @@ End Function
 
 Sub CenterForm(F As Form, BaseFomr As Form)
 
-   Dim I As Integer
+   Dim I As Long
 
    If BaseFomr.WindowState <> vbMinimized Then
       I = (BaseFomr.Left + BaseFomr.Width / 2) - F.Width / 2

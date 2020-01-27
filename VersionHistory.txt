@@ -1,3 +1,91 @@
+1.94.0.1
+------
+Starts from 1.93.0.2
+Handle Windows position as long
+New setting in ini file. [EventMgr]/MarkSignEnviron ; Default is "%", can be set to "£"
+
+1.93.0.2
+--------
+Starts from 1.92.0.6
+Go back to previous handling for CreateLocalVlues; remove check for empty string introduced in 1.92.0.6
+
+Public Sub CreateLocalValues(DictFile As clsDictFile)
+
+   If Len(DictFile.OrgType) = 0 Then
+      DictFile.OrgType = "DSS"
+   End If
+   'If Len(DictFile.LocalFilenameFormat) = 0 Then
+      DictFile.LocalFilenameFormat = CreateTempFileName(DictFile.OrgType)
+   'End If
+   DictFile.LocalFilenamePlay = DictFile.LocalFilenameFormat
+End Sub
+
+New loop for retries at CheckInNewDict
+
+
+1.92.0.6
+--------
+Starts from 1.92.0.4
+Only create new DictFile.LocalFilenameFormat when blank
+
+   If Len(DictFile.LocalFilenameFormat) = 0 Then
+      DictFile.LocalFilenameFormat = CreateTempFileName(DictFile.OrgType)
+   End If
+   DictFile.LocalFilenamePlay = DictFile.LocalFilenameFormat
+
+A few new traces
+Read DatabaseUser from settings, default as before ct_public
+New setting ClientLoadTimeLimit default 12 s
+Add Module to Trace row
+
+
+
+1.92.0.4
+--------
+Starts from 1.92.0.3
+Use default "" for setting "LastUsedComport"
+Add mic button 163 in addition to 129
+Add mic button 164 in addition to 130
+
+
+1.92.0.3
+--------
+Starts from 1.92.0.2
+Go back to use Adapter.IsRecHardware
+
+
+
+1.92.0.2
+--------
+Starts from 1.92.0.1
+Always handle hardware as record instead of reading to Adapter.IsRecHardware
+
+
+1.92.0.1
+--------
+Starts from 1.91.0.1
+New variables for events: ChangedByUserId, AuthorId, TranscriberId, TranscriberOrgId
+Use "£" in stead of "%" for Enviromant variables
+Use URLEncode for valibles starting with "_"
+
+
+1.91.0.1
+--------
+Starts from 1.80.0.1
+Stop mix calibration; No Restore calibration; No Save calibration
+New global function for FileExists
+Remove a few Debug:Print stmts
+New values for Enum Gru_Button, extras for GotoStart, GotoEnd and ButRec
+New parameter to frmRecord.SetMicRecordMode
+New functions for new buttons
+Take care of WindingDuringRec
+GetSDKLic in ServerSQL.cls and ServerNova.cls read from table LicActivation
+
+
+
+
+
+
 1.80.0.1
 --------
 Starts from 1.72.0.1
