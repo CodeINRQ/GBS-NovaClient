@@ -788,6 +788,7 @@ Private Sub DSSRec_GruEvent(EventType As Gru_Event, Data As Long)
 End Sub
 Private Sub CheckForLowRecLevel(Pos As Long)
 
+   Debug.Print "RecMonitor", "Pos:" & Pos, "RecMonitor_StartPos:" & RecMonitor_StartPos, "RecMonitor_MaxLevel:" & RecMonitor_MaxLevel, "RecMonitor_LastWarningPos:" & RecMonitor_LastWarningPos, Timer
    If RecMonitor_StartPos > 0 Then
       If RecMonitor_MaxLevel < Client.SysSettings.PlayerWarningLowRecLevel Then
          If Pos - RecMonitor_StartPos > 5000 Then
@@ -797,7 +798,9 @@ Private Sub CheckForLowRecLevel(Pos As Long)
             End If
          End If
       Else
-         StopRecordingMonitoring
+         RecMonitor_LastWarningPos = Pos
+         RecMonitor_MaxLevel = 0
+         RaiseEvent WarningLowInputWhenRecording(0, 0)
       End If
    End If
 End Sub
@@ -809,6 +812,7 @@ Private Sub StartRecordingMonitoring()
       RecMonitor_LastWarningPos = RecMonitor_StartPos
       RecMonitor_MaxLevel = 0
    End If
+   RaiseEvent WarningLowInputWhenRecording(0, 0)
 End Sub
 Private Sub StopRecordingMonitoring()
  

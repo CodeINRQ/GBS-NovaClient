@@ -534,7 +534,7 @@ Private Sub DSSRecorder_GruEvent(EventType As Gru_Event, Data As Long)
    
    If EventType = GRU_BUTTONPRESS Then
       If Data = GRU_BUT_INDEX Then
-         Debug.Print "GruEvent But_Index+"
+         'Debug.Print "GruEvent But_Index+"
          If Client.SysSettings.PlayerIndexButtonAsCloseDict Then
             'If CheckMandatoryData() Then
                For I = 2 To 0 Step -1

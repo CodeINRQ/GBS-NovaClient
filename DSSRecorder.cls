@@ -213,7 +213,9 @@ Public Function Initialize(IniFilePath As String)
    
    mState = GRU_PORTNOTOPENED
    mComPort = Client.Settings.GetString(SettingSection, "LastUsedComport", "")
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "10"
    OpenPort mComPort
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "20"
    mState = GRU_STOPPED
    ReportStateChanged
    
@@ -1520,7 +1522,7 @@ Private Sub frmRecord_MicStat(Stat As Long)
 
    On Error GoTo MicStat_err
    
-   Debug.Print , , CStr(Stat) & " " & CStr(mState)
+   'Debug.Print , , CStr(Stat) & " " & CStr(mState)
    Client.Trace.AddRow Trace_Level_Events, ModuleName, FuncName, GruTraceTitleEntry, CStr(Stat) & "," & CStr(mButton)
    If Stat <> 20 Then
       If Stat <> 159 Then

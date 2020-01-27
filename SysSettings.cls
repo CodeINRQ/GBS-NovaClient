@@ -98,6 +98,7 @@ Public UserAllowChangeHome As Boolean
 Public ClientStopLoginMsg As String
 Public ClientForceLogoffMsg As String
 Public ClientMinVersion As String
+Public ClientLoadTimeLimit As Long
 
 Public SoundUseImageField As Boolean
 Public SoundChunkSize As Long
@@ -205,6 +206,7 @@ Public Sub Init(Ty As String)
    ClientStopLoginMsg = mSysSettings.GetString("Client", "StopLoginMsg", "")
    ClientForceLogoffMsg = mSysSettings.GetString("Client", "ForceLogoffMsg", "")
    ClientMinVersion = mSysSettings.GetString("Client", "MinVersion", "")
+   ClientLoadTimeLimit = mSysSettings.GetLong("Client", "LoadTimeLimit", 12)
    
    PlayerWarningLowRecLevel = mSysSettings.GetLong("Player", "WarningLowRecLevel", 5)
    PlayerWindingSpeed = mSysSettings.GetLong("Player", "WindingSpeed", 6000)

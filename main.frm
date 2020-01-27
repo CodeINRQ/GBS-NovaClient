@@ -156,15 +156,15 @@ Begin VB.Form frmMain
       TabCaption(5)   =   "Organisation"
       TabPicture(5)   =   "main.frx":0B6E
       Tab(5).ControlEnabled=   0   'False
-      Tab(5).Control(0)=   "ucEditOrg"
+      Tab(5).Control(0)=   "ucOrgDictType"
       Tab(5).Control(1)=   "ucOrgPriority"
-      Tab(5).Control(2)=   "ucOrgDictType"
+      Tab(5).Control(2)=   "ucEditOrg"
       Tab(5).ControlCount=   3
       TabCaption(6)   =   "Systeminställningar"
       TabPicture(6)   =   "main.frx":0B8A
       Tab(6).ControlEnabled=   0   'False
-      Tab(6).Control(0)=   "ucEditSysSettings"
-      Tab(6).Control(1)=   "ucEditGroup"
+      Tab(6).Control(0)=   "ucEditGroup"
+      Tab(6).Control(1)=   "ucEditSysSettings"
       Tab(6).ControlCount=   2
       TabCaption(7)   =   "Tab 6"
       TabPicture(7)   =   "main.frx":0BA6
@@ -535,6 +535,8 @@ Private Const tabVoiceXpress = 7
 Private Const tabDemo = 8
 Private Const tabLoggList = 9
 
+Private Const ModuleName = "frmMain"
+
 Private Declare Function ShowWindow Lib "user32" _
     (ByVal hWnd As Long, _
     ByVal nCmdShow As Long) As Long
@@ -580,6 +582,9 @@ Private DictList_TotalNumber As Long
 Private DictList_NumberOfWarnings As Long
 Private DictList_TotalLength As Long
 
+Private LoadTimer As Double
+Private LoadTimeTotal As Double
+
 Private Sub cmdSetHomeOrg_Click()
 
    Client.User.HomeOrgId = CurrentOrg
@@ -608,6 +613,8 @@ End Sub
 
 Private Sub Form_Load()
 
+   Const FuncName As String = "MainLoad"
+
    Dim I As Integer
    Dim Ver As String
    Dim LoginResult As Integer
@@ -627,7 +634,7 @@ Private Sub Form_Load()
    End If
 
    'Debug.Print App.StartMode
-   
+   LoadTimer = Timer
    
    SetUpStatusBar
    
@@ -661,6 +668,8 @@ Private Sub Form_Load()
       End
    End If
       
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "30", ""
+      
       'We login just to get authenticationmethod and some settings
    If Not Client.Server.DictationStorageOpen(StartUpServer, StartUpDatabase, "", "") Then
       ErrorHandleExplicit "1000421", "", 1000421, "GrundigNova databas kan inte öppnas", False
@@ -671,10 +680,16 @@ Private Sub Form_Load()
       End
    End If
    
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "40", ""
+
    Client.SysSettings.Init "CT"
    Client.CultureLanguage = Client.Server.ReadStationData("Culture", "Code", Client.SysSettings.CultureDefaultLanguage, "")
    Client.Texts.NewLanguage Client.CultureLanguage
    
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "50", ""
+
+   LoadTimeTotal = LoadTimeTotal + (Timer - LoadTimer)
+
    LoginResult = 1
    Do While LoginResult > 0 And LoginResult < 100
       LoginResult = Client.UserMgr.LoginUser(StartUpUserLoginName, StartUpPassword, StartUpExtSystem, StartUpExtPassword)
@@ -714,6 +729,10 @@ Private Sub Form_Load()
       End If
    Loop
    
+   LoadTimer = Timer
+   
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "60", ""
+
    Client.SysSettings.Init "CT"
       
    Me.picLogo.Visible = True
@@ -727,17 +746,23 @@ Private Sub Form_Load()
    
    StatusBar.Panels(5).Text = Client.Server.Database & ":" & Client.User.LoginName
    
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "70", ""
+
    Dim s As String
    s = Client.Server.ReadUserData("CT", "DL", "", Ver)
    ucDictList.RestoreSettings s, Ver
    
    DictFormSettings.Serialized = Client.Server.ReadUserData("CT", "DF", "", Ver)
 
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "71", ""
    Client.DictTypeMgr.Init
    Client.PriorityMgr.Init
    Client.GroupMgr.Init
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "72", ""
    Client.EventMgr.Init
    
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "80", ""
+
    Client.EventMgr.OnAppEvent "OnLogin"
    RaiseEvent OnLogon
            
@@ -759,15 +784,23 @@ Private Sub Form_Load()
    ucVoiceXpress.Init mVx
    ucSearch.Init
    
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "90", ""
+
    InstallLicense
 
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "100", ""
+
    Client.DSSRec.Initialize ""
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "101", ""
    Client.DSSRec.GetHardWare Client.Hw
    Set mDSSRec = Client.DSSRec
    
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "110", ""
+
    Set Client.PortableMgr.DigtaConf = frmMain.DssDigtaConf1
    Set Client.PortableMgr.DigtaConfEx = frmMain.DssDigtaConfEx1
 
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "120", ""
 
    CheckHardware
    mDSSRec.CheckLicens RecordingAllowed
@@ -792,6 +825,14 @@ Private Sub Form_Load()
    tmrUpdateList.Enabled = True
    tmrCheckButtons.Enabled = True
    
+   LoadTimeTotal = LoadTimeTotal + (Timer - LoadTimer)
+
+   If LoadTimeTotal > Client.SysSettings.ClientLoadTimeLimit Then
+      Client.LoggMgr.Insert 1320124, LoggLevel_SysInfo, 0, CStr(LoadTimeTotal)
+   End If
+   
+   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, "Exit", ""
+
    Exit Sub
    
 frmMain_Form_Load_Err:
@@ -1345,8 +1386,11 @@ Private Sub tmrCheckButtons_Timer()
    If DictRecoveryMode = tdiNew Then
       DictRecoveryMode = tdiEmpty
       If Not RecorderInUse Then
-         'Debug.Print "frmMain tmrCheckButtons Before RecordNewDictation"
-         RecordNewDictation DictRecovery, False, 0
+         If FileExists(DictRecovery.LocalDictFile.LocalFilenamePlay) Then
+            Client.LoggMgr.Insert 1320123, LoggLevel_DictFailure, DictRecovery.DictId, DictRecovery.LoggData
+            MsgBox Client.Texts.Txt(1000434, "Detta diktat har inte sparats tidigare. Spara nu eller radera!"), vbExclamation
+            RecordNewDictation DictRecovery, False, 0
+         End If
       End If
    End If
    

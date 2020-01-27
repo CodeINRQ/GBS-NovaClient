@@ -1426,6 +1426,7 @@ Public Function clsServer_DictationStorageOpen(Server As String, _
    Dim CurrUserid As String
    Dim CurrPassword As String
    Dim UseTrustedInSettings As Boolean
+   Dim DatabaseUser As String
 
    DictationStoragePath = Settings.GetFolder("DictationStorage", "Folder", "")
    DictationStorageSoundPath = Settings.GetFolder("DictationStorage", "SoundFolder", DictationStoragePath)
@@ -1451,12 +1452,14 @@ Public Function clsServer_DictationStorageOpen(Server As String, _
    
    CS = Settings.GetString("DictationStorage", "ConnectionString", CS)
      
+   DatabaseUser = Settings.GetString("DictationStorage", "DBUserid", DBUserid)
+   
    If UseTrustedInSettings Then
       Cred = "Trusted_Connection=yes"
       mConnectionString = CS & ";" & Cred
       mAuthMethod = 2
    Else
-      Cred = "User Id=" & DBUserid & ";Password=" & DBPassword
+      Cred = "User Id=" & DatabaseUser & ";Password=" & DBPassword
       mConnectionString = CS & ";" & Cred
       mAuthMethod = 0
    End If

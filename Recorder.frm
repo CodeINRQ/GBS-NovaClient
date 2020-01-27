@@ -89,7 +89,7 @@ Private Sub Adapter_MicStat(ByVal MicStat As Long, ByVal description As String)
    
    Const FuncName As String = "Adapter_MicStat"
 
-   Debug.Print , , , , , MicStat, description
+   'Debug.Print , , , , , MicStat, description
 
    Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "MicStat", CStr(MicStat)
    RaiseEvent MicStat(MicStat)
@@ -211,11 +211,15 @@ Private Sub Form_Load()
    Dim PId As Long
    Dim Aret As Long
    
+   Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, TraceTitle_Entry
    Set AdapterManager = New ADAPTERSERVERLib.AdapterControlManager
+   Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "A"
    Set Adapter = AdapterManager.AdapterControl(m_bCreated)
-   'MsgBox "m_bCreated " & CStr(m_bCreated)
+   Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "B"
    Set AdapterManager = Nothing
+   Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "C"
    PId = GetCurrentProcessId()
+   Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "D"
    Aret = Adapter.RegisterApp(PId)
    Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "RegisterApp", CStr(PId), CStr(Aret)
 End Sub

@@ -66,7 +66,7 @@ Private Sub Class_Terminate()
       mSettings.WriteString SettingSection, "FormPosition", WindowSavePositionToString(mTraceForm)
    End If
    mTraceFileCacheRows = 0
-   AddRowToFile Trace_Level_Full, "", "", ""
+   AddRowToFile Trace_Level_Full, "", "", "", ""
    Unload mTraceForm
    Set mTraceForm = Nothing
 End Sub
@@ -102,16 +102,16 @@ Public Sub AddRow(ByVal Level As TraceLevelType, ByVal Module As String, ByVal L
    If (Level And mLevel) = 0 Then Exit Sub
       
    If (mOutput And Trace_Output_File) <> 0 Then
-      AddRowToFile Level, Location, Title, Data
+      AddRowToFile Level, Module, Location, Title, Data
    End If
    If (mOutput And Trace_Output_ViewForm) <> 0 Then
-      AddRowToForm Level, Location, Title, Data
+      AddRowToForm Level, Module, Location, Title, Data
    End If
    If (mOutput And Trace_Output_MsgBox) <> 0 Then
-      AddRowToMsgBox Level, Location, Title, Data
+      AddRowToMsgBox Level, Module, Location, Title, Data
    End If
 End Sub
-Private Sub AddRowToFile(ByVal Level As TraceLevelType, ByVal Location As String, ByVal Title As String, ByVal Data As String)
+Private Sub AddRowToFile(ByVal Level As TraceLevelType, ByVal Module As String, ByVal Location As String, ByVal Title As String, ByVal Data As String)
 
    Dim F As Integer
    Dim I As Integer
@@ -119,7 +119,7 @@ Private Sub AddRowToFile(ByVal Level As TraceLevelType, ByVal Location As String
    On Error Resume Next
    If mNumberOfCachedRows > UBound(mCachedRows) Then Exit Sub
    
-   mCachedRows(mNumberOfCachedRows) = Format$(Now, "ddddd ttttt") & vbTab & CStr(Level) & vbTab & Location & vbTab & Title & vbTab & Data
+   mCachedRows(mNumberOfCachedRows) = Format$(Now, "ddddd ttttt") & vbTab & CStr(Level) & vbTab & Module & vbTab & Location & vbTab & Title & vbTab & Data
    mNumberOfCachedRows = mNumberOfCachedRows + 1
    
    If mNumberOfCachedRows >= mTraceFileCacheRows Then
@@ -185,7 +185,7 @@ Private Function BuildFileNameWithGenerationNumber(FileName As String, GenNo As 
       BuildFileNameWithGenerationNumber = FileName
    End If
 End Function
-Private Sub AddRowToForm(ByVal Level As TraceLevelType, ByVal Location As String, ByVal Title As String, ByVal Data As String)
+Private Sub AddRowToForm(ByVal Level As TraceLevelType, ByVal Module As String, ByVal Location As String, ByVal Title As String, ByVal Data As String)
 
    Dim Row As String
 
@@ -200,20 +200,20 @@ Private Sub AddRowToForm(ByVal Level As TraceLevelType, ByVal Location As String
       mTraceFormUsed = True
    End If
    
-   Row = Format$(Now, "ddddd ttttt") & vbTab & CStr(Level) & vbTab & Location & vbTab & Title & vbTab & Data
+   Row = Format$(Now, "ddddd ttttt") & vbTab & CStr(Level) & vbTab & Module & vbTab & Location & vbTab & Title & vbTab & Data
    mTraceForm.lstTrace.AddItem Row
    mTraceForm.lstTrace.ListIndex = mTraceForm.lstTrace.ListCount - 1
    If mTraceForm.lstTrace.ListCount > 500 Then
       mTraceForm.lstTrace.RemoveItem 0
    End If
 End Sub
-Private Sub AddRowToMsgBox(ByVal Level As TraceLevelType, ByVal Location As String, ByVal Title As String, ByVal Data As String)
+Private Sub AddRowToMsgBox(ByVal Level As TraceLevelType, ByVal Module As String, ByVal Location As String, ByVal Title As String, ByVal Data As String)
 
    Dim Row As String
    Dim MsgType As Integer
 
    On Error Resume Next
-   Row = Format$(Now, "ddddd ttttt") & vbLf & CStr(Level) & vbLf & Location & vbLf & Title & vbLf & Data
+   Row = Format$(Now, "ddddd ttttt") & vbLf & CStr(Level) & vbLf & Module & vbLf & Location & vbLf & Title & vbLf & Data
    If Level < Trace_Level_Warning Then
       MsgType = vbCritical
    Else
