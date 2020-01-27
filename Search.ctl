@@ -133,7 +133,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   56033281
+      Format          =   59179009
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -149,7 +149,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   56033281
+      Format          =   59179009
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -165,7 +165,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   56033281
+      Format          =   59179009
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -181,7 +181,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   56033281
+      Format          =   59179009
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -363,21 +363,21 @@ Public Sub Init()
    cboStatus.AddItem "", Idx
    cboStatus.ItemData(Idx) = 0
    Idx = Idx + 1
-   cboStatus.AddItem Client.Texts.Txt(1250100 + 20, ""), Idx
+   cboStatus.AddItem Client.Texts.Txt(1250100 + 20, "Under inspelning"), Idx
    cboStatus.ItemData(Idx) = 20
    Idx = Idx + 1
-   cboStatus.AddItem Client.Texts.Txt(1250100 + 30, ""), Idx
+   cboStatus.AddItem Client.Texts.Txt(1250100 + 30, "Inspelat"), Idx
    cboStatus.ItemData(Idx) = 30
    Idx = Idx + 1
-   cboStatus.AddItem Client.Texts.Txt(1250100 + 50, ""), Idx
+   cboStatus.AddItem Client.Texts.Txt(1250100 + 50, "Under utskrift"), Idx
    cboStatus.ItemData(Idx) = 50
    If Client.SysSettings.UseAuthorsSign Then
       Idx = Idx + 1
-      cboStatus.AddItem Client.Texts.Txt(1250100 + 60, ""), Idx
+      cboStatus.AddItem Client.Texts.Txt(1250100 + 60, "För signering"), Idx
       cboStatus.ItemData(Idx) = 60
    End If
    Idx = Idx + 1
-   cboStatus.AddItem Client.Texts.Txt(1250100 + 70, ""), Idx
+   cboStatus.AddItem Client.Texts.Txt(1250100 + 70, "Utskrivet"), Idx
    cboStatus.ItemData(Idx) = 70
       
    SetEnabled
@@ -467,7 +467,7 @@ Private Sub cmdSearch_Click()
 End Sub
 Public Sub SetNewCurrentOrg(OrgId As Long, OrgText As String)
 
-   Dim S As String
+   Dim s As String
    Dim LastDictTypeId As Long
    Dim LastPriorityId As Integer
    
@@ -483,16 +483,16 @@ Public Sub SetNewCurrentOrg(OrgId As Long, OrgText As String)
    Else
       LastPriorityId = -1
    End If
-   S = Client.Texts.Txt(1150112, "")
+   s = Client.Texts.Txt(1150112, "")
    If mOrgId < 30000 Then
       Client.DictTypeMgr.FillCombo cboDictType, mOrgId, LastDictTypeId, -1, False
       Client.PriorityMgr.FillCombo cboPriority, mOrgId, LastPriorityId, False
-      S = S & " " & OrgText
+      s = s & " " & OrgText
    Else
       Client.DictTypeMgr.FillCombo cboDictType, Client.User.HomeOrgId, LastDictTypeId, -1, False
       Client.PriorityMgr.FillCombo cboPriority, Client.User.HomeOrgId, LastPriorityId, False
    End If
-   lblSearchOrg.Caption = S
+   lblSearchOrg.Caption = s
    
    SetEnabled
 End Sub

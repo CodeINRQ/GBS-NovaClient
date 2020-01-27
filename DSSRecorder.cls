@@ -212,7 +212,7 @@ Public Function Initialize(IniFilePath As String)
    mRecording = False
    
    mState = GRU_PORTNOTOPENED
-   mComPort = Client.Settings.GetString(SettingSection, "LastUsedComport", "USB")
+   mComPort = Client.Settings.GetString(SettingSection, "LastUsedComport", "")
    OpenPort mComPort
    mState = GRU_STOPPED
    ReportStateChanged
@@ -1529,10 +1529,10 @@ Private Sub frmRecord_MicStat(Stat As Long)
       Select Case Stat
          Case 128
             NewButton = GRU_BUT_PLAYPAUSE
-         Case 129
+         Case 129, 163
             WindingDuringRec = (mState = GRU_REC) Or (mState = GRU_RECPAUSED)
             NewButton = GRU_BUT_REWIND
-         Case 130
+         Case 130, 164
             WindingDuringRec = (mState = GRU_REC) Or (mState = GRU_RECPAUSED)
             NewButton = GRU_BUT_FORWARD
          Case 131

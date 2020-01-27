@@ -131,6 +131,7 @@ Public Function CreateDictString(ExtSystem As String, Delimit As Integer, ByVal 
    C = ChangeParam(C, Delimit, "StatusText", D.StatusText)
    C = ChangeParam(C, Delimit, "Created", Format$(D.Created, "ddddd ttttt"))
    C = ChangeParam(C, Delimit, "Changed", Format$(D.Changed, "ddddd ttttt"))
+   C = ChangeParam(C, Delimit, "ChangedByUserId", D.ChangedByUserId)
    C = ChangeParam(C, Delimit, "ChangedByUserShortName", D.ChangedByUserShortName)
    C = ChangeParam(C, Delimit, "ChangedByUserLongName", D.ChangedByUserLongName)
    
@@ -142,8 +143,12 @@ Public Function CreateDictString(ExtSystem As String, Delimit As Integer, ByVal 
    C = ChangeParam(C, Delimit, "OrgText", D.OrgText)
    C = ChangeParam(C, Delimit, "ExtOrg", Client.ExtSystemMgr.GetExtOrg(ExtSystem, D.OrgId))
 
+   C = ChangeParam(C, Delimit, "AuthorId", D.AuthorId)
    C = ChangeParam(C, Delimit, "AuthorShortName", D.AuthorShortName)
    C = ChangeParam(C, Delimit, "AuthorLongName", D.AuthorLongName)
+   
+   C = ChangeParam(C, Delimit, "TranscriberId", D.TranscriberId)
+   C = ChangeParam(C, Delimit, "TranscriberOrgId", D.TranscriberOrgId)
    C = ChangeParam(C, Delimit, "TranscriberShortName", D.TranscriberShortName)
    C = ChangeParam(C, Delimit, "TranscriberLongName", D.TranscriberLongName)
    
@@ -192,33 +197,44 @@ Private Function CreateVariableString(ByVal ExtSystem As String, Delimit As Inte
 End Function
 Private Function CreateEnvironString(Delimit As Integer, ByVal C As String) As String
 
+   Const MarkSignEnviron As String = "£"
+
    Dim Pos1 As Integer
    Dim Pos2 As Integer
    Dim Key As String
+   Dim Env As String
 
    Do
       Pos2 = 0
-      Pos1 = InStr(C, "%")
+      Pos1 = InStr(C, MarkSignEnviron)
       If Pos1 > 0 Then
-         Pos2 = InStr(Pos1 + 1, C, "%")
+         Pos2 = InStr(Pos1 + 1, C, MarkSignEnviron)
       End If
       If Pos1 > 0 And Pos2 > Pos1 Then
          Key = mId$(C, Pos1 + 1, Pos2 - Pos1 - 1)
-         C = ChangeParam(C, Delimit, Key, Environ(Key))
+         Env = Environ(Key)
+         If Len(Env) > 0 Then
+            C = ChangeParam(C, Delimit, Key, Env, MarkSignEnviron)
+         End If
       End If
    Loop While Pos2 > Pos1
    CreateEnvironString = C
 End Function
-Private Function ChangeParam(ByVal s As String, ByVal Delimit As Integer, ByVal Param As String, ByVal Value As String) As String
+Private Function ChangeParam(ByVal s As String, ByVal Delimit As Integer, ByVal Param As String, ByVal Value As String, Optional MarkSign As String = "%") As String
 
    Dim Pos As Integer
+   Dim EncValue As String
    
    Value = Replace(Value, Chr(Delimit), "")
+   EncValue = URLEncode(Value)
    If Len(Value) = 0 Or InStr(Value, " ") > 0 And Delimit > 0 Then
       Value = Chr(Delimit) & Value & Chr(Delimit)
    End If
       
-   ChangeParam = Replace(s, "%" & Param & "%", Value, 1, -1, vbTextCompare)
+   s = Replace(s, MarkSign & Param & MarkSign, Value, 1, -1, vbTextCompare)
+   s = Replace(s, MarkSign & "_" & Param & MarkSign, EncValue, 1, -1, vbTextCompare)
+   
+   ChangeParam = s
 End Function
 Public Sub Init()
 
@@ -663,3 +679,50 @@ Private Function RemoveWhiteSpaceFromString(s As String) As String
    Next I
    RemoveWhiteSpaceFromString = Res
 End Function
+
+Private Function URLEncode(ByVal Txt As String) As String
+   Dim I As Integer
+   Dim ch As String
+   Dim ch_asc As Integer
+   Dim result As String
+
+    result = ""
+    For I = 1 To Len(Txt)
+        ' Translate the next character.
+        ch = mId$(Txt, I, 1)
+        ch_asc = Asc(ch)
+        If SafeChars(ch_asc) Then
+            ' Use the character.
+            result = result & ch
+        Else
+            ' Convert the character to hex.
+            result = result & "%" & Right$("0" & _
+                Hex$(ch_asc), 2)
+        End If
+    Next I
+
+    URLEncode = result
+End Function
+
+Private Function SafeChars(I As Integer) As Boolean
+
+   Select Case I
+      Case 0 To 47
+         SafeChars = False
+      Case 48 To 57
+          SafeChars = True
+      Case 58 To 64
+          SafeChars = False
+      Case 65 To 90
+          SafeChars = True
+      Case 91 To 96
+          SafeChars = False
+      Case 97 To 122
+          SafeChars = True
+      Case 123 To 255
+          SafeChars = False
+      Case Else
+         SafeChars = True
+   End Select
+End Function
+
