@@ -156,15 +156,15 @@ Begin VB.Form frmMain
       TabCaption(5)   =   "Organisation"
       TabPicture(5)   =   "main.frx":0B6E
       Tab(5).ControlEnabled=   0   'False
-      Tab(5).Control(0)=   "ucOrgDictType"
+      Tab(5).Control(0)=   "ucEditOrg"
       Tab(5).Control(1)=   "ucOrgPriority"
-      Tab(5).Control(2)=   "ucEditOrg"
+      Tab(5).Control(2)=   "ucOrgDictType"
       Tab(5).ControlCount=   3
       TabCaption(6)   =   "Systeminställningar"
       TabPicture(6)   =   "main.frx":0B8A
       Tab(6).ControlEnabled=   0   'False
-      Tab(6).Control(0)=   "ucEditGroup"
-      Tab(6).Control(1)=   "ucEditSysSettings"
+      Tab(6).Control(0)=   "ucEditSysSettings"
+      Tab(6).Control(1)=   "ucEditGroup"
       Tab(6).ControlCount=   2
       TabCaption(7)   =   "Tab 6"
       TabPicture(7)   =   "main.frx":0BA6
@@ -759,12 +759,15 @@ Private Sub Form_Load()
    ucVoiceXpress.Init mVx
    ucSearch.Init
    
+   InstallLicense
+
    Client.DSSRec.Initialize ""
    Client.DSSRec.GetHardWare Client.Hw
    Set mDSSRec = Client.DSSRec
    
    Set Client.PortableMgr.DigtaConf = frmMain.DssDigtaConf1
    Set Client.PortableMgr.DigtaConfEx = frmMain.DssDigtaConfEx1
+
 
    CheckHardware
    mDSSRec.CheckLicens RecordingAllowed
@@ -795,6 +798,40 @@ frmMain_Form_Load_Err:
    Eno = Err.Number
    ErrorHandle "1000420", Eno, 1000420, "Grundig Nova kan inte startas", False
    End
+End Sub
+
+Private Sub InstallLicense()
+
+   Dim SDKLic As New clsSDKLicense
+   Dim Pos As Integer
+   Dim Site As String
+   Dim LicFilePath As String
+   Dim LicContent As String
+   Dim InstKeyAppPath As String
+   
+   On Error Resume Next
+   
+   Pos = InStr(Client.User.LoginName, "\")
+   If Pos > 0 Then
+      Site = Left(Client.User.LoginName, Pos - 1)
+   End If
+
+   InstKeyAppPath = App.Path & "\InstallKeyDigtaSDK.exe"
+   If FileExists(InstKeyAppPath) Then
+      If Client.Server.GetSDKLic(SDKLic, Site, Client.Station.Id) Then
+         If Len(SDKLic.SerialNumber) > 0 And Len(SDKLic.ActivationCode) > 0 Then
+            LicFilePath = CreateTempFileName("lic")
+            LicContent = SDKLic.SerialNumber & vbCrLf & SDKLic.ActivationCode & vbCrLf
+            WriteStringToFile LicContent, LicFilePath
+            
+            If FileExists(LicFilePath) Then
+               ShellAndWait App.Path & "\InstallKeyDigtaSDK.exe " & LicFilePath, vbHide
+            End If
+            
+            KillFileIgnoreError LicFilePath
+         End If
+      End If
+   End If
 End Sub
 Private Sub SetClientSetting()
 

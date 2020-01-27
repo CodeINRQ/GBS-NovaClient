@@ -30,7 +30,7 @@ Public Property Get Database() As String
 End Property
 Public Property Get StorageOpened() As Boolean
 End Property
-Public Property Set Settings(S As clsSettings)
+Public Property Set Settings(s As clsSettings)
 End Property
 Public Function IsBatchDoneByClient() As Boolean
 End Function
@@ -45,6 +45,8 @@ End Sub
 Private Sub DeleteHistoryByDictId(DictId As Long)
 End Sub
 Public Function GetRoles(Roles As clsRoles, ByVal GroupId As Long, ByVal OrgId As Long) As Boolean
+End Function
+Public Function GetSDKLic(SDKLic As clsSDKLicense, ByVal Site As String, ByVal StationId As String) As Boolean
 End Function
 Public Sub SaveRoles(Roles As clsRoles)
 End Sub
@@ -213,17 +215,17 @@ Public Sub AddString(Dest As String, AddPhrase As String, Addendum As String)
 End Sub
 Public Sub WriteUserData(Ty As String, Ke As String, Va As String)
 End Sub
-Public Function ReadUserData(Ty As String, Ke As String, Def As String, ByRef Version) As String
+Public Function ReadUserData(Ty As String, Ke As String, Def As String, ByRef version) As String
 End Function
 Public Sub CreateSysSettingsList(ByVal Ty As String)
 End Sub
 Public Function SysSettingsListGetNext(ByRef Se As String, ByRef Ke As String, ByRef Va As String) As Boolean
 End Function
-Public Sub WriteSysSettings(Ty As String, Se As String, Ke As String, S As String)
+Public Sub WriteSysSettings(Ty As String, Se As String, Ke As String, s As String)
 End Sub
 Public Sub WriteStationData(Ty As String, Ke As String, Va As String)
 End Sub
-Public Function ReadStationData(Ty As String, Ke As String, Def As String, ByRef Version) As String
+Public Function ReadStationData(Ty As String, Ke As String, Def As String, ByRef version) As String
 End Function
 Public Function SQLDateTimeString(D As Date) As String
 End Function

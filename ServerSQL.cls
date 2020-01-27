@@ -180,6 +180,38 @@ Public Function clsServer_GetRoles(Roles As clsRoles, ByVal GroupId As Long, ByV
    End If
    CloseRecordset Rs
 End Function
+Public Function clsServer_GetSDKLic(SDKLic As clsSDKLicense, ByVal Site As String, ByVal StationId As String) As Boolean
+
+   Dim Res As Boolean
+   
+   Res = clsServer_GetSDKLicInt(SDKLic, Site, StationId)
+   If Not Res Then
+      Res = clsServer_GetSDKLicInt(SDKLic, Site, "*")
+   End If
+   clsServer_GetSDKLic = Res
+End Function
+Private Function clsServer_GetSDKLicInt(SDKLic As clsSDKLicense, ByVal Site As String, ByVal StationId As String) As Boolean
+
+   Dim Rs As ADODB.Recordset
+   Dim SQL As String
+   
+   SQL = clsServer_BuildSQL("Select * from LicActivation", "Site='" & Site & "' and StationId='" & StationId & "'", "", "")
+   
+   Set Rs = New ADODB.Recordset
+   Rs.CursorLocation = adUseClient
+   Rs.CursorType = adOpenDynamic
+   Rs.LockType = adLockPessimistic
+   OpenRecordset Rs, SQL
+   
+   If Rs.EOF Then
+      clsServer_GetSDKLicInt = False
+   Else
+      SDKLic.SerialNumber = nvl(Rs("SerialNumber"), "")
+      SDKLic.ActivationCode = nvl(Rs("ActivationCode"), "")
+      clsServer_GetSDKLicInt = True
+   End If
+   CloseRecordset Rs
+End Function
 Public Sub clsServer_SaveRoles(Roles As clsRoles)
 
    Dim Rs As ADODB.Recordset

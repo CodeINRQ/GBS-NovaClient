@@ -657,6 +657,10 @@ Public Sub ShellAndWait(ByVal program_name As String, ByVal window_style As VbAp
    End If
 End Sub
 
+Public Function FileExists(ByVal sFileName As String) As Boolean
+
+   FileExists = Len(Dir(sFileName)) > 0
+End Function
 Public Function MyGetTickCount() As Long
    
    Dim Count As Currency
