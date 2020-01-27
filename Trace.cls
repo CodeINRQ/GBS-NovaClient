@@ -42,6 +42,7 @@ Private mTraceFilename As String
 Private mTraceFileMaxSize As Long
 Private mTraceFileCacheRows As Long
 Private mTraceFileCreateNew As Boolean
+Private mTraceFileGenerations As Long
 
 Private mTraceFormAlwaysOnTop As Boolean
 Private mTracePosition As String
@@ -75,10 +76,11 @@ Public Sub Initialize(Setting As clsSettings)
    If mLevel <> Trace_Level_None Then
       mOutput = mSettings.GetLong(SettingSection, "Output", Trace_Output_None)
       
-      mTraceFilename = mSettings.GetString(SettingSection, "Filename", App.Path & "\" & App.EXEName & ".log")
+      mTraceFilename = CreateEnvironString(mSettings.GetString(SettingSection, "Filename", App.Path & "\" & App.EXEName & ".log"))
       mTraceFileMaxSize = mSettings.GetLong(SettingSection, "FileMaxSize", 0)
       mTraceFileCacheRows = mSettings.GetLong(SettingSection, "FileCacheRows", 50)
       mTraceFileCreateNew = mSettings.GetBool(SettingSection, "FileCreateNew", True)
+      mTraceFileGenerations = mSettings.GetLong(SettingSection, "FileGenerations", 0)
       
       mTraceFormAlwaysOnTop = mSettings.GetBool(SettingSection, "FormAlwaysOnTop", False)
       mTracePosition = mSettings.GetString(SettingSection, "FormPosition", "")
@@ -119,9 +121,7 @@ Private Sub AddRowToFile(ByVal Level As TraceLevelType, ByVal Location As String
    
    If mNumberOfCachedRows >= mTraceFileCacheRows Then
       If Not mFileUsed Then
-         If mTraceFileCreateNew Then
-            Kill mTraceFilename
-         End If
+         PrepareForTraceFile
          mFileUsed = True
       End If
       If FileLen(mTraceFilename) < mTraceFileMaxSize Then
@@ -135,6 +135,53 @@ Private Sub AddRowToFile(ByVal Level As TraceLevelType, ByVal Location As String
       mNumberOfCachedRows = 0
    End If
 End Sub
+Private Sub PrepareForTraceFile()
+
+   Dim FileNameOld As String
+   Dim FileNameNew As String
+   Dim OldGenNo As Long
+   
+   On Error Resume Next
+   If mTraceFileGenerations > 0 Then
+      FileNameOld = BuildFileNameWithGenerationNumber(mTraceFilename, mTraceFileGenerations - 1)
+      Kill FileNameOld
+      For OldGenNo = mTraceFileGenerations - 2 To 0 Step -1
+         FileNameOld = BuildFileNameWithGenerationNumber(mTraceFilename, OldGenNo)
+         FileNameNew = BuildFileNameWithGenerationNumber(mTraceFilename, OldGenNo + 1)
+         Name FileNameOld As FileNameNew
+      Next OldGenNo
+   Else
+      If mTraceFileCreateNew Then
+         Kill mTraceFilename
+      End If
+   End If
+End Sub
+Private Function BuildFileNameWithGenerationNumber(FileName As String, GenNo As Long) As String
+
+   Dim FileNameFirstPart As String
+   Dim FileNameLastPart As String
+   Dim Pos As Integer
+   
+   If GenNo > 0 Then
+      FileNameFirstPart = FileName
+      FileNameLastPart = ""
+   
+      For Pos = Len(FileName) To 1 Step -1
+         If mId$(FileName, Pos, 1) = "\" Then
+            Exit For
+         Else
+            If mId$(FileName, Pos, 1) = "." Then
+               FileNameFirstPart = Left$(FileName, Pos - 1)
+               FileNameLastPart = mId$(FileName, Pos)
+               Exit For
+            End If
+         End If
+      Next Pos
+      BuildFileNameWithGenerationNumber = FileNameFirstPart & CStr(GenNo) & FileNameLastPart
+   Else
+      BuildFileNameWithGenerationNumber = FileName
+   End If
+End Function
 Private Sub AddRowToForm(ByVal Level As TraceLevelType, ByVal Location As String, ByVal Title As String, ByVal Data As String)
 
    Dim Row As String
@@ -184,4 +231,26 @@ Public Property Let Output(ByVal NewValue As TraceOutputType)
 
     mOutput = NewValue
 End Property
+Private Function CreateEnvironString(ByVal StringWithEnvVariables As String) As String
 
+   Dim Pos1 As Integer
+   Dim Pos2 As Integer
+   Dim Key As String
+
+   Do
+      Pos2 = 0
+      Pos1 = InStr(StringWithEnvVariables, "%")
+      If Pos1 > 0 Then
+         Pos2 = InStr(Pos1 + 1, StringWithEnvVariables, "%")
+      End If
+      If Pos1 > 0 And Pos2 > Pos1 Then
+         Key = mId$(StringWithEnvVariables, Pos1 + 1, Pos2 - Pos1 - 1)
+         StringWithEnvVariables = ChangeParam(StringWithEnvVariables, Key, Environ(Key))
+      End If
+   Loop While Pos2 > Pos1
+   CreateEnvironString = StringWithEnvVariables
+End Function
+Private Function ChangeParam(ByVal S As String, ByVal Key As String, ByVal Value As String) As String
+
+   ChangeParam = Replace(S, "%" & Key & "%", Value, 1, -1, vbTextCompare)
+End Function

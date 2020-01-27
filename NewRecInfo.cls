@@ -20,4 +20,5 @@ Public PatName       As String
 Public DictTypeId    As Long
 Public OrgId         As Long
 Public PrioId        As Long
+Public KeyWord       As String
 

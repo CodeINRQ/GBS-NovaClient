@@ -464,8 +464,8 @@ Public Sub CreateDictIdList(OrgId As Long, AuthorId As Long, TranscriberId As Lo
       Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , TranscriberId)
       OpenStoredProcWithRsResultAndCommand RsDictIdList, "s_Dictation_GetIdByTranscriberId", Cmd
    ElseIf Len(PatId) > 0 Or Len(PatId2) > 0 Then
-      Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 12, PatId)
-      Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 12, PatId2)
+      Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 12, Left$(PatId, 12))
+      Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 12, Left$(PatId2, 12))
       OpenStoredProcWithRsResultAndCommand RsDictIdList, "s_Dictation_GetIdByPatId", Cmd
    Else
       OpenStoredProcWithRsResult RsDictIdList, "s_Dictation_GetIdList"
@@ -941,7 +941,7 @@ End Function
 Private Sub ConvertOrgRsToClass(ByRef Rs As ADODB.Recordset, ByRef Org As clsOrg)
 
    Dim RolesFromParent As clsRoles
-   Dim R As clsRoles
+   Dim r As clsRoles
    
    Set Org = New clsOrg
    With Org
@@ -963,21 +963,21 @@ Private Sub ConvertOrgRsToClass(ByRef Rs As ADODB.Recordset, ByRef Org As clsOrg
 End Sub
 Private Sub GetRolesFromOrgId(Res As clsRoles, OrgId As Long)
 
-   Dim R As clsRoles
+   Dim r As clsRoles
    Dim Sum As clsRoles
    
    If Not RsUserRole.EOF Or Not RsUserRole.BOF Then
       RsUserRole.MoveFirst
       Do While Not RsUserRole.EOF
          If nvl(RsUserRole("Orgid"), 0) = OrgId Then
-            Set R = New clsRoles
+            Set r = New clsRoles
             
-            R.OrgId = RsUserRole("OrgId")
-            R.Roles = RsUserRole("Roles")
-            R.Delayed = RsUserRole("Delayed")
-            R.DelayedHours = RsUserRole("DelayedHours")
+            r.OrgId = RsUserRole("OrgId")
+            r.Roles = RsUserRole("Roles")
+            r.Delayed = RsUserRole("Delayed")
+            r.DelayedHours = RsUserRole("DelayedHours")
             
-            AddRole Res, R
+            AddRole Res, r
          End If
          RsUserRole.MoveNext
       Loop
@@ -985,7 +985,7 @@ Private Sub GetRolesFromOrgId(Res As clsRoles, OrgId As Long)
 End Sub
 Private Sub GetRolesFromOrgParent(Res As clsRoles, ByVal Id As Long)
 
-   Dim R As clsRoles
+   Dim r As clsRoles
    Dim RParent As clsRoles
    Dim Sum As clsRoles
    
@@ -1010,8 +1010,8 @@ Public Sub CreateDictList(ByVal OrgId As Long, ByVal AuthorId As Long, ByVal Tra
    DictListCount = 0
    
    If Len(PatId) > 0 Or Len(PatId2) > 0 Then
-      Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 12, PatId)
-      Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 12, PatId2)
+      Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 12, Left$(PatId, 12))
+      Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 12, Left$(PatId2, 12))
       Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , StatusIdStart)
       Cmd.Parameters.Append Cmd.CreateParameter(, adInteger, adParamInput, , StatusIdEnd)
       
@@ -2065,7 +2065,7 @@ Public Sub WriteUserData(Ty As String, Ke As String, Va As String)
    OpenStoredProcWithCommand "s_UserData_Set", Cmd
 
 End Sub
-Public Function ReadUserData(Ty As String, Ke As String, Def As String, ByRef Version) As String
+Public Function ReadUserData(Ty As String, Ke As String, Def As String, ByRef version) As String
 
    Dim Rs As ADODB.Recordset
    Dim Cmd As New ADODB.Command
@@ -2078,7 +2078,7 @@ Public Function ReadUserData(Ty As String, Ke As String, Def As String, ByRef Ve
    
    If Not Rs.EOF Then
       ReadUserData = Rs("Va")
-      Version = Rs("Version")
+      version = Rs("Version")
    End If
    CloseRecordset Rs
 End Function
@@ -2139,7 +2139,7 @@ Public Sub WriteStationData(Ty As String, Ke As String, Va As String)
    Rs.Update
    CloseRecordset Rs
 End Sub
-Public Function ReadStationData(Ty As String, Ke As String, Def As String, ByRef Version) As String
+Public Function ReadStationData(Ty As String, Ke As String, Def As String, ByRef version) As String
 
    Dim Rs As ADODB.Recordset
    Dim SQL As String
@@ -2153,10 +2153,10 @@ Public Function ReadStationData(Ty As String, Ke As String, Def As String, ByRef
    OpenRecordset Rs, SQL
    If Rs.EOF Then
       ReadStationData = Def
-      Version = ""
+      version = ""
    Else
       ReadStationData = Rs("Va")
-      Version = Rs("Version")
+      version = Rs("Version")
    End If
    CloseRecordset Rs
 End Function

@@ -1,6 +1,7 @@
 Attribute VB_Name = "modCareTalkClient"
 Option Explicit
 
+Public Const API_ACCESS_CODE = "dsfkkd8jd,.,sdf88h3%&%&¤iyt"
 Private Const STATUS_TIMEOUT = &H102&
 Private Const INFINITE = -1& ' Infinite interval
 Private Const QS_KEY = &H1&
@@ -27,13 +28,13 @@ Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" _
    As Long
 Public Const GW_HWNDPREV = 3
 
-Declare Function OpenIcon Lib "user32" (ByVal hwnd As Long) As Long
+Declare Function OpenIcon Lib "user32" (ByVal hWnd As Long) As Long
 
 Declare Function GetWindow Lib "user32" _
-  (ByVal hwnd As Long, ByVal wCmd As Long) As Long
+  (ByVal hWnd As Long, ByVal wCmd As Long) As Long
 
 Declare Function SetForegroundWindow Lib "user32" _
-  (ByVal hwnd As Long) As Long
+  (ByVal hWnd As Long) As Long
 
 Private Declare Function GetTempPath Lib "kernel32" Alias "GetTempPathA" _
                         (ByVal nBufferLength As Long, ByVal lpBuffer As String) As Long

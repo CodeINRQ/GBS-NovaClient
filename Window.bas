@@ -1,27 +1,26 @@
 Attribute VB_Name = "modWindow"
 Option Explicit
 
+
 Declare Function SetWindowPos Lib "user32" _
-   (ByVal hwnd As Long, ByVal hWndInsertAfter As Long, _
+   (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, _
     ByVal x As Long, ByVal y As Long, ByVal cx As Long, _
     ByVal cy As Long, ByVal wFlags As Long) As Long
 
-' SetWindowPos Flags
 Public Const SWP_NOSIZE = &H1
 Public Const SWP_NOMOVE = &H2
 Private Const SW_SHOW = 5
 Private Const SW_RESTORE = 9
 Public Const HWND_TOPMOST = -1
 Public Const HWND_NOTOPMOST = -2
+Public Const PROCESS_QUERY_INFORMATION = 1024
+Public Const PROCESS_VM_READ = 16
 
-Private Declare Function GetForegroundWindow Lib "user32" () As Long
-Public Declare Function SetForegroundWindow Lib "user32" (ByVal hwnd As Long) As Long
-'Private Declare Function GetWindowText Lib "user32.dll" Alias "GetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String, ByVal cch As Long) As Long
-'Private Declare Function GetWindowTextLength Lib "user32.dll" Alias "GetWindowTextLengthA" (ByVal hWnd As Long) As Long
-Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hwnd As Long, lpdwProcessId As Long) As Long
+Public Declare Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As Long, lpdwProcessId As Long) As Long
 Private Declare Function AttachThreadInput Lib "user32" (ByVal idAttach As Long, ByVal idAttachTo As Long, ByVal fAttach As Long) As Long
-Private Declare Function IsIconic Lib "user32" (ByVal hwnd As Long) As Long
-Private Declare Function ShowWindow Lib "user32" (ByVal hwnd As Long, ByVal nCmdShow As Long) As Long
+Private Declare Function IsIconic Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function ShowWindow Lib "user32" (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
 
 Private LastForegroundWindow As Long
 
@@ -33,29 +32,58 @@ Sub SetWindowTopMostAndForeground(F As Form)
    WindowFloating F
    WindowNotFloating F
 
-   SetNewForgroundWindow F.hwnd
+   SetNewForgroundWindow F.hWnd
 
 End Sub
 Function SaveForegroundWindow() As Long
 
-'   Dim FGWCaption As String
-   
-   On Error Resume Next
-   LastForegroundWindow = GetForegroundWindow()
-'   Client.Trace.AddRow Trace_Level_Full, "Win", "SFW", "LFG", CStr(LastForegroundWindow)
-
-'   FGWCaption = GetForegroundWindowCaption(LastForegroundWindow)
-'   Client.Trace.AddRow Trace_Level_Full, "Win", "SFW", "FGWC", FGWCaption
+   LastForegroundWindow = winGetForegroundWindow()
    
    SaveForegroundWindow = LastForegroundWindow
 End Function
-Private Function GetForegroundWindowCaption(hwnd As Long)
+Public Function FindControlOnWindow(hWnd As Long, ControlId As Long, ByRef Caption As String, ByRef hControl As Long) As Boolean
 
-'   Dim hWndTitle As String
+   Dim Ret As Long
+   Dim Rct As Rect
    
-'   hWndTitle = String(GetWindowTextLength(hWnd), 0)
-'   GetWindowText hWnd, hWndTitle, (GetWindowTextLength(hWnd) + 1)
-'   GetForegroundWindowCaption = hWndTitle
+   Do
+      hControl = winFindWindowEx(hWnd, hControl, vbNullString, vbNullString)
+      If hControl <> 0 Then
+         If winGetWindowControlId(hControl) = ControlId Then
+            FindControlOnWindow = True
+            
+            Caption = winGetChildWindowText(hControl)
+               
+            Exit Function
+         End If
+      End If
+   Loop Until hControl = 0
+   
+End Function
+Public Function GetWindowRectAsString(hWnd As Long) As String
+
+   Dim Rectangle As Rect
+   Dim Ret As Long
+   
+   Ret = winGetWindowRect(hWnd, Rectangle)
+   If Ret <> 0 Then
+      GetWindowRectAsString = FormatRectAsString(Rectangle)
+   End If
+End Function
+Public Function GetClientRectAsString(hWnd As Long) As String
+
+   Dim Rectangle As Rect
+   Dim Ret As Long
+   
+   Ret = winGetClientRect(hWnd, Rectangle)
+   If Ret <> 0 Then
+      GetClientRectAsString = FormatRectAsString(Rectangle)
+   End If
+End Function
+
+Public Function FormatRectAsString(Rect As Rect) As String
+
+   FormatRectAsString = CStr(Rect.Left) & "," & CStr(Rect.Top) & "," & CStr(Rect.Right) & "," & CStr(Rect.Bottom)
 End Function
 Function RestoreForegroundWindow(Optional WindowHandle As Long = 0) As Long
   
@@ -80,14 +108,14 @@ Private Sub SetNewForgroundWindow(WindowHandle As Long)
 End Sub
 Sub WindowFloating(F As Form, Optional SetAlsoForeground As Boolean = False)
 
-   Call SetWindowPos(F.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE Or SWP_NOMOVE)
+   Call SetWindowPos(F.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE Or SWP_NOMOVE)
    If SetAlsoForeground Then
-      SetNewForgroundWindow F.hwnd
+      SetNewForgroundWindow F.hWnd
    End If
 End Sub
 Sub WindowNotFloating(F As Form)
 
-   Call SetWindowPos(F.hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE Or SWP_NOMOVE)
+   Call SetWindowPos(F.hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE Or SWP_NOMOVE)
 End Sub
 
 Sub WindowSetPositionFromString(F As Form, S)
@@ -153,30 +181,30 @@ Sub TranslateForm(F As Form)
 
    Client.Texts.ApplyToOneForm F
 End Sub
-Public Function ForceForegroundWindow(ByVal hwnd As Long) As Boolean
+Public Function ForceForegroundWindow(ByVal hWnd As Long) As Boolean
 
    Dim ThreadID1 As Long
    Dim ThreadID2 As Long
    Dim nRet As Long
    
    ' Nothing to do if already in foreground.
-   If hwnd = GetForegroundWindow() Then
+   If hWnd = winGetForegroundWindow() Then
       ForceForegroundWindow = True
    Else
       ' First need to get the thread responsible for
       ' the foreground window, then the thread running
       ' the passed window.
-      ThreadID1 = GetWindowThreadProcessId(GetForegroundWindow, ByVal 0&)
-      ThreadID2 = GetWindowThreadProcessId(hwnd, ByVal 0&)
+      ThreadID1 = GetWindowThreadProcessId(winGetForegroundWindow, ByVal 0&)
+      ThreadID2 = GetWindowThreadProcessId(hWnd, ByVal 0&)
       
       ' By sharing input state, threads share their
       ' concept of the active window.
       If ThreadID1 <> ThreadID2 Then
          Call AttachThreadInput(ThreadID1, ThreadID2, True)
-         nRet = SetForegroundWindow(hwnd)
+         nRet = SetForegroundWindow(hWnd)
          Call AttachThreadInput(ThreadID1, ThreadID2, False)
       Else
-         nRet = SetForegroundWindow(hwnd)
+         nRet = SetForegroundWindow(hWnd)
       End If
       
       ' Restore and repaint
@@ -190,4 +218,6 @@ Public Function ForceForegroundWindow(ByVal hwnd As Long) As Boolean
       ForceForegroundWindow = CBool(nRet)
    End If
 End Function
+
+
 

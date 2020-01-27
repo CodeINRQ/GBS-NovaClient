@@ -718,9 +718,13 @@ Private Sub DSSRec_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long
          End Select
          tmrBlink.Enabled = LastState = GRU_RECPAUSED
          If LastState = GRU_REC Or LastState = GRU_RECPAUSED Then
+            optInsert(0).Enabled = False
+            optInsert(1).Enabled = False
             optPlayer(butRec).Picture = ilButtons16.ListImages(icoRecLight).Picture
             SetNewIcon optPlayer(butRec).Picture
          Else
+            optInsert(0).Enabled = True
+            optInsert(1).Enabled = True
             If Client.SysSettings.PlayerAutoOverwrite Then
                optInsert(1).Value = True
             End If
@@ -734,7 +738,9 @@ Private Sub DSSRec_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long
             End If
          ElseIf Data = GRU_BUT_INSERT Then
             If Client.SysSettings.PlayerAllowInsertFromMic Then
-               optInsert(0).Value = True
+               If optInsert(0).Enabled Then
+                  optInsert(0).Value = True
+               End If
                DSSRec.Rec
             End If
          End If

@@ -1,4 +1,45 @@
-1.21.0.0
+1.22.0.45
+---------
+Starts from 1.22.0.44
+Change in modParse.FindPos 
+
+
+1.22.0.44
+---------
+Starts from 1.22.0.38
+More trace in HandleWindow
+Remove spaces from patid in HandleWindow
+Don't save window position from frmDict if window state is not normal
+
+
+1.22.0.38
+---------
+Starts from 1.22.0.32
+Use evironment variables in [Gru_Trace]\Filename (eg Filename=%temp%\Caretalk.log)
+New setting: [Gru_Trace]\FileGenerations gives generations of trace files
+Use array to cache Row-DictId in ucDictList to make list update faster when many dictations
+No extra CloseChoiceSelected fired when close frmDict with Close-function-key. Give right value in Text edit mode
+
+
+1.22.0.32
+---------
+Starts from 1.22.0.30
+A few more exits when flag ShutDownRequest is set. Prevent runtime error when shutdown with open (new) diktation
+
+
+1.22.0.30
+---------
+Starts from 1.21.0.66
+Don't CheckMandatoryData if Dict object not set. Prevent crash if fast press to red-blue buttons
+Disable Insert/Overwrite radio buttons i player when recording. User must stop before changing mode.
+Reset TopRow and LeftCol in lstDict after an update/resort
+New event handler to watch external window. OnWindow
+External system "Me" is used internal even if it is not registered in db tabel ExtSystem
+ClientAPI.Currpat and ClientAPI.RecordNew check PatName for character ¤. If included last part is KeyWord
+New system settings. Import\DefaultId, Import\DefaultName and Import\DefaultKeyWord
+
+
+1.21.0.66
 ---------
 Starts from 1.20.0.84
 Don't select all text when PatId or PatName in frmDict get focus

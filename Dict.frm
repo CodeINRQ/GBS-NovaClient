@@ -11,7 +11,6 @@ Begin VB.Form frmDict
    KeyPreview      =   -1  'True
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
-   MinButton       =   0   'False
    ScaleHeight     =   5175
    ScaleWidth      =   8760
    StartUpPosition =   1  'CenterOwner
@@ -415,9 +414,18 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Private Declare Function ShowWindow Lib "user32" _
-    (ByVal hwnd As Long, _
-    ByVal nCmdShow As Long) As Long
-
+    (ByVal hWnd As Long, _
+     ByVal nCmdShow As Long) As Long
+Private Declare Function GetSystemMenu Lib "user32" (ByVal hWnd As Long, _
+   ByVal bRevert As Long) As Long
+Private Declare Function DeleteMenu Lib "user32" (ByVal hMenu As Long, _
+   ByVal nPosition As Long, ByVal wFlags As Long) As Long
+Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" _
+   (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Long) As Long
+Private Const SC_CLOSE = &HF060
+Private Const MF_BYCOMMAND = &H0&
+Private Const WM_NCACTIVATE = &H86
+               
 Public Event CloseChoiceSelected(Index As Integer)
 
 Public mForceUnload As Boolean
@@ -438,6 +446,7 @@ Private mCloseText(2) As String
 Private mCloseTip(2) As String
 Private mIsInChangeMode As Boolean
 Private mPos As Long
+Private mUserIsSysAdmin As Boolean
 
 Private UseAutomaticTranscribersStatusChange As Boolean
 Private WeHaveBeenInMidlePartOfDictation As Boolean
@@ -463,13 +472,21 @@ End Sub
 
 Private Sub SetChoiseFromChangeMode()
 
+   Static ChoiceValueBeforeCahngeMode As Integer
+
    If mIsInChangeMode Then
+      ChoiceValueBeforeCahngeMode = ucCloseChoice.ChoiceValue
       ucCloseChoice.ChoiceText(0) = Client.Texts.Txt(1030118, "Stäng utan att spara")
       ucCloseChoice.ChoiceTip(0) = Client.Texts.ToolTip(1030118, "Lämna diktatet utan ändring")
       ucCloseChoice.ChoiceText(1) = Client.Texts.Txt(1030119, "Spara för utskrift")
       ucCloseChoice.ChoiceTip(1) = Client.Texts.ToolTip(1030119, "Status inspelat")
       ucCloseChoice.ChoiceText(2) = Client.Texts.Txt(1030120, "Spara som utskrivet")
       ucCloseChoice.ChoiceTip(2) = Client.Texts.ToolTip(1030120, "Status utskrivet")
+      If mDict.StatusId < Transcribed Then
+         ucCloseChoice.ChoiceValue = 1
+      Else
+         ucCloseChoice.ChoiceValue = 2
+      End If
    Else
       ucCloseChoice.ChoiceText(0) = mCloseText(0)
       ucCloseChoice.ChoiceTip(0) = mCloseTip(0)
@@ -477,6 +494,7 @@ Private Sub SetChoiseFromChangeMode()
       ucCloseChoice.ChoiceTip(1) = mCloseTip(1)
       ucCloseChoice.ChoiceText(2) = mCloseText(2)
       ucCloseChoice.ChoiceTip(2) = mCloseTip(2)
+      ucCloseChoice.ChoiceValue = ChoiceValueBeforeCahngeMode
    End If
 End Sub
 Private Sub DSSRecorder_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long)
@@ -486,12 +504,14 @@ Private Sub DSSRecorder_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As
    
    If EventType = GRU_BUTTONPRESS Then
       If Data = GRU_BUT_INDEX Then
+         Debug.Print "GruEvent But_Index+"
          If Client.SysSettings.PlayerIndexButtonAsCloseDict Then
             If CheckMandatoryData() Then
                For I = 2 To 0 Step -1
                   If Len(ucCloseChoice.ChoiceText(I)) > 0 Then
                      ucCloseChoice.ChoiceValue = I
                      RaiseEvent CloseChoiceSelected(I)
+                     Debug.Print "GruEvent Unload Me"
                      Unload Me
                      Exit Sub
                   End If
@@ -530,9 +550,9 @@ Private Sub Form_Activate()
    End If
    
    'Has to be here...
-   ShowWindow Me.hwnd, SW_Hide
+   ShowWindow Me.hWnd, SW_Hide
    Me.Caption = Me.Caption
-   ShowWindow Me.hwnd, SW_ShowNormal
+   ShowWindow Me.hWnd, SW_ShowNormal
          
    SetWindowTopMostAndForeground Me
    If mFloating Then
@@ -636,7 +656,7 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
    CloseX = False
    Sh = Shift And 7
    K = Sh * 256 + (KeyCode And 255)
-   Debug.Print KeyCode, Shift, Sh, K,
+   'Debug.Print KeyCode, Shift, Sh, K,
    Select Case K
       Case Client.SysSettings.PlayerKeyPlay
          B = butPlay
@@ -691,7 +711,6 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
       If Len(ucCloseChoice.ChoiceText(CloseIndex)) > 0 Then
          ucCloseChoice.ChoiceValue = CloseIndex
          If CheckMandatoryData() Or CloseIndex = 0 Then
-            RaiseEvent CloseChoiceSelected(CloseIndex)
             Unload Me
          End If
       End If
@@ -700,7 +719,6 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
       KeyCode = 0
       If ucCloseChoice.ChoiceValue > -1 Then
          If CheckMandatoryData() Or CloseIndex = 0 Then
-            RaiseEvent CloseChoiceSelected(ucCloseChoice.ChoiceValue)
             Unload Me
          End If
       End If
@@ -718,8 +736,15 @@ Private Sub Form_Load()
 
    Dim Org As New clsOrg
    Dim I As Integer
-   
+   Dim hMenu As Long, Success As Long
+
    Trc "frmDict load", ""
+
+   'Disable Close button (X)
+   hMenu = GetSystemMenu(Me.hWnd, 0)
+   Success = DeleteMenu(hMenu, SC_CLOSE, MF_BYCOMMAND)
+   SendMessage Me.hWnd, WM_NCACTIVATE, 0&, 0&
+   SendMessage Me.hWnd, WM_NCACTIVATE, 1&, 0&
       
    mForceUnload = False
    
@@ -777,6 +802,7 @@ Public Sub SaveSettings(Settings As clsStringStore)
 End Sub
 Public Sub EditDictation(ByRef Dictation As clsDict, ByVal NewDict As Boolean)
 
+   mUserIsSysAdmin = Client.OrgMgr.CheckUserRole(Dictation.OrgId, RTSysAdmin)
    Set mDict = Dictation
    mNewDict = NewDict
    If mNewDict Then
@@ -873,6 +899,7 @@ Private Sub Form_Unload(Cancel As Integer)
    Dim Ok As Boolean
    Dim SoundL As Long
 
+   Debug.Print "frmDict_Unload+"
    Ok = True
    If Not mForceUnload Then
       If ucCloseChoice.ChoiceValue < 0 Then
@@ -905,12 +932,16 @@ Private Sub Form_Unload(Cancel As Integer)
       ucDSSRecGUI.StopAndClose
       Set ucDSSRecGUI.DSSRecorder = Nothing
       Set mDict = Nothing
-      LastfrmDictLeft = Me.Left
-      LastfrmDictTop = Me.Top
+      If Me.WindowState = 0 Then
+         LastfrmDictLeft = Me.Left
+         LastfrmDictTop = Me.Top
+      End If
    Else
       MsgBox Client.Texts.Txt(1030101, "Uppgifterna är inte kompletta!"), vbCritical
       Cancel = True
    End If
+   Debug.Print "frmDict_Unload-"
+
 End Sub
 
 Private Sub imgLess_Click()
@@ -1100,8 +1131,8 @@ Private Sub SetEnabled()
    
    Enbld = Not mTextReadOnly
    ucOrgTree.Enabled = Enbld
-   txtPatId.Enabled = mDict.AuthorId = Client.User.UserId Or mDict.AuthorId = 0
-   txtPatName.Enabled = mDict.AuthorId = Client.User.UserId Or mDict.AuthorId = 0
+   txtPatId.Enabled = mDict.AuthorId = Client.User.UserId Or mDict.AuthorId = 0 Or (mUserIsSysAdmin And mIsInChangeMode)
+   txtPatName.Enabled = mDict.AuthorId = Client.User.UserId Or mDict.AuthorId = 0 Or (mUserIsSysAdmin And mIsInChangeMode)
    chkNoPatient.Enabled = Enbld
    cboDictType.Enabled = Enbld
    cboPriority.Enabled = Enbld
@@ -1117,7 +1148,15 @@ Private Function CheckMandatoryData() As Boolean
 
    Dim Ok As Boolean
 
+   If mDict Is Nothing Then
+      Debug.Print "CheckMandatoryData Nothing"
+      CheckMandatoryData = False
+      Exit Function
+   End If
+   Debug.Print "CheckMandatoryData"
+   
    Ok = True
+   
    If chkNoPatient.Value <> vbChecked Then
       If Not CheckPatId(txtPatId) Then
          lblPatIdMissing.Visible = True

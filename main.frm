@@ -138,15 +138,15 @@ Begin VB.Form frmMain
       TabCaption(5)   =   "Organisation"
       TabPicture(5)   =   "main.frx":076C
       Tab(5).ControlEnabled=   0   'False
-      Tab(5).Control(0)=   "ucOrgDictType"
+      Tab(5).Control(0)=   "ucEditOrg"
       Tab(5).Control(1)=   "ucOrgPriority"
-      Tab(5).Control(2)=   "ucEditOrg"
+      Tab(5).Control(2)=   "ucOrgDictType"
       Tab(5).ControlCount=   3
       TabCaption(6)   =   "Systeminställningar"
       TabPicture(6)   =   "main.frx":0788
       Tab(6).ControlEnabled=   0   'False
-      Tab(6).Control(0)=   "ucEditSysSettings"
-      Tab(6).Control(1)=   "ucEditGroup"
+      Tab(6).Control(0)=   "ucEditGroup"
+      Tab(6).Control(1)=   "ucEditSysSettings"
       Tab(6).ControlCount=   2
       TabCaption(7)   =   "Tab 6"
       TabPicture(7)   =   "main.frx":07A4
@@ -447,7 +447,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 Private Declare Function WinHelp Lib "user32" Alias "WinHelpA" _
-      (ByVal hwnd As Long, ByVal lpHelpFile As String, _
+      (ByVal hWnd As Long, ByVal lpHelpFile As String, _
       ByVal wCommand As Long, ByVal dwData As Long) As Long
 
 'Help Constants
@@ -484,7 +484,7 @@ Private Const tabDemo = 8
 Private Const tabLoggList = 9
 
 Private Declare Function ShowWindow Lib "user32" _
-    (ByVal hwnd As Long, _
+    (ByVal hWnd As Long, _
     ByVal nCmdShow As Long) As Long
 
 Private CurrentUIStatus As New clsUIStatus
@@ -547,6 +547,7 @@ Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
    Select Case K
       Case Client.SysSettings.PlayerKeyRec
          If Me.Toolbar1.Buttons(1).Visible Then
+            Debug.Print "frmMain KeyDown Before RecordNewDictation"
             Set Dict = New clsDict
             RecordNewDictation Dict, True
          End If
@@ -996,7 +997,7 @@ Private Sub Form_Unload(Cancel As Integer)
       Exit Sub
    End If
 
-   Res = WinHelp(frmMain.hwnd, App.HelpFile, HELP_QUIT, 0&)
+   Res = WinHelp(frmMain.hWnd, App.HelpFile, HELP_QUIT, 0&)
    
    If Client.User.UserId > 0 Then
       Client.EventMgr.OnAppEvent "OnLogout"
@@ -1114,7 +1115,7 @@ Private Sub mnuHelp_Click(Index As Integer)
    Select Case Index
       Case 1
          On Error Resume Next
-         Res = WinHelp(frmMain.hwnd, App.HelpFile, HELP_CONTENTS, 0&)
+         Res = WinHelp(frmMain.hWnd, App.HelpFile, HELP_CONTENTS, 0&)
       Case 5
          StartCalibration
       Case 10
@@ -1175,6 +1176,7 @@ Private Sub tmrCheckButtons_Timer()
    If DictRecoveryMode = tdiNew Then
       DictRecoveryMode = tdiEmpty
       If Not RecorderInUse Then
+         Debug.Print "frmMain tmrCheckButtons Before RecordNewDictation"
          RecordNewDictation DictRecovery, False
       End If
    End If
@@ -1183,6 +1185,7 @@ Private Sub tmrCheckButtons_Timer()
    If IsDictButtonPressed Then
       IsDictButtonPressed = False
       Set Dict = New clsDict
+      Debug.Print "frmMain tmrCheckButtons Before RecordNewDictation"
       RecordNewDictation Dict, True ' CurrentOrg = 30005
    End If
    If IsRecNewFromAPI Then
@@ -1190,6 +1193,7 @@ Private Sub tmrCheckButtons_Timer()
       If RecordingAllowed Then
          If Not RecorderInUse Then
             Set Dict = New clsDict
+            Debug.Print "frmMain tmrCheckButtons Before RecordNewDictation"
             RecordNewDictation Dict, True ' CurrentOrg = 30005
          End If
       End If
@@ -1200,14 +1204,16 @@ Private Sub tmrCheckButtons_Timer()
          EditExistingDictation Client.PlayDictIdFromAPI
       End If
    End If
-   If Client.SysSettings.PlayerHWcheckfreq > 0 Then
-      If Freq <= 0 Then
-         Freq = Client.SysSettings.PlayerHWcheckfreq
-         If Not RecorderInUse Then
-            KeepHardwareAlive
+   If Not ShutDownRequest Then
+      If Client.SysSettings.PlayerHWcheckfreq > 0 Then
+         If Freq <= 0 Then
+            Freq = Client.SysSettings.PlayerHWcheckfreq
+            If Not RecorderInUse Then
+               KeepHardwareAlive
+            End If
+         Else
+            Freq = Freq - 1
          End If
-      Else
-         Freq = Freq - 1
       End If
    End If
 End Sub
@@ -1216,6 +1222,7 @@ Private Sub tmrCheckCtCmdFiles_Timer()
 
    If Not RecorderInUse And Not ShutDownRequest Then
       Client.EventMgr.CheckForCtCmdFiles
+      Client.EventMgr.CheckForWindow
    End If
 End Sub
 
@@ -1225,6 +1232,7 @@ Private Sub tmrUpdateList_Timer()
    Static NextTickForAction As Long
    Dim MeanTime As Long
    Dim NewUpdateInterval As Long
+   Static OldUpdateInterval As Long
    Dim TickNow As Long
 
    If Not RecorderInUse Then
@@ -1235,12 +1243,16 @@ Private Sub tmrUpdateList_Timer()
          TimeForUpdates.StopMeasure
          
          TickNow = GetTickCount()
-         MeanTime = TimeForUpdates.SlidingMeanTimeInMilliSec(10, True)
+         MeanTime = TimeForUpdates.SlidingMeanTimeInMilliSec(Client.SysSettings.DictListUpdateValues, True)
          NewUpdateInterval = MeanTime * Client.SysSettings.DictListUpdateK + Client.SysSettings.DictListUpdateM
          If NewUpdateInterval <= 2000 Then
             NewUpdateInterval = 2000
-         ElseIf NewUpdateInterval > 100000 Then
-            NewUpdateInterval = 100000
+         ElseIf NewUpdateInterval > Client.SysSettings.DictListUpdateMax Then
+            NewUpdateInterval = Client.SysSettings.DictListUpdateMax
+         End If
+         If Abs(NewUpdateInterval - OldUpdateInterval) > 5000 Then
+            Client.Trace.AddRow Trace_Level_Warning, "frmMain", "tmrUpdateList", "UpdateInterval", CStr(NewUpdateInterval), CStr(OldUpdateInterval)
+            OldUpdateInterval = NewUpdateInterval
          End If
          NextTickForAction = TickNow + NewUpdateInterval
          Debug.Print "Interval: " & CStr(NewUpdateInterval) & " MeanTime: " & CStr(MeanTime) & " Last: " & CStr(TimeForUpdates.LastMeasurement)
@@ -1255,6 +1267,7 @@ Private Sub Toolbar1_ButtonClick(ByVal Button As MSComctlLib.Button)
    Select Case Button.Index
       Case 1
          Set Dict = New clsDict
+         Debug.Print "frmMain Tollbar1 Before RecordNewDictation"
          RecordNewDictation Dict, True ' CurrentOrg = 30005
       Case 3
          mVx.Activate = frmMain.Toolbar1.Buttons(3).Value = tbrPressed
@@ -1327,6 +1340,8 @@ End Sub
 
 Private Sub ucEditOrg_OrgSaved(Org As clsOrg)
 
+   'double call to make shure an update
+   ShowOrgTree False, False, RTSysAdmin
    ShowOrgTree True, False, RTSysAdmin
    CurrentOrg = Org.OrgId
    ucOrgTree.PickOrgId CurrentOrg
@@ -1494,6 +1509,7 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
       If Client.NewRecInfo.PrioId > 0 Then
          Dict.PriorityId = Client.NewRecInfo.PrioId
       End If
+      Dict.Txt = Client.NewRecInfo.KeyWord
    End If
    
    If UseCurrPat Then
@@ -1510,6 +1526,7 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
       If Client.CurrPatient.PriorityId > 0 Then
          Dict.PriorityId = Client.CurrPatient.PriorityId
       End If
+      Dict.Txt = Client.CurrPatient.KeyWord
    End If
    
    If Dict.OrgId = 0 Then
@@ -1534,9 +1551,12 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
    
    Client.DictMgr.SaveTempDictationInfo Dict, tdiNew
    
-   ShowWindow Me.hwnd, SW_Hide
+   ShowWindow Me.hWnd, SW_Hide
+   Debug.Print "frmMain RecordNewDictation show modal+"
    mDictForm.Show vbModal
-   ShowWindow Me.hwnd, SW_SHOW
+   Debug.Print "frmMain RecordNewDictation show modal-"
+
+   ShowWindow Me.hWnd, SW_SHOW
    Select Case mDictCloseChoice
       Case 0
          KillFileIgnoreError Dict.LocalFilename
@@ -1573,6 +1593,7 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
    
    If ShutDownRequest Then
       Unload Me
+      Exit Sub
    End If
    
    RestoreForegroundWindow
@@ -1619,10 +1640,17 @@ Private Sub ImportNewDictation()
       
       If CopyImportFileToTempStorage(ImportFileName, Dict.LocalFilename) Then
          KillFileIgnoreError ImportFileName
+         
          Dict.OrgId = LastOrgidForNewDictation
          Dict.AuthorId = Client.User.UserId
          Dict.DictTypeId = -1
          Dict.PriorityId = -1
+         
+         Dict.Pat.PatId = Client.SysSettings.ImportDefaultId
+         Dict.Pat.PatName = Client.SysSettings.ImportDefaultName
+         Dict.Txt = Client.SysSettings.ImportDefaultKeyWord
+         Dict.Note = Client.SysSettings.ImportDefaultNote
+         
          Set mDictForm = New frmDict
          Load mDictForm
          mDictForm.RestoreSettings DictFormSettings
@@ -1633,9 +1661,9 @@ Private Sub ImportNewDictation()
          mDictForm.CloseTip(1) = Client.Texts.ToolTip(1000502, "Under inspelning")
          mDictForm.CloseText(2) = Client.Texts.Txt(1000503, "Klart för utskrift")
          mDictForm.CloseTip(2) = Client.Texts.ToolTip(1000503, "")
-         ShowWindow Me.hwnd, SW_Hide
+         ShowWindow Me.hWnd, SW_Hide
          mDictForm.Show vbModal
-         ShowWindow Me.hwnd, SW_SHOW
+         ShowWindow Me.hWnd, SW_SHOW
          Select Case mDictCloseChoice
             Case 0
                KillFileIgnoreError Dict.LocalFilename
@@ -1658,11 +1686,13 @@ Private Sub ImportNewDictation()
          Set mDictForm = Nothing
       End If
       
+      UpdateCurrentView
+      
       If ShutDownRequest Then
          Unload Me
+         Exit Sub
       End If
       
-      UpdateCurrentView
    End If
    RecorderInUse = False
    AllreadyStarted = False
@@ -1810,6 +1840,7 @@ Public Sub EditExistingDictation(DictId As Long)
          
          If Not ShutDownRequest Then
             Client.EventMgr.CheckForCtCmdFiles
+            Client.EventMgr.CheckForWindow
          End If
    
          ucOrgTree.PickOrgId SavedCurrentOrg
@@ -1825,6 +1856,7 @@ Public Sub EditExistingDictation(DictId As Long)
       
       If ShutDownRequest Then
          Unload Me
+         Exit Sub
       End If
 
    End If
@@ -1849,9 +1881,9 @@ Private Function ShowAndSetNewStatus(Dict As clsDict, _
    mDictForm.CloseTip(1) = Tip2
    mDictForm.CloseText(2) = Text3
    mDictForm.CloseTip(2) = Tip3
-   ShowWindow Me.hwnd, SW_Hide
+   ShowWindow Me.hWnd, SW_Hide
    mDictForm.Show vbModal
-   ShowWindow Me.hwnd, SW_SHOW
+   ShowWindow Me.hWnd, SW_SHOW
    Select Case mDictCloseChoice
       Case 0
          NewStatus = NewStatus1
@@ -1946,7 +1978,7 @@ Private Function AttachProgBar(pb As ProgressBar, _
    If defProgBarHwnd = 0 Then
        
      'change the parent
-      defProgBarHwnd = SetParent(pb.hwnd, sb.hwnd)
+      defProgBarHwnd = SetParent(pb.hWnd, sb.hWnd)
    
       With sb
       

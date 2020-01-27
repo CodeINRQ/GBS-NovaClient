@@ -105,6 +105,7 @@ Dim TotalLength As Long
 
 Dim CurrentOrgId As Long
 Dim CurrentTimeStamp As Double
+Dim RowDictId(MaxNumberOfDictation) As Long
 
 Private NewSearchFilter As Boolean
 Private NewCurrPatientFilter As Boolean
@@ -357,6 +358,8 @@ Public Sub GetData(OrgId As Long)
    Dim ReSort As Boolean
    Dim PrevTimeStamp As Double
    Dim DictIdForSelectedRow As Long
+   Dim TopRow As Long
+   Dim LeftCol As Long
    Dim TooMany As Boolean
    Dim LastNumberOfWarnings As Long
    Dim LastTotalNumberInList As Long
@@ -381,11 +384,16 @@ Public Sub GetData(OrgId As Long)
       
       TotalLength = 0
       DictIdForSelectedRow = lstDict.GetRowItemData(lstDict.SelModeIndex)
+      TopRow = lstDict.TopRow
+      LeftCol = lstDict.LeftCol
       PrevTimeStamp = CurrentTimeStamp
+      
+      RowDictIdCacheInit
+      
       CurrentTimeStamp = Client.DictMgr.CreateList(OrgId, CurrentTimeStamp, TooMany)
       Do While Client.DictMgr.ListNextItem(Dict)
          TotalLength = TotalLength + Dict.SoundLength
-         Row = FindRowFromDictId(Dict.DictId)
+         Row = FindRowFromRowDictIdCache(Dict.DictId)
          If Row <= 0 Then
             lstDict.MaxRows = lstDict.MaxRows + 1
             Row = lstDict.MaxRows
@@ -399,6 +407,7 @@ Public Sub GetData(OrgId As Long)
          End If
          RowUpdated(Row) = True
       Loop
+      
       For I = lstDict.MaxRows To 1 Step -1
          If Not RowUpdated(I) Then
             DeleteRowInList I
@@ -408,6 +417,8 @@ Public Sub GetData(OrgId As Long)
       If ReSort Then
          lstDict.UserColAction = UserColActionSort
          lstDict.SelModeIndex = FindRowFromDictId(DictIdForSelectedRow)
+         lstDict.TopRow = TopRow
+         lstDict.LeftCol = LeftCol
       End If
    Else
       NewSearchFilter = False
@@ -421,6 +432,7 @@ Public Sub GetData(OrgId As Long)
       
       lstDict.MaxRows = 0
       lstDict.ClearRange -1, -1, -1, -1, True
+      
       NumberOfWarnings = 0
       Row = 1
       Do While Client.DictMgr.ListNextItem(Dict)
@@ -580,3 +592,31 @@ Public Function GetSetting() As String
    GetSetting = ReadStringFromTempFile(Pathname)
    KillFileIgnoreError Pathname
 End Function
+Private Sub RowDictIdCacheInit()
+
+   Dim Row As Integer
+   Dim Idx As Integer
+   Dim MaxRows As Integer
+   
+   MaxRows = lstDict.MaxRows
+   For Row = 1 To MaxRows
+      RowDictId(Row) = CLng(lstDict.GetRowItemData(Row))
+   Next Row
+   
+   For Idx = MaxRows + 1 To UBound(RowDictId)
+      RowDictId(Idx) = 0
+   Next Idx
+
+End Sub
+Private Function FindRowFromRowDictIdCache(DictId As Long) As Long
+
+   Dim Row As Long
+    
+   For Row = 1 To lstDict.MaxRows
+      If RowDictId(Row) = DictId Then
+         FindRowFromRowDictIdCache = Row
+         Exit For
+      End If
+   Next Row
+End Function
+

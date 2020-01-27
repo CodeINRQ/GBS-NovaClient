@@ -179,7 +179,11 @@ Public Function GetExtPriority(ExtSys As String, IntPriorityId As Long) As Strin
 End Function
 Public Sub Init()
    
-   mExtSystemCount = 0
+   'Add default ext system 'Me'. Can be used for simple event handlers
+   Set mExtSystemArr(0) = New clsExtSystem
+   mExtSystemArr(0).ExtSystem = "Me"
+   mExtSystemCount = 1
+   
    Client.Server.CreateExtSystemList
    Do While Client.Server.ExtSystemGetNext(mExtSystemArr(mExtSystemCount))
       mExtSystemCount = mExtSystemCount + 1

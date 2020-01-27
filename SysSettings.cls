@@ -24,6 +24,8 @@ Public DeleteLogg As Integer
 Public DictListShowDictId As Boolean
 Public DictListUpdateK As Long
 Public DictListUpdateM As Long
+Public DictListUpdateMax As Long
+Public DictListUpdateValues As Long
 Public DictListCurrStatusStart As Long
 Public DictListCurrStatusEnd As Long
 
@@ -106,6 +108,11 @@ Public DictationAuditEnable As Boolean
 Public ImportAllowMenu As Boolean
 Public ImportAllowTool As Boolean
 Public ImportDSSDrives As String
+Public ImportDefaultId As String
+Public ImportDefaultName As String
+Public ImportDefaultKeyWord As String
+Public ImportDefaultNote As String
+
 Public ExportAllowMenu As Boolean
 
 Public Property Get Store() As clsStringStore
@@ -145,6 +152,8 @@ Public Sub Init(Ty As String)
    DictListShowDictId = mSysSettings.GetBool("DictList", "ShowDictId", False)
    DictListUpdateK = mSysSettings.GetLong("DictList", "UpdateK", 10)
    DictListUpdateM = mSysSettings.GetLong("DictList", "UpdateM", 2000)
+   DictListUpdateMax = mSysSettings.GetLong("DictList", "UpdateMax", 100000)
+   DictListUpdateValues = mSysSettings.GetLong("DictList", "UpdateValues", 5)
    DictListCurrStatusStart = mSysSettings.GetLong("DictList", "CurrStatusStart", 20)
    DictListCurrStatusEnd = mSysSettings.GetLong("DictList", "CurrStatusEnd", 60)
    
@@ -227,6 +236,10 @@ Public Sub Init(Ty As String)
    ImportAllowMenu = mSysSettings.GetBool("Import", "AllowMenu", True)
    ImportAllowTool = mSysSettings.GetBool("Import", "AllowTool", True)
    ImportDSSDrives = mSysSettings.GetString("Import", "DSSDrives", "")
+   ImportDefaultId = mSysSettings.GetString("Import", "DefaultId", "")
+   ImportDefaultName = mSysSettings.GetString("Import", "DefaultName", "")
+   ImportDefaultKeyWord = mSysSettings.GetString("Import", "DefaultKeyWord", "")
+   ImportDefaultNote = mSysSettings.GetString("Import", "DefaultNote", "")
 
    ExportAllowMenu = mSysSettings.GetBool("Export", "AllowMenu", True)
 

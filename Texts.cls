@@ -132,17 +132,17 @@ Private Sub ApplyToAllForms()
    Next I
 End Sub
 
-Public Sub ApplyToOneForm(f As Form)
+Public Sub ApplyToOneForm(F As Form)
 
    Dim I As Integer
    Dim C As Control
    Dim S As String
 
    On Error Resume Next
-   f.Caption = Txt(CLng(f.Tag), f.Caption)
+   F.Caption = Txt(CLng(F.Tag), F.Caption)
    On Error GoTo ApplyToOneForm_Err
-   For I = 0 To f.Controls.Count - 1
-      Set C = f.Controls(I)
+   For I = 0 To F.Controls.Count - 1
+      Set C = F.Controls(I)
       ApplyToControl C
       If Left$(C.Name, 2) = "uc" Then
          C.NewLanguage
@@ -161,7 +161,7 @@ Public Sub ApplyToControl(C As Control)
        C.Caption = Txt(CLng(C.Tag), C.Caption)
        C.ToolTipText = ToolTip(CLng(C.Tag), C.ToolTipText)
     End If
-    Debug.Print C.Name
+    'Debug.Print C.Name
 End Sub
 Public Function Txt(Id As Long, ByVal Def As String) As String
 

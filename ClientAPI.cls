@@ -14,7 +14,7 @@ Attribute VB_Exposed = True
 Option Explicit
 
 Private Declare Function ShowWindow Lib "user32" _
-    (ByVal hwnd As Long, _
+    (ByVal hWnd As Long, _
     ByVal nCmdShow As Long) As Long
 
 Public Event OnOpenDictation(DictId As String, _
@@ -62,7 +62,7 @@ Public Function Init(ExtSystem As String, AccessCode As String) As Long
    On Error GoTo Init_Err
    'If Not InitAtEveryFunction(FuncName, ExtSystem, "", False) Then Exit Function
    
-   AccessCodeOk = (AccessCode = "dsfkkd8jd,.,sdf88h3%&%&¤iyt")
+   AccessCodeOk = (AccessCode = API_ACCESS_CODE)
    If Not AccessCodeOk Then Exit Function
    
    mExtSystem = ExtSystem
@@ -174,7 +174,9 @@ Public Function CurrPat(PatId1 As String, _
       Client.CurrPatient.PatId = PatId1
       Client.CurrPatient.PatId2 = PatId2
    End If
-   Client.CurrPatient.PatName = PatName
+   Client.CurrPatient.PatName = GetPatNameFromNameParameter(PatName)
+   Client.CurrPatient.KeyWord = GetKeyWordFromNameParameter(PatName)
+   
    Client.CurrPatient.DictTypeId = Client.ExtSystemMgr.GetIntDictTypeId(mExtSystem, ExtDictType)
    Client.CurrPatient.OrgId = Client.ExtSystemMgr.GetIntOrgId(mExtSystem, ExtOrg)
    Client.CurrPatient.PriorityId = Client.ExtSystemMgr.GetIntPriorityId(mExtSystem, ExtPriority)
@@ -229,7 +231,10 @@ Public Function RecNew(PatId As String, _
    With Client.NewRecInfo
       .ExtSystem = mExtSystem
       .PatId = PatId
-      .PatName = PatName
+      
+      .PatName = GetPatNameFromNameParameter(PatName)
+      .KeyWord = GetKeyWordFromNameParameter(PatName)
+      
       .ExtDictId = ExtId
       .DictTypeId = Client.ExtSystemMgr.GetIntDictTypeId(mExtSystem, ExtDictType)
       If Len(Client.DictTypeMgr.TextFromId(.DictTypeId)) = 0 Then
@@ -393,7 +398,7 @@ Public Function ClientWindow(Style As Long) As Long
 '      Ret = -1
 '   End If
    If Not IsNull(mfrmMain) Then
-      ShowWindow mfrmMain.hwnd, Style
+      ShowWindow mfrmMain.hWnd, Style
    End If
    
 ClientWindow_Exit:
@@ -679,5 +684,27 @@ Private Function ErrorHandler(FuncName As String, ErrorCode As Long) As Long
    
    ErrorHandler = ErrorCode
    Client.Trace.AddRow Trace_Level_NonFatalErrors, ModuleName, FuncName, TraceTitle_Err, CStr(ErrorCode), Error$(ErrorCode)
+End Function
+Private Function GetPatNameFromNameParameter(NameParameter As String) As String
+
+   Dim Pos As Integer
+   
+   Pos = InStr(NameParameter, "¤")
+   If Pos > 0 Then
+      GetPatNameFromNameParameter = Left$(NameParameter, Pos - 1)
+   Else
+      GetPatNameFromNameParameter = NameParameter
+   End If
+End Function
+Private Function GetKeyWordFromNameParameter(NameParameter As String) As String
+
+   Dim Pos As Integer
+   
+   Pos = InStr(NameParameter, "¤")
+   If Pos > 0 Then
+      GetKeyWordFromNameParameter = mId$(NameParameter, Pos + 1)
+   Else
+      GetKeyWordFromNameParameter = ""
+   End If
 End Function
 
