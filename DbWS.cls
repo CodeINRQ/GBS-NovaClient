@@ -111,7 +111,7 @@ Public Function User_Validate(ByRef LoginName As String, Password As String, Ext
    If Len(CtfContent) > 0 Then
       mCtfpath = CreateTempPath & "Nova.ctf"
       WriteStringToFile CtfContent, mCtfpath
-      Client.Texts.Ctfpath = mCtfpath
+      Client.Texts.CTFPath = mCtfpath
    End If
    
    'On Error Resume Next
@@ -339,7 +339,7 @@ Public Function DictationStorageOpen(Server As String, _
 
    WebProtocol = Client.Settings.GetString("Nova", "Protocol", "http")
    WebServer = Client.Settings.GetString("Nova", "Server", "nova.caretalk.se")
-   WebApp = Client.Settings.GetString("Nova", "App", "v160")
+   WebApp = Client.Settings.GetString("Nova", "App", "v170")
    WebService = Client.Settings.GetString("Nova", "Service", "Service.asmx")
    WebUrl = Client.Settings.GetString("Nova", "Url", "")
    
@@ -371,7 +371,7 @@ Public Function DictationStorageOpen(Server As String, _
    If Len(CtfContent) > 0 Then
       mCtfpath = CreateTempPath & "Nova.ctf"
       WriteStringToFile CtfContent, mCtfpath
-      Client.Texts.Ctfpath = mCtfpath
+      Client.Texts.CTFPath = mCtfpath
    End If
       
    StorageOpened = True

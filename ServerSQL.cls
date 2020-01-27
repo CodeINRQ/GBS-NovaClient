@@ -92,9 +92,9 @@ Public Property Get clsServer_StorageOpened() As Boolean
    clsServer_StorageOpened = mStorageOpened
 End Property
 
-Public Property Set clsServer_Settings(S As clsSettings)
+Public Property Set clsServer_Settings(s As clsSettings)
 
-   Set Settings = S
+   Set Settings = s
 End Property
 Public Function clsServer_IsBatchDoneByClient() As Boolean
 
@@ -574,6 +574,8 @@ Public Function clsServer_UserLogin(User As clsUser, _
    Dim SQL As String
    Dim RightPassword As String
     
+   Client.ExtSystemMgr.Init
+
    If mAuthMethod = 2 Then
       If Not SetUserFromSQLLoginName(User) Then
          clsServer_UserLogin = 100
@@ -806,15 +808,15 @@ Public Function clsServer_ExtSystemGetNext(ByRef E As clsExtSystem) As Boolean
 End Function
 Private Sub ConvertExtSystemRsToClass(ByRef Rs As ADODB.Recordset, ByRef E As clsExtSystem)
 
-   Dim S As String
+   Dim s As String
    
    Set E = New clsExtSystem
    With E
       .ExtSystem = Rs("ExtSystem")
       On Error Resume Next    'Ok if field is not in table
-      S = nvl(Rs("ExtSystemPw"), "")
-      If Len(S) > 0 Then
-         .ExtSystemPw = RC4(S, ct_ext_crypto_key)
+      s = nvl(Rs("ExtSystemPw"), "")
+      If Len(s) > 0 Then
+         .ExtSystemPw = RC4(s, ct_ext_crypto_key)
       Else
          .ExtSystemPw = ""
       End If
@@ -2139,7 +2141,7 @@ Public Sub clsServer_WriteUserData(Ty As String, Ke As String, Va As String)
    OpenStoredProcWithCommand "s_UserData_Set", Cmd
 
 End Sub
-Public Function clsServer_ReadUserData(Ty As String, Ke As String, Def As String, ByRef Version) As String
+Public Function clsServer_ReadUserData(Ty As String, Ke As String, Def As String, ByRef version) As String
 
    Dim Rs As ADODB.Recordset
    Dim Cmd As New ADODB.Command
@@ -2152,7 +2154,7 @@ Public Function clsServer_ReadUserData(Ty As String, Ke As String, Def As String
    
    If Not Rs.EOF Then
       clsServer_ReadUserData = Rs("Va")
-      Version = Rs("Version")
+      version = Rs("Version")
    End If
    CloseRecordset Rs
 End Function
@@ -2178,14 +2180,14 @@ Public Function clsServer_SysSettingsListGetNext(ByRef Se As String, ByRef Ke As
       clsServer_SysSettingsListGetNext = True
    End If
 End Function
-Public Sub clsServer_WriteSysSettings(Ty As String, Se As String, Ke As String, S As String)
+Public Sub clsServer_WriteSysSettings(Ty As String, Se As String, Ke As String, s As String)
 
    Dim Cmd As New ADODB.Command
    
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 50, Ty)
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 50, Se)
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 50, Ke)
-   Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 200, S)
+   Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 200, s)
    
    OpenStoredProcWithCommand "s_SysSettings_Set", Cmd
    
@@ -2213,7 +2215,7 @@ Public Sub clsServer_WriteStationData(Ty As String, Ke As String, Va As String)
    Rs.Update
    CloseRecordset Rs
 End Sub
-Public Function clsServer_ReadStationData(Ty As String, Ke As String, Def As String, ByRef Version) As String
+Public Function clsServer_ReadStationData(Ty As String, Ke As String, Def As String, ByRef version) As String
 
    Dim Rs As ADODB.Recordset
    Dim SQL As String
@@ -2227,10 +2229,10 @@ Public Function clsServer_ReadStationData(Ty As String, Ke As String, Def As Str
    OpenRecordset Rs, SQL
    If Rs.EOF Then
       clsServer_ReadStationData = Def
-      Version = ""
+      version = ""
    Else
       clsServer_ReadStationData = Rs("Va")
-      Version = Rs("Version")
+      version = Rs("Version")
    End If
    CloseRecordset Rs
 End Function
@@ -2365,12 +2367,12 @@ Private Function SaveNullIfZero(Value As Long) As Variant
       SaveNullIfZero = Value
    End If
 End Function
-Private Function SaveNullZeroLength(S As String, MAXLEN As Integer) As Variant
+Private Function SaveNullZeroLength(s As String, MAXLEN As Integer) As Variant
 
-   If Len(S) = 0 Then
+   If Len(s) = 0 Then
       SaveNullZeroLength = Null
    Else
-      SaveNullZeroLength = Left$(S, MAXLEN)
+      SaveNullZeroLength = Left$(s, MAXLEN)
    End If
 End Function
 Function FileToBlob(fld As ADODB.Field, FileName As String, Optional ChunkSize As Long = 8192) As Long

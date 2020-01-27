@@ -1,3 +1,10 @@
+1.71.0.2
+--------
+Starts from 1.70.0.2
+MyGetTickCount take care of negative result from Windows GetTickCount (Win8)
+Don't try to delete sound file when Checkout locked dictation
+
+
 1.70.0.2
 --------
 Starts from 1.70.0.1

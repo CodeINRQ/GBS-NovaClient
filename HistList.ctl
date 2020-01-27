@@ -460,21 +460,21 @@ Sub SetCellString(Sheet As Integer, Row As Integer, Col As Integer, Txt As Strin
 End Sub
 Sub SetCellNumber(Sheet As Integer, Row As Integer, Col As Integer, Num As Long)
 
-   Dim S As String
+   Dim s As String
 
    If Num <> 0 Then
-      S = CStr(Num)
+      s = CStr(Num)
    End If
-   SetCellString Sheet, Row, Col, S
+   SetCellString Sheet, Row, Col, s
 End Sub
 Sub SetCellTime(Sheet As Integer, Row As Integer, Col As Integer, Sec As Long)
 
-   Dim S As String
+   Dim s As String
 
    If Sec > 0 Then
-      S = FormatLength(Sec)
+      s = FormatLength(Sec)
    End If
-   SetCellString Sheet, Row, Col, S
+   SetCellString Sheet, Row, Col, s
 End Sub
 
 Public Function GetSetting() As String

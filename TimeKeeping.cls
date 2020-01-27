@@ -28,7 +28,7 @@ Private Sub Class_Initialize()
 End Sub
 Public Sub StartMeasure()
 
-   StartValue = GetTickCount()
+   StartValue = MyGetTickCount()
    IsStarted = True
 End Sub
 Public Sub StopMeasure()
@@ -36,7 +36,7 @@ Public Sub StopMeasure()
    Dim StopValue As Long
    Dim MeasuredValue As Long
 
-   StopValue = GetTickCount()
+   StopValue = MyGetTickCount()
    If IsStarted Then
       MeasuredValue = StopValue - StartValue
       If MeasuredValue < 0 Then

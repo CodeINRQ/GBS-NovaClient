@@ -13,8 +13,6 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Private Declare Function GetTickCount Lib "kernel32" () As Long
-
 Private Const ModuleName = "DSSRecorder"
 Const SettingSection As String = "DSSRecorder"
 
@@ -299,7 +297,7 @@ Private Sub TryToOpenPort(FirstChoicePort As String)
    Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, GruTraceTitleEntry, FirstChoicePort
    
    On Error Resume Next
-   T = GetTickCount()
+   T = MyGetTickCount()
    Debug.Print frmRecord.Adapter.AdapterType
    'MsgBox "AdapterType " & frmRecord.Adapter.AdapterType
    frmRecord.OpenAdapter FirstChoicePort
@@ -1399,8 +1397,8 @@ Private Sub ReportPosition(ByVal Position As Long, UseInterval As Boolean)
    
    'Client.Trace.AddRow Trace_Level_Events, Modulename, FuncName, GruTraceTitleEntry, CStr(Position)
    If mCallBackPositionInterval > 0 Then
-      If (GetTickCount() - mTimeForReportedPosition >= mCallBackPositionInterval) Or Not UseInterval Then
-         mTimeForReportedPosition = GetTickCount
+      If (MyGetTickCount() - mTimeForReportedPosition >= mCallBackPositionInterval) Or Not UseInterval Then
+         mTimeForReportedPosition = MyGetTickCount
          If Position < 0 Then
             Position = frmRecord.DssRecorderBase.Position
             Client.Trace.AddRow Trace_Level_DSSRec, ModuleName, FuncName, "Position (get)", CStr(Position)
@@ -1426,8 +1424,8 @@ Private Sub frmRecord_DssOnRecord(ByVal RecStart As Long, ByVal RecEnd As Long, 
 
    On Error GoTo DssOnRecord_Err
    If mCallBackPositionInterval > 0 Then
-      If GetTickCount() - mTimeForReportedPosition >= mCallBackPositionInterval Then
-         mTimeForReportedPosition = GetTickCount
+      If MyGetTickCount() - mTimeForReportedPosition >= mCallBackPositionInterval Then
+         mTimeForReportedPosition = MyGetTickCount
          mLastReportedPosition = RecEnd
          RaiseGruEvent GRU_POSCHANGE, mLastReportedPosition
       End If

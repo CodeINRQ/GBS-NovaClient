@@ -3,7 +3,7 @@ Object = "{B93A8074-3A0D-49E0-AB7B-55BC0E6D3452}#1.2#0"; "DSSHEA~1.DLL"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
 Object = "{BDC217C8-ED16-11CD-956C-0000C04E4C0A}#1.1#0"; "TABCTL32.OCX"
 Object = "{A455B2A1-A33C-11D1-A8BD-002078104456}#1.0#0"; "cp5ocx32.ocx"
-Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "COMDLG32.OCX"
+Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "comdlg32.ocx"
 Begin VB.Form frmMain 
    Caption         =   "Grundig"
    ClientHeight    =   10200
@@ -110,8 +110,8 @@ Begin VB.Form frmMain
       TabIndex        =   3
       Top             =   480
       Width           =   2175
-      _extentx        =   3836
-      _extenty        =   16113
+      _ExtentX        =   3836
+      _ExtentY        =   16113
    End
    Begin TabDlg.SSTab Tabs 
       Height          =   9375
@@ -156,15 +156,15 @@ Begin VB.Form frmMain
       TabCaption(5)   =   "Organisation"
       TabPicture(5)   =   "main.frx":0B6E
       Tab(5).ControlEnabled=   0   'False
-      Tab(5).Control(0)=   "ucOrgDictType"
+      Tab(5).Control(0)=   "ucEditOrg"
       Tab(5).Control(1)=   "ucOrgPriority"
-      Tab(5).Control(2)=   "ucEditOrg"
+      Tab(5).Control(2)=   "ucOrgDictType"
       Tab(5).ControlCount=   3
       TabCaption(6)   =   "Systeminställningar"
       TabPicture(6)   =   "main.frx":0B8A
       Tab(6).ControlEnabled=   0   'False
-      Tab(6).Control(0)=   "ucEditGroup"
-      Tab(6).Control(1)=   "ucEditSysSettings"
+      Tab(6).Control(0)=   "ucEditSysSettings"
+      Tab(6).Control(1)=   "ucEditGroup"
       Tab(6).ControlCount=   2
       TabCaption(7)   =   "Tab 6"
       TabPicture(7)   =   "main.frx":0BA6
@@ -187,8 +187,8 @@ Begin VB.Form frmMain
          TabIndex        =   13
          Top             =   360
          Width           =   8535
-         _extentx        =   15055
-         _extenty        =   7011
+         _ExtentX        =   15055
+         _ExtentY        =   7011
       End
       Begin CareTalk.ucVoiceXpress ucVoiceXpress 
          Height          =   4095
@@ -197,8 +197,8 @@ Begin VB.Form frmMain
          TabIndex        =   12
          Top             =   480
          Width           =   8535
-         _extentx        =   15055
-         _extenty        =   7223
+         _ExtentX        =   15055
+         _ExtentY        =   7223
       End
       Begin CareTalk.ucEditSysSettings ucEditSysSettings 
          Height          =   4575
@@ -207,8 +207,8 @@ Begin VB.Form frmMain
          TabIndex        =   11
          Top             =   4560
          Width           =   8175
-         _extentx        =   14420
-         _extenty        =   8070
+         _ExtentX        =   14420
+         _ExtentY        =   8070
       End
       Begin CareTalk.ucEditUser ucEditUser 
          Height          =   6735
@@ -217,8 +217,8 @@ Begin VB.Form frmMain
          TabIndex        =   10
          Top             =   480
          Width           =   10575
-         _extentx        =   15055
-         _extenty        =   4048
+         _ExtentX        =   15055
+         _ExtentY        =   4048
       End
       Begin CareTalk.ucEditGroup ucEditGroup 
          Height          =   4095
@@ -227,8 +227,8 @@ Begin VB.Form frmMain
          TabIndex        =   9
          Top             =   480
          Width           =   8175
-         _extentx        =   14420
-         _extenty        =   7223
+         _ExtentX        =   14420
+         _ExtentY        =   7223
       End
       Begin CareTalk.ucStatList ucStatList 
          Height          =   6735
@@ -237,8 +237,8 @@ Begin VB.Form frmMain
          TabIndex        =   7
          Top             =   480
          Width           =   7815
-         _extentx        =   13785
-         _extenty        =   11880
+         _ExtentX        =   13785
+         _ExtentY        =   11880
       End
       Begin CareTalk.ucDictList ucDictList 
          Height          =   6735
@@ -247,8 +247,8 @@ Begin VB.Form frmMain
          TabIndex        =   6
          Top             =   480
          Width           =   7815
-         _extentx        =   13785
-         _extenty        =   11880
+         _ExtentX        =   13785
+         _ExtentY        =   11880
       End
       Begin CareTalk.ucSearch ucSearch 
          Height          =   7095
@@ -257,8 +257,8 @@ Begin VB.Form frmMain
          TabIndex        =   8
          Top             =   480
          Width           =   4935
-         _extentx        =   8705
-         _extenty        =   12515
+         _ExtentX        =   8705
+         _ExtentY        =   12515
       End
       Begin CareTalk.ucHistList ucHistList 
          Height          =   6735
@@ -267,8 +267,8 @@ Begin VB.Form frmMain
          TabIndex        =   17
          Top             =   480
          Width           =   7815
-         _extentx        =   13785
-         _extenty        =   11880
+         _ExtentX        =   13785
+         _ExtentY        =   11880
       End
       Begin CareTalk.ucEditOrg ucEditOrg 
          Height          =   1815
@@ -277,8 +277,8 @@ Begin VB.Form frmMain
          TabIndex        =   0
          Top             =   480
          Width           =   8535
-         _extentx        =   15055
-         _extenty        =   2566
+         _ExtentX        =   15055
+         _ExtentY        =   2566
       End
       Begin CareTalk.ucOrgPriority ucOrgPriority 
          Height          =   3015
@@ -286,8 +286,8 @@ Begin VB.Form frmMain
          TabIndex        =   2
          Top             =   5280
          Width           =   8295
-         _extentx        =   14631
-         _extenty        =   4048
+         _ExtentX        =   14631
+         _ExtentY        =   4048
       End
       Begin CareTalk.ucOrgDictType ucOrgDictType 
          Height          =   3015
@@ -295,8 +295,8 @@ Begin VB.Form frmMain
          TabIndex        =   1
          Top             =   2280
          Width           =   8295
-         _extentx        =   14631
-         _extenty        =   5318
+         _ExtentX        =   14631
+         _ExtentY        =   5318
       End
       Begin CareTalk.ucLoggList ucLoggList 
          Height          =   6735
@@ -305,8 +305,8 @@ Begin VB.Form frmMain
          TabIndex        =   19
          Top             =   360
          Width           =   7815
-         _extentx        =   13785
-         _extenty        =   11880
+         _ExtentX        =   13785
+         _ExtentY        =   11880
       End
    End
    Begin MSComctlLib.Toolbar Toolbar1 
@@ -719,7 +719,7 @@ Private Sub Form_Load()
    frmMain.cmdSetHomeOrg.Visible = Client.SysSettings.UserAllowChangeHome
    Client.Texts.NewLanguage Client.CultureLanguage
 
-   Client.ExtSystemMgr.Init
+   'Client.ExtSystemMgr.Init
    
    GetValuesFromAutostartSection
    GetValuesFromExportSection
@@ -1459,13 +1459,13 @@ Private Sub tmrUpdateList_Timer()
    Dim TickNow As Long
 
    If Not RecorderInUse Then
-      TickNow = GetTickCount()
+      TickNow = MyGetTickCount()
       If TickNow > NextTickForAction Then
          TimeForUpdates.StartMeasure
          UpdateCurrentView
          TimeForUpdates.StopMeasure
          
-         TickNow = GetTickCount()
+         TickNow = MyGetTickCount()
          MeanTime = TimeForUpdates.SlidingMeanTimeInMilliSec(Client.SysSettings.DictListUpdateValues, True)
          NewUpdateInterval = MeanTime * Client.SysSettings.DictListUpdateK + Client.SysSettings.DictListUpdateM
          If NewUpdateInterval <= 2000 Then

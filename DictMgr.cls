@@ -697,9 +697,6 @@ Public Function CheckOut(ByRef Dict As clsDict, ByVal DictId As Long, ByVal With
          Dict.TextReadOnly = Not (Client.OrgMgr.CheckUserRole(Dict.OrgId, RTTextEdit) And Dict.StatusId < SoundDeleted)
       End If
    Else
-      If WithSound Then
-         Client.DictFileMgr.KillLocalTempDictationFile Dict.LocalDictFile
-      End If
       MsgBox Client.Texts.Txt(1190101, "Diktatet är upptaget")
    End If
    CheckOut = Res
