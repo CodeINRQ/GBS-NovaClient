@@ -24,7 +24,12 @@ Public Event OnOpenDictation(DictId As String, _
                              ExtOrg As String, _
                              ExtPriority As String, _
                              AuthorShortName As String, _
-                             AuthorLongName As String)
+                             AuthorLongName As String, _
+                             SoundLen As String, _
+                             ExtDictId As String, _
+                             OrgText As String, _
+                             DictTypeText As String, _
+                             PriorityText As String)
 Public Event OnCloseDictation(DictId As String, _
                              PatId As String, _
                              PatName As String, _
@@ -32,7 +37,12 @@ Public Event OnCloseDictation(DictId As String, _
                              ExtOrg As String, _
                              ExtPriority As String, _
                              AuthorShortName As String, _
-                             AuthorLongName As String)
+                             AuthorLongName As String, _
+                             SoundLen As String, _
+                             ExtDictId As String, _
+                             OrgText As String, _
+                             DictTypeText As String, _
+                             PriorityText As String)
 Public Event OnNewDictation(DictId As String, _
                              PatId As String, _
                              PatName As String, _
@@ -40,7 +50,13 @@ Public Event OnNewDictation(DictId As String, _
                              ExtOrg As String, _
                              ExtPriority As String, _
                              AuthorShortName As String, _
-                             AuthorLongName As String)
+                             AuthorLongName As String, _
+                             SoundLen As String, _
+                             ExtDictId As String, _
+                             OrgText As String, _
+                             DictTypeText As String, _
+                             PriorityText As String)
+                             
 Public Event OnCreateDictation()
 Public Event OnLogon()
 Public Event OnLogout()
@@ -597,7 +613,7 @@ Private Sub mfrmMain_OnOpenDictation(Dict As clsDict)
    Const FuncName As String = "OnOpenDictation"
 
    AtEveryRaiseEvent FuncName
-   RaiseEvent OnOpenDictation(Dict.DictId, Dict.Pat.PatId, Dict.Pat.PatName, "", "", "", Dict.AuthorShortName, Dict.AuthorLongName)
+   RaiseEvent OnOpenDictation(Dict.DictId, Dict.Pat.PatId, Dict.Pat.PatName, "", "", "", Dict.AuthorShortName, Dict.AuthorLongName, FormatLength(Dict.SoundLength), Dict.ExtDictId, Dict.OrgText, Dict.DictTypeText, Dict.PriorityText)
 End Sub
 
 Private Sub mfrmMain_OnCloseDictation(Dict As clsDict)
@@ -605,7 +621,7 @@ Private Sub mfrmMain_OnCloseDictation(Dict As clsDict)
    Const FuncName As String = "OnCloseDictation"
 
    AtEveryRaiseEvent FuncName
-   RaiseEvent OnCloseDictation(Dict.DictId, Dict.Pat.PatId, Dict.Pat.PatName, "", "", "", Dict.AuthorShortName, Dict.AuthorLongName)
+   RaiseEvent OnCloseDictation(Dict.DictId, Dict.Pat.PatId, Dict.Pat.PatName, "", "", "", Dict.AuthorShortName, Dict.AuthorLongName, FormatLength(Dict.SoundLength), Dict.ExtDictId, Dict.OrgText, Dict.DictTypeText, Dict.PriorityText)
 End Sub
 
 Private Sub mfrmMain_OnNewDictation(Dict As clsDict)
@@ -613,7 +629,7 @@ Private Sub mfrmMain_OnNewDictation(Dict As clsDict)
    Const FuncName As String = "OnNewDictation"
 
    AtEveryRaiseEvent FuncName
-   RaiseEvent OnNewDictation(Dict.DictId, Dict.Pat.PatId, Dict.Pat.PatName, "", "", "", Dict.AuthorShortName, Dict.AuthorLongName)
+   RaiseEvent OnNewDictation(Dict.DictId, Dict.Pat.PatId, Dict.Pat.PatName, "", "", "", Dict.AuthorShortName, Dict.AuthorLongName, FormatLength(Dict.SoundLength), Dict.ExtDictId, Dict.OrgText, Dict.DictTypeText, Dict.PriorityText)
 End Sub
 
 Private Sub mfrmMain_OnCreateDictation()

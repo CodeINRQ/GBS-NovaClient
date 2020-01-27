@@ -1,3 +1,11 @@
+1.80.0.1
+--------
+Starts from 1.72.0.1
+Support extra API for Kliniken
+Support new variables in API
+
+
+
 1.72.0.1
 --------
 Starts from 1.71.0.1

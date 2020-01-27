@@ -153,6 +153,7 @@ Public Function CreateDictString(ExtSystem As String, Delimit As Integer, ByVal 
    C = ChangeParam(C, Delimit, "ExpiryDate", Format$(D.ExpiryDate, "ddddd ttttt"))
    
    C = ChangeParam(C, Delimit, "Txt", D.Txt)
+   C = ChangeParam(C, Delimit, "Note", D.Note)
 
    C = CreateVariableString(ExtSystem, Delimit, C)
    C = CreateUserString(Delimit, C)
