@@ -1537,11 +1537,21 @@ Private Function CheckInDictInternal(ByRef Dict As clsDict) As Integer
 End Function
 Public Function clsServer_CheckInNewDict(ByRef Dict As clsDict) As Long
 
+   Dim I As Integer
+
    'RaiseEvent UIStatusSet(Client.Texts.Txt(1260102, "Diktatet sparas"), True)
    Client.UIStatusSet Client.Texts.Txt(1260102, "Diktatet sparas"), True
       Dict.AuthorId = Client.User.UserId
       Dict.AuthorPos = Dict.CurrentPos
-      CheckInDictInternal Dict
+      
+      For I = 1 To 5
+         CheckInDictInternal Dict
+         If Dict.DictId = 0 Then
+            Delay 2
+         Else
+            Exit For
+         End If
+      Next I
       
       If Dict.LocalDictFile.IsSoundData Then
          CheckInSound Dict
@@ -1550,6 +1560,16 @@ Public Function clsServer_CheckInNewDict(ByRef Dict As clsDict) As Long
    'RaiseEvent UIStatusClear
    Client.UIStatusClear
 End Function
+
+Private Sub Delay(Sek As Integer)
+
+   Dim T As Double
+   
+   T = Timer + Sek
+   Do While T > Timer
+      DoEvents
+   Loop
+End Sub
 Public Sub clsServer_UnlockDict(DictId As Long)
 
    Dim Cmd As New ADODB.Command
