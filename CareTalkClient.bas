@@ -2,6 +2,11 @@ Attribute VB_Name = "modCareTalkClient"
 Option Explicit
 
 Public Const API_ACCESS_CODE = "dsfkkd8jd,.,sdf88h3%&%&¤iyt"
+
+Private Const SYNCHRONIZE = &H100000
+Private Const WAIT_OBJECT_0 = 0
+Private Const WAIT_TIMEOUT = &H102
+
 Private Const STATUS_TIMEOUT = &H102&
 Private Const INFINITE = -1& ' Infinite interval
 Private Const QS_KEY = &H1&
@@ -43,6 +48,16 @@ Public Const MAX_BUFFER_LENGTH = 256
 Private Declare Function GetDriveType Lib "kernel32" _
 Alias "GetDriveTypeA" (ByVal nDrive As String) As Long
 Public Client As clsClient
+
+Private Declare Function OpenProcess Lib "kernel32" ( _
+   ByVal dwDesiredAccess As Long, ByVal bInheritHandle As Long, _
+   ByVal dwProcessId As Long) As Long
+
+Private Declare Function WaitForSingleObject Lib "kernel32" ( _
+   ByVal hHandle As Long, ByVal dwMilliseconds As Long) As Long
+
+Private Declare Function CloseHandle Lib "kernel32" ( _
+   ByVal hObject As Long) As Long
 
 Public Enum StatusEnum
    BeingRecorded = 20
@@ -150,8 +165,18 @@ Function nvl(Value As Variant, InsteadOfNull As Variant) As Variant
 End Function
 Public Function CreateTempFileName(ExtensionExclDot As String) As String
 
-    CreateTempFileName = CreateTempPath() & CStr(CLng(Timer)) & "." & ExtensionExclDot
+   CreateTempFileName = CreateTempPath() & CStr(CLng(Timer)) & "." & ExtensionExclDot
 End Function
+Public Function CreateTempFolder(FolderName As String) As String
+
+   Dim P As String
+   
+   P = CreateTempPath() & FolderName
+   On Error Resume Next
+   MkDir P
+   CreateTempFolder = P
+End Function
+
 Public Function CreateTempPath() As String
 
     Dim strBufferString As String
@@ -160,12 +185,7 @@ Public Function CreateTempPath() As String
     lngResult = GetTempPath(MAX_BUFFER_LENGTH, strBufferString)
     CreateTempPath = mId(strBufferString, 1, lngResult)
 End Function
-Public Sub KillLocalTempDictationFile(Dict As clsDict)
 
-   If Client.SysSettings.DeleteTemp = 0 Then
-      KillFileIgnoreError Dict.LocalFilename
-   End If
-End Sub
 Public Sub KillFileIgnoreError(FileName As String)
 
    On Error Resume Next
@@ -606,3 +626,19 @@ Public Function RC4(ByVal Expression As String, ByVal Password As String) As Str
    RC4 = StrConv(ByteArray, vbUnicode)
 End Function
 
+Public Sub ShellAndWait(ByVal program_name As String, ByVal window_style As VbAppWinStyle)
+
+   Dim process_id As Long
+   Dim process_handle As Long
+
+   ' Start the program.
+   process_id = Shell(program_name, window_style)
+
+   ' Wait for the program to finish.
+   ' Get the process handle.
+   process_handle = OpenProcess(SYNCHRONIZE, 0, process_id)
+   If process_handle <> 0 Then
+      WaitForSingleObject process_handle, INFINITE
+      CloseHandle process_handle
+   End If
+End Sub

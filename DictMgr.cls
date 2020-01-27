@@ -146,7 +146,9 @@ Private Function FillCache(ByVal OrgId As Long, ByRef TooMany As Boolean) As Dou
       DictCacheTimeStampOrg(OrgId) = FillCacheFromFilter(OrgId, TooMany)
       FillCache = DictCacheTimeStampOrg(OrgId)
    Else
+      Debug.Print DictCacheTimeStampTot
       Client.Server.CreateDictList 0, 0, 0, 0, 255, DictCacheTimeStampTot
+      Debug.Print DictCacheTimeStampTot
       MaxTimeStamp = DictCacheTimeStampTot
       FirstUpdate = True
       Do While Client.Server.DictListGetNext(Dict)
@@ -684,12 +686,8 @@ End Sub
 Public Function CheckOut(ByRef Dict As clsDict, ByVal DictId As Long, ByVal WithSound As Boolean) As Integer
 
    Dim Res As Integer
-   Dim TempfileName As String
    
-   If WithSound Then
-      TempfileName = CreateTempFileName("dss")
-   End If
-   Res = Client.Server.CheckOutDict(Dict, DictId, WithSound, TempfileName)
+   Res = Client.Server.CheckOutDict(Dict, DictId, WithSound)
    If Res = 0 Then
       Client.DictAuditMgr.Insert DictId, AuditType_CheckOut, Dict.StatusId
       Dict.SoundReadOnly = Dict.AuthorId <> Client.User.UserId Or Dict.StatusId > 30
@@ -700,7 +698,7 @@ Public Function CheckOut(ByRef Dict As clsDict, ByVal DictId As Long, ByVal With
       End If
    Else
       If WithSound Then
-         KillFileIgnoreError TempfileName
+         Client.DictFileMgr.KillLocalTempDictationFile Dict.LocalDictFile
       End If
       MsgBox Client.Texts.Txt(1190101, "Diktatet är upptaget")
    End If
@@ -725,9 +723,8 @@ Public Function CheckIn(ByRef Dict As clsDict, ByVal DiscardChanges As Boolean) 
    Else
       MsgBox Client.Texts.Txt(1190102, "Diktatet kunde inte sparas")
    End If
-   If Len(Dict.LocalFilename) > 0 Then
-      KillLocalTempDictationFile Dict
-      Dict.LocalFilename = ""
+   If Dict.LocalDictFile.IsSoundData Then
+      Client.DictFileMgr.KillLocalTempDictationFile Dict.LocalDictFile
    End If
    CheckIn = Res
 End Function
@@ -738,10 +735,7 @@ Public Function CreateNew(ByRef Dict As clsDict) As Integer
    Dim TempfileName As String
       
    Dict.Created = Now
-   If Len(Dict.LocalFilename) = 0 Then
-      TempfileName = CreateTempFileName("dss")
-      Dict.LocalFilename = TempfileName
-   End If
+   Client.DictFileMgr.CreateLocalValues Dict.LocalDictFile
    Dict.AuthorId = Client.User.UserId
    Dict.AuthorLongName = Client.User.LongName
    Dict.AuthorShortName = Client.User.ShortName
@@ -760,10 +754,7 @@ Public Function CheckInNew(ByRef Dict As clsDict) As Boolean
    If Res <> 0 Then
       Client.LoggMgr.Insert 1320112, LoggLevel_DictInfo, Dict.DictId, Dict.LoggData
       Client.DictAuditMgr.Insert Dict.DictId, AuditType_CheckInNew, Dict.StatusId
-      If Len(Dict.LocalFilename) Then
-         KillLocalTempDictationFile Dict
-         Dict.LocalFilename = ""
-      End If
+      Client.DictFileMgr.KillLocalTempDictationFile Dict.LocalDictFile
    Else
       Client.LoggMgr.Insert 1320113, LoggLevel_DictFailure, Dict.DictId, Dict.LoggData
       MsgBox Client.Texts.Txt(1190102, "Diktatet kunde inte sparas")
@@ -816,7 +807,7 @@ Public Sub SaveTempDictationInfo(D As clsDict, mode As TempDictInfoTypeEnum)
    Settings.WriteLong Section, "DictType", D.DictTypeId
    Settings.WriteLong Section, "Priority", D.PriorityId
    Settings.WriteString Section, "Txt", D.Txt
-   Settings.WriteString Section, "Lfn", D.LocalFilename
+   Client.DictFileMgr.WriteDictFileInfoToSettings D.LocalDictFile, Settings, Section
 End Sub
 Public Sub EmptyTempDictationInfo()
 
@@ -848,7 +839,8 @@ Public Function RestoreTempDictationInfo(D As clsDict) As TempDictInfoTypeEnum
       D.DictTypeId = Settings.GetLong(Section, "DictType", 0)
       D.PriorityId = Settings.GetLong(Section, "Priority", 0)
       D.Txt = Settings.GetString(Section, "Txt", "")
-      D.LocalFilename = Settings.GetString(Section, "Lfn", "")
+      
+      Client.DictFileMgr.GetDictFileInfoToSettings D.LocalDictFile, Settings, Section
       
       D.AuthorId = Client.User.UserId
    End If

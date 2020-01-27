@@ -807,13 +807,13 @@ Private Sub Form_Load()
       Client.OrgMgr.GetSortedOrg Org, I
       If Org.ShowInTree Then
          If (Org.Roles.Author Or Org.Roles.TextEditor) And Org.DictContainer Then
-            If Org.OrgId = Client.User.HomeOrgId Then
-               ucOrgTree.AddNode Org.OrgId, Org.ShowParent, Org.OrgText, 7, True
+            If Org.Orgid = Client.User.HomeOrgId Then
+               ucOrgTree.AddNode Org.Orgid, Org.ShowParent, Org.OrgText, 7, True
             Else
-               ucOrgTree.AddNode Org.OrgId, Org.ShowParent, Org.OrgText, 1, True
+               ucOrgTree.AddNode Org.Orgid, Org.ShowParent, Org.OrgText, 1, True
             End If
          Else
-            ucOrgTree.AddNode Org.OrgId, Org.ShowParent, Org.OrgText, 5, False
+            ucOrgTree.AddNode Org.Orgid, Org.ShowParent, Org.OrgText, 5, False
          End If
       End If
    Next I
@@ -832,7 +832,7 @@ Public Sub SaveSettings(Settings As clsStringStore)
 End Sub
 Public Sub EditDictation(ByRef Dictation As clsDict, ByVal NewDict As Boolean)
 
-   mUserIsSysAdmin = Client.OrgMgr.CheckUserRole(Dictation.OrgId, RTSysAdmin)
+   mUserIsSysAdmin = Client.OrgMgr.CheckUserRole(Dictation.Orgid, RTSysAdmin)
    Set mDict = Dictation
    mNewDict = NewDict
    If mNewDict Then
@@ -847,15 +847,15 @@ Public Sub EditDictation(ByRef Dictation As clsDict, ByVal NewDict As Boolean)
    End If
    mSoundReadOnly = Dictation.SoundReadOnly
    
-   If Len(mDict.LocalFilename) > 0 Then
+   If mDict.LocalDictFile.IsSoundToPlay Then
       ucDSSRecGUI.Visible = True
       ucDSSRecGUI.AutoRewind = mAutoRewind
       If mNewDict Then
          ucDSSRecGUI.ReadOnly = mSoundReadOnly
-         ucDSSRecGUI.CreateNewFile mDict.LocalFilename
+         ucDSSRecGUI.CreateNewFile mDict.LocalDictFile.LocalFilenamePlay
       Else
          ucDSSRecGUI.ReadOnly = mSoundReadOnly
-         ucDSSRecGUI.OpenAndPlay mDict.LocalFilename
+         ucDSSRecGUI.OpenAndPlay mDict.LocalDictFile.LocalFilenamePlay
       End If
    Else
       ucDSSRecGUI.Visible = False
@@ -869,8 +869,8 @@ End Sub
 
 Private Sub ShowDictation()
 
-   If mDict.OrgId > 0 Then
-      ucOrgTree.PickOrgId mDict.OrgId
+   If mDict.Orgid > 0 Then
+      ucOrgTree.PickOrgId mDict.Orgid
    End If
    If mDict.NoPatient Then
       chkNoPatient.Value = vbChecked
@@ -880,7 +880,7 @@ Private Sub ShowDictation()
    txtPatId.Text = mDict.Pat.PatIdFormatted
    txtPatName.Text = mDict.Pat.PatName
    
-   Client.DictTypeMgr.FillCombo cboDictType, mDict.OrgId, mDict.DictTypeId, mDict.DictTypeIdNoDefault, True
+   Client.DictTypeMgr.FillCombo cboDictType, mDict.Orgid, mDict.DictTypeId, mDict.DictTypeIdNoDefault, True
    If cboDictType.ListIndex >= 0 Then
       Dim DictType As clsDictType
       Client.DictTypeMgr.GetFromId DictType, cboDictType.ItemData(cboDictType.ListIndex)
@@ -889,7 +889,7 @@ Private Sub ShowDictation()
       Set DictType = Nothing
    End If
    
-   Client.PriorityMgr.FillCombo cboPriority, mDict.OrgId, mDict.PriorityId, True
+   Client.PriorityMgr.FillCombo cboPriority, mDict.Orgid, mDict.PriorityId, True
    If cboPriority.ListIndex >= 0 Then
       Dim Priority As clsPriority
       Client.PriorityMgr.GetFromId Priority, cboPriority.ItemData(cboPriority.ListIndex)
@@ -1133,14 +1133,14 @@ Private Sub ucDSSRecGUI_WarningLowInputWhenRecording(TimeWithLowInput As Long, M
    End If
 End Sub
 
-Private Sub ucOrgTree_NewSelect(OrgId As Long, Txt As String)
+Private Sub ucOrgTree_NewSelect(Orgid As Long, Txt As String)
 
    If Screen.ActiveControl Is ucOrgTree Then
-      mDict.OrgId = OrgId
+      mDict.Orgid = Orgid
       mDict.OrgText = Txt
       mDict.InfoDirty = True
       
-      Client.DictTypeMgr.FillCombo cboDictType, mDict.OrgId, mDict.DictTypeId, mDict.DictTypeIdNoDefault, True
+      Client.DictTypeMgr.FillCombo cboDictType, mDict.Orgid, mDict.DictTypeId, mDict.DictTypeIdNoDefault, True
       If cboDictType.ListIndex >= 0 Then
          Dim DictType As clsDictType
          Client.DictTypeMgr.GetFromId DictType, cboDictType.ItemData(cboDictType.ListIndex)
@@ -1151,7 +1151,7 @@ Private Sub ucOrgTree_NewSelect(OrgId As Long, Txt As String)
          mDict.DictTypeId = -1
       End If
       
-      Client.PriorityMgr.FillCombo cboPriority, mDict.OrgId, mDict.PriorityId, True
+      Client.PriorityMgr.FillCombo cboPriority, mDict.Orgid, mDict.PriorityId, True
       If cboPriority.ListIndex >= 0 Then
          Dim Priority As clsPriority
          Client.PriorityMgr.GetFromId Priority, cboPriority.ItemData(cboPriority.ListIndex)
@@ -1217,7 +1217,7 @@ Private Function CheckMandatoryData() As Boolean
       lblPatIdMissing.Visible = False
       lblPatNameMissing.Visible = False
    End If
-   If mDict.OrgId = 0 Then
+   If mDict.Orgid = 0 Then
       lblOrgMissing.Visible = True
       Ok = False
    Else

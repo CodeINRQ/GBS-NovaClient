@@ -118,6 +118,10 @@ Public ImportDefaultId As String
 Public ImportDefaultName As String
 Public ImportDefaultKeyWord As String
 Public ImportDefaultNote As String
+Public ImportDeleteOrgFile As Boolean
+Public ImportMoveFileTypes As String
+Public ImportDirectToRecorded As Boolean
+Public ImportWithDialog As Boolean
 
 Public ExportAllowMenu As Boolean
 
@@ -128,6 +132,7 @@ Public IndicatorLightColor As Long
 Public IndicatorLightTime As Long
 Public IndicatorDarkTime As Long
 Public IndicatorMaxBlink As Long
+
 
 Public Property Get Store() As clsStringStore
 
@@ -262,6 +267,11 @@ Public Sub Init(Ty As String)
    ImportDefaultName = mSysSettings.GetString("Import", "DefaultName", "")
    ImportDefaultKeyWord = mSysSettings.GetString("Import", "DefaultKeyWord", "")
    ImportDefaultNote = mSysSettings.GetString("Import", "DefaultNote", "")
+   ImportDeleteOrgFile = mSysSettings.GetBool("Import", "DeleteOrgFile", True)
+   ImportMoveFileTypes = mSysSettings.GetString("Import", "MoveFiles", "*.DSS;*.DS2;*.MP3;*.WAV")
+   ImportDirectToRecorded = mSysSettings.GetBool("Import", "DirectToRecorded", False)
+   ImportWithDialog = mSysSettings.GetBool("Import", "WithDialog", False)
+
 
    ExportAllowMenu = mSysSettings.GetBool("Export", "AllowMenu", True)
 
@@ -272,6 +282,7 @@ Public Sub Init(Ty As String)
    IndicatorLightTime = mSysSettings.GetLong("Indicator", "LightTime", 2)
    IndicatorDarkTime = mSysSettings.GetLong("Indicator", "DarkTime", 20)
    IndicatorMaxBlink = mSysSettings.GetLong("Indicator", "MaxBlink", -1)
+   
 End Sub
 Public Sub Save(Ty As String)
 

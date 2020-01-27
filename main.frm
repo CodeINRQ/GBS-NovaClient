@@ -1,21 +1,21 @@
 VERSION 5.00
-Object = "{B93A8074-3A0D-49E0-AB7B-55BC0E6D3452}#1.0#0"; "DssHeaderCtrl.dll"
+Object = "{B93A8074-3A0D-49E0-AB7B-55BC0E6D3452}#1.1#0"; "DSSHEA~1.DLL"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
 Object = "{BDC217C8-ED16-11CD-956C-0000C04E4C0A}#1.1#0"; "TABCTL32.OCX"
-Object = "{A455B2A1-A33C-11D1-A8BD-002078104456}#1.0#0"; "CP5OCX32.OCX"
+Object = "{A455B2A1-A33C-11D1-A8BD-002078104456}#1.0#0"; "cp5ocx32.ocx"
 Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "COMDLG32.OCX"
 Begin VB.Form frmMain 
    Caption         =   "Grundig"
    ClientHeight    =   10200
    ClientLeft      =   105
    ClientTop       =   795
-   ClientWidth     =   13410
+   ClientWidth     =   13455
    HelpContextID   =   1000000
    Icon            =   "main.frx":0000
    KeyPreview      =   -1  'True
    LinkTopic       =   "Form1"
    ScaleHeight     =   10200
-   ScaleWidth      =   13410
+   ScaleWidth      =   13455
    Begin VB.Timer tmrCheckCtCmdFiles 
       Enabled         =   0   'False
       Interval        =   1000
@@ -70,8 +70,8 @@ Begin VB.Form frmMain
       Left            =   0
       TabIndex        =   14
       Top             =   9945
-      Width           =   13410
-      _ExtentX        =   23654
+      Width           =   13455
+      _ExtentX        =   23733
       _ExtentY        =   450
       _Version        =   393216
       BeginProperty Panels {8E3867A5-8586-11D1-B16A-00C0F0283628} 
@@ -300,8 +300,8 @@ Begin VB.Form frmMain
       Left            =   0
       TabIndex        =   5
       Top             =   0
-      Width           =   13410
-      _ExtentX        =   23654
+      Width           =   13455
+      _ExtentX        =   23733
       _ExtentY        =   741
       ButtonWidth     =   609
       ButtonHeight    =   582
@@ -310,13 +310,14 @@ Begin VB.Form frmMain
       ImageList       =   "ImageList1"
       _Version        =   393216
       BeginProperty Buttons {66833FE8-8583-11D1-B16A-00C0F0283628} 
-         NumButtons      =   5
+         NumButtons      =   6
          BeginProperty Button1 {66833FEA-8583-11D1-B16A-00C0F0283628} 
             Object.ToolTipText     =   "Spela in"
             Object.Tag             =   "1000701"
             ImageIndex      =   1
          EndProperty
          BeginProperty Button2 {66833FEA-8583-11D1-B16A-00C0F0283628} 
+            ImageIndex      =   3
             Style           =   3
          EndProperty
          BeginProperty Button3 {66833FEA-8583-11D1-B16A-00C0F0283628} 
@@ -333,6 +334,11 @@ Begin VB.Form frmMain
             Object.Tag             =   "1000703"
             ImageIndex      =   7
          EndProperty
+         BeginProperty Button6 {66833FEA-8583-11D1-B16A-00C0F0283628} 
+            Object.ToolTipText     =   "Importera diktat från fil"
+            Object.Tag             =   "1000703"
+            ImageIndex      =   8
+         EndProperty
       EndProperty
       BorderStyle     =   1
       Begin MSComctlLib.ImageList ImageList1 
@@ -346,7 +352,7 @@ Begin VB.Form frmMain
          MaskColor       =   12632256
          _Version        =   393216
          BeginProperty Images {2C247F25-8591-11D1-B16A-00C0F0283628} 
-            NumListImages   =   7
+            NumListImages   =   8
             BeginProperty ListImage1 {2C247F27-8591-11D1-B16A-00C0F0283628} 
                Picture         =   "main.frx":0D3E
                Key             =   ""
@@ -375,12 +381,26 @@ Begin VB.Form frmMain
                Picture         =   "main.frx":3E3A
                Key             =   ""
             EndProperty
+            BeginProperty ListImage8 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+               Picture         =   "main.frx":43D4
+               Key             =   ""
+            EndProperty
          EndProperty
       End
    End
+   Begin DSSHEADERCTRLLibCtl.DssDigtaConfEx DssDigtaConfEx1 
+      Left            =   13320
+      OleObjectBlob   =   "main.frx":44CE
+      Top             =   1080
+   End
+   Begin DSSHEADERCTRLLibCtl.DssDigtaConf DssDigtaConf1 
+      Left            =   13320
+      OleObjectBlob   =   "main.frx":44F2
+      Top             =   600
+   End
    Begin DSSHEADERCTRLLibCtl.DssFileHeaderSimple DssFileHeaderSimple 
       Left            =   720
-      OleObjectBlob   =   "main.frx":43D4
+      OleObjectBlob   =   "main.frx":4516
       Top             =   6960
    End
    Begin CompplusLib.MhZip MhZip 
@@ -544,8 +564,6 @@ Private DictList_TotalNumber As Long
 Private DictList_NumberOfWarnings As Long
 Private DictList_TotalLength As Long
 
-
-   
 Private Sub cmdSetHomeOrg_Click()
 
    Client.User.HomeOrgId = CurrentOrg
@@ -725,6 +743,10 @@ Private Sub Form_Load()
    Client.DSSRec.Initialize ""
    Client.DSSRec.GetHardWare Client.Hw
    Set mDSSRec = Client.DSSRec
+   
+   Set Client.PortableMgr.DigtaConf = frmMain.DssDigtaConf1
+   Set Client.PortableMgr.DigtaConfEx = frmMain.DssDigtaConfEx1
+
    CheckHardware
    mDSSRec.CheckLicens RecordingAllowed
 
@@ -805,7 +827,8 @@ Private Sub CheckHardware()
       
       Me.Toolbar1.Buttons(1).Visible = RecordingAllowed
       Me.mnuHelp(5).Enabled = RecordingAllowed
-      Me.Toolbar1.Buttons(5).Visible = Client.OrgMgr.CheckUserRole(0, RTAuthor) And Client.SysSettings.ImportAllowTool
+      Me.Toolbar1.Buttons(6).Visible = Client.OrgMgr.CheckUserRole(0, RTAuthor) And Client.SysSettings.ImportAllowTool
+      Me.Toolbar1.Buttons(5).Visible = Client.PortableMgr.DeviceConnected
       Me.mnuFile(5).Visible = Client.OrgMgr.CheckUserRole(0, RTAuthor) And Client.SysSettings.ImportAllowMenu
    
       If Client.SysSettings.VoiceExpressActive And Client.Hw = GRU_HW_RECORD Then
@@ -817,6 +840,7 @@ Private Sub CheckHardware()
       Else
          Me.Toolbar1.Buttons(3).Visible = False
       End If
+      
    End If
 End Sub
 
@@ -1096,6 +1120,11 @@ Private Sub Form_Unload(Cancel As Integer)
    'End
 End Sub
 
+Private Sub mClient_DeviceChanged()
+
+   Me.Toolbar1.Buttons(5).Visible = Client.PortableMgr.DeviceConnected
+End Sub
+
 Private Sub mClient_UIStatusClear()
 
    UIStatusClear
@@ -1158,7 +1187,7 @@ Private Sub mnuFile_Click(Index As Integer)
 
    Select Case Index
       Case 5
-         ImportNewDictation
+         ImportNewDictationFromFile
       Case 6
          Select Case Tabs.Tab
             Case tabDictList
@@ -1274,7 +1303,7 @@ Private Sub tmrCheckButtons_Timer()
          If Not RecorderInUse Then
             Set Dict = New clsDict
             Debug.Print "frmMain tmrCheckButtons Before RecordNewDictation"
-            RecordNewDictation Dict, True ' CurrentOrg = 30005
+            RecordNewDictation Dict, False ' CurrentOrg = 30005
          End If
       End If
    End If
@@ -1346,7 +1375,7 @@ Private Sub DoExportOneDict(DictId As Long)
 
    If Client.DictMgr.CheckOut(D, DictId, True) = 0 Then
       SetDSSHeaderInformation D
-      If TryToCopyFile(D.LocalFilename, Client.ExportSettings.ExportDSSFilesToFolder & CStr(D.DictId) & ".dss") Then
+      If TryToCopyFile(D.LocalDictFile.LocalFilenamePlay, Client.ExportSettings.ExportDSSFilesToFolder & CStr(D.DictId) & "." & D.LocalDictFile.LocalType) Then
          D.StatusId = Transcribed
          Client.DictMgr.CheckIn D, False
       Else
@@ -1355,10 +1384,18 @@ Private Sub DoExportOneDict(DictId As Long)
    End If
 End Sub
 
+Private Sub GetDSSHeaderInformation(D As clsDict)
+
+   On Error Resume Next
+   frmMain.DssFileHeaderSimple.Open D.LocalDictFile.LocalFilenamePlay, 0
+   D.Created = frmMain.DssFileHeaderSimple.CreationDate
+   frmMain.DssFileHeaderSimple.Close
+End Sub
+
 Private Sub SetDSSHeaderInformation(D As clsDict)
 
    On Error Resume Next
-   frmMain.DssFileHeaderSimple.Open D.LocalFilename, 1
+   frmMain.DssFileHeaderSimple.Open D.LocalDictFile.LocalFilenamePlay, 1
    frmMain.DssFileHeaderSimple.Author = GetExtUserFromName(D.AuthorLongName)
    frmMain.DssFileHeaderSimple.Typist = GetExtUserFromName(Client.User.LongName)
    frmMain.DssFileHeaderSimple.Worktype = Client.ExtSystemMgr.GetExtDictType(Client.ExportSettings.ExtSystem, D.DictTypeId)
@@ -1436,7 +1473,9 @@ Private Sub Toolbar1_ButtonClick(ByVal Button As MSComctlLib.Button)
       Case 3
          mVx.Activate = frmMain.Toolbar1.Buttons(3).Value = tbrPressed
       Case 5
-         ImportNewDictation
+         ImportNewDictationFromPortable
+      Case 6
+         ImportNewDictationFromFile
    End Select
 End Sub
 
@@ -1687,7 +1726,7 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
       mVx.Activate = False
    End If
       
-   ThereIsALocalFile = Len(Dict.LocalFilename) > 0
+   ThereIsALocalFile = Dict.LocalDictFile.IsSoundToPlay
    Client.DictMgr.CreateNew Dict
    
    Client.EventMgr.OnDictEvent "OnCreate", Dict
@@ -1767,8 +1806,7 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean)
    ShowWindow Me.hWnd, SW_SHOW
    Select Case mDictCloseChoice
       Case 0
-         KillLocalTempDictationFile Dict
-         Dict.LocalFilename = ""
+         Client.DictFileMgr.KillLocalTempDictationFile Dict.LocalDictFile
          Client.DictMgr.EmptyTempDictationInfo
       Case 1
          LastOrgidForNewDictation = Dict.OrgId
@@ -1827,7 +1865,7 @@ Public Sub ShowNewCurrPat()
    StatusBar.Panels(4) = Client.CurrPatient.PatId & " " & Client.CurrPatient.PatName
 End Sub
 
-Private Sub ImportNewDictation()
+Private Sub ImportNewDictationFromFile()
 
    Dim Dict As clsDict
    Static AllreadyStarted As Boolean
@@ -1845,25 +1883,104 @@ Private Sub ImportNewDictation()
    
    ImportFileName = GetImportFileName()
    If Len(ImportFileName) > 0 Then
+   
       Set Dict = New clsDict
-      Client.DictMgr.CreateNew Dict
+
+      ImportNewDictationInternal ImportFileName, Dict, True, False, True
       
-      Client.EventMgr.OnDictEvent "OnCreate", Dict
-      RaiseEvent OnCreateDictation
+      If Client.SysSettings.ImportDirectToRecorded Then
+         ucOrgTree.PickOrgId 30020
+      Else
+         ucOrgTree.PickOrgId 30010
+      End If
       
-      If CopyImportFileToTempStorage(ImportFileName, Dict.LocalFilename) Then
-         KillFileIgnoreError ImportFileName
-         
-         Dict.OrgId = LastOrgidForNewDictation
-         Dict.AuthorId = Client.User.UserId
-         Dict.DictTypeIdNoDefault = LastDictTypeIdForNewDictation
-         Dict.PriorityId = -1
-         
-         Dict.Pat.PatId = Client.SysSettings.ImportDefaultId
-         Dict.Pat.PatName = Client.SysSettings.ImportDefaultName
-         Dict.Txt = Client.SysSettings.ImportDefaultKeyWord
-         Dict.Note = Client.SysSettings.ImportDefaultNote
-         
+      UpdateCurrentView
+      
+      If ShutDownRequest Then
+         Unload Me
+         Exit Sub
+      End If
+      
+   End If
+   RecorderInUse = False
+   AllreadyStarted = False
+End Sub
+Private Sub ImportNewDictationFromPortable()
+
+   Dim Dict As clsDict
+   Static AllreadyStarted As Boolean
+   Dim ImportFileName As String
+
+   WaitForUIBusy
+   If AllreadyStarted Then Exit Sub
+   If RecorderInUse Then Exit Sub
+   AllreadyStarted = True
+   RecorderInUse = True
+   
+   If VoiceXpressAllowed Then
+      mVx.Activate = False
+   End If
+   
+   Client.PortableMgr.MoveAllFilesToImportTempFolder
+   
+   ImportFileName = Client.PortableMgr.GetImportFileName()
+   Do While Len(ImportFileName) > 0
+   
+      Set Dict = New clsDict
+      
+      ImportNewDictationInternal ImportFileName, Dict, Client.SysSettings.ImportWithDialog, Client.SysSettings.ImportDirectToRecorded, True
+      
+      If Client.SysSettings.ImportDirectToRecorded Then
+         ucOrgTree.PickOrgId 30020
+      Else
+         ucOrgTree.PickOrgId 30010
+      End If
+
+      UpdateCurrentView
+      
+      If ShutDownRequest Then
+         Unload Me
+         Exit Sub
+      End If
+   
+      ImportFileName = Client.PortableMgr.GetImportFileName()
+      
+   Loop
+   RecorderInUse = False
+   AllreadyStarted = False
+End Sub
+
+Private Sub ImportNewDictationInternal(Fn As String, Dict As clsDict, WithDialog As Boolean, DirectToRecorded As Boolean, KillAfterImport As Boolean)
+
+   Dim Prio As clsPriority
+
+   Client.DictMgr.CreateNew Dict
+   Client.EventMgr.OnDictEvent "OnCreate", Dict
+   RaiseEvent OnCreateDictation
+   
+   If Client.DictFileMgr.CopyImportFileToTempStorage(Fn, Dict.LocalDictFile) Then
+      If KillAfterImport Then
+         KillFileIgnoreError Fn
+      End If
+      
+      Dict.OrgId = LastOrgidForNewDictation
+      Dict.AuthorId = Client.User.UserId
+    
+      Dict.DictTypeIdNoDefault = Client.DictTypeMgr.DefDictTypeIdForOrg(Dict.OrgId)
+      Dict.DictTypeId = Dict.DictTypeIdNoDefault
+      Dict.PriorityId = Client.PriorityMgr.DefPriorityIdForOrg(Dict.OrgId)
+      
+      Dict.Pat.PatId = Client.SysSettings.ImportDefaultId
+      Dict.Pat.PatName = Client.SysSettings.ImportDefaultName
+      Dict.Txt = Client.SysSettings.ImportDefaultKeyWord
+      Dict.Note = Client.SysSettings.ImportDefaultNote
+            
+      Client.PriorityMgr.GetFromId Prio, Dict.PriorityId
+      Dict.PriorityId = Prio.PriorityId
+      Dict.PriorityText = Prio.PriortyText
+      Dict.ExpiryDate = DateAdd("d", Prio.Days, Dict.Created)
+
+      If WithDialog Then
          Set mDictForm = New frmDict
          Load mDictForm
          mDictForm.RestoreSettings DictFormSettings
@@ -1879,8 +1996,7 @@ Private Sub ImportNewDictation()
          ShowWindow Me.hWnd, SW_SHOW
          Select Case mDictCloseChoice
             Case 0
-               KillLocalTempDictationFile Dict
-               Dict.LocalFilename = ""
+               Client.DictFileMgr.KillLocalTempDictationFile Dict.LocalDictFile
             Case 1
                LastOrgidForNewDictation = Dict.OrgId
                LastDictTypeIdForNewDictation = Dict.DictTypeId
@@ -1901,19 +2017,21 @@ Private Sub ImportNewDictation()
          mDictForm.SaveSettings DictFormSettings
          Unload mDictForm
          Set mDictForm = Nothing
+      Else
+         Dict.SoundLength = Client.DictFileMgr.SoundLength(Dict.LocalDictFile)
+         If DirectToRecorded Then
+            Dict.StatusId = 30
+         Else
+            Dict.StatusId = 20
+         End If
+         If Client.DictMgr.CheckInNew(Dict) Then
+            Client.EventMgr.OnDictEvent "OnNew", Dict
+            RaiseEvent OnNewDictation(Dict)
+         End If
       End If
-      
-      UpdateCurrentView
-      
-      If ShutDownRequest Then
-         Unload Me
-         Exit Sub
-      End If
-      
    End If
-   RecorderInUse = False
-   AllreadyStarted = False
 End Sub
+
 Public Sub EditExistingDictation(DictId As Long)
 
    Dim Dict As clsDict
@@ -2318,9 +2436,8 @@ End Sub
 Private Function GetImportFileName() As String
 
    Dim Filter As String
-   Dim Pos As Integer
    
-   Filter = Client.Texts.Txt(1000801, "DSS diktat") & " (*.dss)|*.dss|"
+   Filter = Client.Texts.Txt(1000801, "Diktat") & "|" & Client.SysSettings.ImportMoveFileTypes & "|"
    Filter = Filter & Client.Texts.Txt(1000802, "Alla filer") & " (*.*)|*.*"
    
    frmMain.CDialog.FileName = ""
@@ -2343,17 +2460,7 @@ Private Function GetImportFileName() As String
 
    GetImportFileName = frmMain.CDialog.FileName
 End Function
-Private Function CopyImportFileToTempStorage(Source As String, Dest As String) As Boolean
 
-   On Error GoTo CopyImportFileToTempStorage_Err
-   FileCopy Source, Dest
-   CopyImportFileToTempStorage = True
-   Exit Function
-   
-CopyImportFileToTempStorage_Err:
-   CopyImportFileToTempStorage = False
-   Exit Function
-End Function
 Private Sub KeepHardwareAlive()
 
    CheckHardware

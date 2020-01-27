@@ -673,15 +673,15 @@ Public Function ExtSystemGetNext(ByRef E As clsExtSystem) As Boolean
 End Function
 Private Sub ConvertExtSystemRsToClass(ByRef RS As ADODB.Recordset, ByRef E As clsExtSystem)
 
-   Dim s As String
+   Dim S As String
    
    Set E = New clsExtSystem
    With E
       .ExtSystem = RS("ExtSystem")
       On Error Resume Next    'Ok if field is not in table
-      s = nvl(RS("ExtSystemPw"), "")
-      If Len(s) > 0 Then
-         .ExtSystemPw = RC4(s, ct_ext_crypto_key)
+      S = nvl(RS("ExtSystemPw"), "")
+      If Len(S) > 0 Then
+         .ExtSystemPw = RC4(S, ct_ext_crypto_key)
       Else
          .ExtSystemPw = ""
       End If
@@ -1227,7 +1227,7 @@ Public Sub DictationStorageClose()
    Db.DictationStorageClose
 End Sub
 
-Public Function CheckOutDict(ByRef Dict As clsDict, ByVal DictId As Long, ByVal WithSound As Boolean, ByVal LocalTempFileName As String) As Integer
+Public Function CheckOutDict(ByRef Dict As clsDict, ByVal DictId As Long, ByVal WithSound As Boolean) As Integer
 
    Dim RS As ADODB.Recordset
    Dim Cmd As New ADODB.Command
@@ -1255,9 +1255,8 @@ Public Function CheckOutDict(ByRef Dict As clsDict, ByVal DictId As Long, ByVal 
          End If
       End If
       
-      If WithSound And Len(LocalTempFileName) > 0 And Dict.StatusId < SoundDeleted Then
-         Dict.LocalFilename = LocalTempFileName
-         CopyFileFromSoundStorage DictId, LocalTempFileName
+      If WithSound And Dict.StatusId < SoundDeleted Then
+         CheckOutSound Dict
       End If
      
       CheckOutDict = 0
@@ -1267,6 +1266,32 @@ Public Function CheckOutDict(ByRef Dict As clsDict, ByVal DictId As Long, ByVal 
 CheckOutDict_Exit:
    RaiseEvent UIStatusClear
 End Function
+Private Sub CheckOutSound(Dict As clsDict)
+
+   CheckoutSoundValues Dict
+   Client.DictFileMgr.CreateLocalValues Dict.LocalDictFile
+   CopyFileFromSoundStorage Dict.DictId, Dict.LocalDictFile.LocalFilenameFormat
+   Client.DictFileMgr.ConvertOrgFormatToPlayFormat Dict.LocalDictFile
+End Sub
+Private Sub CheckoutSoundValues(Dict As clsDict)
+
+   Dim RS As ADODB.Recordset
+   Dim SQL As String
+   
+   SQL = BuildSQL("Select FileName, SoundType from Sound", "DictId=" & CStr(Dict.DictId), "", "")
+   
+   Set RS = New ADODB.Recordset
+   RS.CursorLocation = adUseClient
+   RS.CursorType = adOpenForwardOnly
+   RS.LockType = adLockReadOnly
+   Db.OpenRecordset RS, SQL
+      
+   Dict.LocalDictFile.OrgFileName = nvl(RS("FileName"), "")
+   Dict.LocalDictFile.OrgType = nvl(RS("SoundType"), "")
+   
+   CloseRecordset RS
+
+End Sub
 Public Function GetDictIdFromExtDictId(ExtSystem As String, ExtDictId As String) As Long
 
    If Len(ExtSystem) = 0 Or Len(ExtDictId) = 0 Then Exit Function
@@ -1363,9 +1388,9 @@ Public Function CheckInDict(ByRef Dict As clsDict, DiscardChanges As Boolean)
                   Dirty = True
                End If
                
-               If Len(Dict.LocalFilename) > 0 Then
+               If Dict.LocalDictFile.IsSoundData Then
                   If Dict.SoundDirty Then
-                     CopyFileToSoundStorage Dict.LocalFilename, Dict.DictId
+                     CheckInSound Dict
                   End If
                End If
                
@@ -1419,6 +1444,10 @@ Public Function CheckInDict(ByRef Dict As clsDict, DiscardChanges As Boolean)
    CloseRecordset RS
    RaiseEvent UIStatusClear
 End Function
+Private Sub CheckInSound(Dict As clsDict)
+
+   CopyFileToSoundStorage Dict.LocalDictFile.LocalFilenameFormat, Dict.DictId, Dict.LocalDictFile.OrgFileName, Dict.LocalDictFile.OrgType
+End Sub
 Private Function CheckInDictInternal(ByRef Dict As clsDict) As Integer
 
    Dim Cmd As New ADODB.Command
@@ -1464,8 +1493,8 @@ Public Function CheckInNewDict(ByRef Dict As clsDict) As Long
       Dict.AuthorPos = Dict.CurrentPos
       CheckInDictInternal Dict
       
-      If Len(Dict.LocalFilename) > 0 Then
-         CopyFileToSoundStorage Dict.LocalFilename, Dict.DictId
+      If Dict.LocalDictFile.IsSoundData Then
+         CheckInSound Dict
       End If
       CheckInNewDict = Dict.DictId
    RaiseEvent UIStatusClear
@@ -1613,14 +1642,14 @@ Public Function SysSettingsListGetNext(ByRef Se As String, ByRef Ke As String, B
       SysSettingsListGetNext = True
    End If
 End Function
-Public Function WriteSysSettings(Ty As String, Se As String, Ke As String, s As String)
+Public Function WriteSysSettings(Ty As String, Se As String, Ke As String, S As String)
 
    Dim Cmd As New ADODB.Command
    
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 50, Ty)
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 50, Se)
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 50, Ke)
-   Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 200, s)
+   Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 200, S)
    
    OpenStoredProcWithCommand "s_SysSettings_Set", Cmd
    
@@ -1664,25 +1693,12 @@ Public Function ReadStationData(Ty As String, Ke As String, Def As String, ByRef
    CloseRecordset RS
 End Function
 
-Private Sub CopyFileToSoundStorage(SourcePath As String, DictId As Long)
+Private Sub CopyFileToSoundStorage(SourcePath As String, DictId As Long, FileName As String, SoundType As String)
 
    Dim SoundPath As String
 
    RaiseEvent UIStatusSetSub(Client.Texts.Txt(1260103, "Ljudet sparas..."))
-   If Client.SysSettings.SoundUseImageField Then
-      Db.CopyFileToSoundTable SourcePath, DictId
-   Else
-      SoundPath = GetSoundfilePath(DictId)
-      On Error Resume Next
-      SetAttr SoundPath, vbNormal
-      On Error GoTo 0
-      
-      FileCopyWithRetry SourcePath, SoundPath
-      
-      On Error Resume Next
-      SetAttr SoundPath, vbReadOnly + vbHidden
-      On Error GoTo 0
-   End If
+   Db.CopyFileToSoundTable SourcePath, DictId, FileName, SoundType
    RaiseEvent UIStatusSetSub("")
 End Sub
 
@@ -1763,12 +1779,12 @@ Private Function SaveNullIfZero(Value As Long) As Variant
       SaveNullIfZero = Value
    End If
 End Function
-Private Function SaveNullZeroLength(s As String, MAXLEN As Integer) As Variant
+Private Function SaveNullZeroLength(S As String, MAXLEN As Integer) As Variant
 
-   If Len(s) = 0 Then
+   If Len(S) = 0 Then
       SaveNullZeroLength = Null
    Else
-      SaveNullZeroLength = Left$(s, MAXLEN)
+      SaveNullZeroLength = Left$(S, MAXLEN)
    End If
 End Function
 Function FileToBlob(fld As ADODB.Field, FileName As String, Optional ChunkSize As Long = 8192) As Long

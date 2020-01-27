@@ -58,7 +58,7 @@ Public SoundDeleted     As Date
 Public OrgId           As Long
 Public OrgText         As String
 
-Public LocalFilename    As String
+Public LocalDictFile   As clsDictFile
 
 Public InfoDirty        As Boolean
 Public SoundDirty       As Boolean
@@ -77,6 +77,7 @@ Public Note             As String
 Private Sub Class_Initialize()
 
    Set Pat = New clsPat
+   Set LocalDictFile = New clsDictFile
 End Sub
 
 Private Sub Class_Terminate()

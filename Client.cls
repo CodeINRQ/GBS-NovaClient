@@ -18,6 +18,8 @@ Public Event UIStatusSetSub(SubText As String)
 Public Event UIStatusProgress(Total As Long, Left As Long)
 Public Event UIStatusClear()
 
+Public Event DeviceChanged()
+
 Public Texts As clsTexts
 
 Public User As clsUser
@@ -28,7 +30,6 @@ Public StationMgr As clsStationMgr
 
 Public WithEvents Server As clsServerSQL
 Attribute Server.VB_VarHelpID = -1
-'Public WithEvents Server As clsServerJet
 
 Public DictTypeMgr As clsDictTypeMgr
 Public PriorityMgr As clsPriorityMgr
@@ -37,6 +38,9 @@ Public ExtSystemMgr As clsExtSystemMgr
 Public EventMgr As clsEventMgr
 
 Public DictMgr As clsDictMgr
+Public DictFileMgr As clsDictFileMgr
+Public WithEvents PortableMgr As clsPortableMgr
+Attribute PortableMgr.VB_VarHelpID = -1
 
 Public OrgMgr As clsOrgMgr
 Public RolesMgr As clsRoleMgr
@@ -85,6 +89,9 @@ Private Sub Class_Initialize()
    Set LoggMgr = New clsLoggMgr
    Set DictAuditMgr = New clsDictAuditMgr
    Set DictMgr = New clsDictMgr
+   Set DictFileMgr = New clsDictFileMgr
+   Set PortableMgr = New clsPortableMgr
+   
    Set GroupMgr = New clsGroupMgr
    Set DictTypeMgr = New clsDictTypeMgr
    Set PriorityMgr = New clsPriorityMgr
@@ -103,6 +110,7 @@ End Sub
 Private Sub Class_Terminate()
 
    Set ExportSettings = Nothing
+   Set PortableMgr = Nothing
    Set DSSRec = Nothing
    Set DictMgr = Nothing
    Set StationMgr = Nothing
@@ -113,6 +121,11 @@ Private Sub Class_Terminate()
    
    Set Trace = Nothing
    Set Settings = Nothing
+End Sub
+
+Private Sub PortableMgr_DeviceChanged()
+
+   RaiseEvent DeviceChanged
 End Sub
 
 Private Sub Server_UIStatusClear()

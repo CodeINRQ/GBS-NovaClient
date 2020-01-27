@@ -70,6 +70,7 @@ Private Enum WSFunctionEnum
    wsCloseSession = 11
    wsUploadFileBlock = 12
    wsDownloadFileBlock = 13
+   wsUploadFileBlockWithType = 14
 End Enum
 
 Public Function User_Validate(ByRef LoginName As String, Password As String, ExtSystem As String, ExtPassword As String) As Boolean
@@ -223,7 +224,7 @@ Public Sub CopyFileFromSoundTable(DictId As Long, DestPath As String)
       End If
    Loop Until Len(s) < MaxBlockSize
 End Sub
-Public Sub CopyFileToSoundTable(SourcePath As String, DictId As Long)
+Public Sub CopyFileToSoundTable(SourcePath As String, DictId As Long, FileName As String, SoundType As String)
 
    Const MaxBlockSize = 500000
    Dim s As String
@@ -246,7 +247,7 @@ Public Sub CopyFileToSoundTable(SourcePath As String, DictId As Long)
       FileRest = FileRest - BlockSize
       BlockNo = BlockNo + 1
       If Len(s) > 0 Then
-         Res = CallWS(wsUploadFileBlock, CStr(DictId) & vbTab & BlockNo & vbTab & FileLength & vbTab & Len(s) & vbTab & s)
+         Res = CallWS(wsUploadFileBlockWithType, CStr(DictId) & vbTab & BlockNo & vbTab & FileLength & vbTab & Len(s) & vbTab & FileName & vbTab & SoundType & vbTab & s)
       End If
    Loop Until FileRest = 0
 End Sub
@@ -338,7 +339,7 @@ Public Function DictationStorageOpen(Server As String, _
 
    WebProtocol = Client.Settings.GetString("Nova", "Protocol", "http")
    WebServer = Client.Settings.GetString("Nova", "Server", "nova.caretalk.se")
-   WebApp = Client.Settings.GetString("Nova", "App", "v150")
+   WebApp = Client.Settings.GetString("Nova", "App", "v160")
    WebService = Client.Settings.GetString("Nova", "Service", "Service.asmx")
    WebUrl = Client.Settings.GetString("Nova", "Url", "")
    

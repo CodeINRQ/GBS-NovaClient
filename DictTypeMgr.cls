@@ -243,6 +243,46 @@ Public Property Get Count() As Integer
    Count = mDictTypeCount
 End Property
 
+Public Function DefDictTypeIdForOrg(OrgId As Long, Optional AlwayReturnDictTypeId As Boolean = False) As Long
+
+   Dim Res As Long
+   Dim Org As clsOrg
+
+   Res = -1
+   Do While OrgId >= 0
+      Client.OrgMgr.GetOrgFromId Org, OrgId
+      If Not Org Is Nothing Then
+         Res = DefDictTypeIdForOrgInt(OrgId)
+         If Res >= 0 Then
+            Exit Do
+         End If
+         OrgId = Org.OrgParent
+         If OrgId <= 0 Then
+            Exit Do
+         End If
+      Else
+         Exit Do
+      End If
+   Loop
+   
+   DefDictTypeIdForOrg = Res
+End Function
+
+Private Function DefDictTypeIdForOrgInt(OrgId As Long) As Long
+
+   Dim I As Integer
+   Dim Res As Long
+   
+   Res = -1
+   For I = 0 To mOrgDictTypeCount - 1
+      If mOrgDictTypeArr(I).OrgId = OrgId Then
+         Res = mOrgDictTypeArr(I).DictTypeId
+         If mOrgDictTypeArr(I).Def Then Exit For
+      End If
+   Next I
+   
+   DefDictTypeIdForOrgInt = Res
+End Function
 Private Sub Class_Initialize()
 
    ReDim mDictTypeArr(50)
