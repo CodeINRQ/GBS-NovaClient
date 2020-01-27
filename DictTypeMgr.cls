@@ -74,13 +74,14 @@ Public Sub GetOrgDictTypeFromId(OrgDictType As clsOrgDictType, OrgId As Long, Di
       End If
    Next I
 End Sub
-Public Sub FillCombo(Cbo As ComboBox, ByVal OrgId As Long, SelectedId As Integer, SetDefault As Boolean)
+Public Sub FillCombo(Cbo As ComboBox, ByVal OrgId As Long, SelectedId As Long, IdIfNoDefault As Long, SetDefault As Boolean)
 
    Dim I As Integer
    Dim NewIdx As Integer
    Dim SelectedIndex As Integer
+   Dim IndexIfNoDefault As Integer
    Dim DefaultIndex As Integer
-   Dim CurrId As Integer
+   Dim CurrId As Long
    Dim Org As clsOrg
    
    Cbo.Clear
@@ -88,7 +89,7 @@ Public Sub FillCombo(Cbo As ComboBox, ByVal OrgId As Long, SelectedId As Integer
       Do
          Client.OrgMgr.GetOrgFromId Org, OrgId
          If Not Org Is Nothing Then
-            FillComboForOrg Cbo, Org, SelectedId, SetDefault
+            FillComboForOrg Cbo, Org, SelectedId, IdIfNoDefault, SetDefault
             OrgId = Org.OrgParent
             If OrgId <= 0 Then
                Exit Do
@@ -111,10 +112,18 @@ Public Sub FillCombo(Cbo As ComboBox, ByVal OrgId As Long, SelectedId As Integer
          If CurrId = SelectedId Then
             SelectedIndex = NewIdx
          End If
+         If CurrId = IdIfNoDefault Then
+            IndexIfNoDefault = NewIdx
+         End If
          If CurrId = Client.SysSettings.DictInfoDefaultDictTypeId Then
             DefaultIndex = NewIdx
          End If
       Next I
+      
+      If DefaultIndex < 0 Then
+         DefaultIndex = IndexIfNoDefault
+      End If
+      
       If Cbo.ListCount > 0 Then                 'Set selected only if list is not empty
          If SelectedIndex >= 0 Then             'Did we detect one item to select?
             Cbo.ListIndex = SelectedIndex
@@ -130,16 +139,18 @@ Public Sub FillCombo(Cbo As ComboBox, ByVal OrgId As Long, SelectedId As Integer
       End If
    End If
 End Sub
-Public Sub FillComboForOrg(Cbo As ComboBox, Org As clsOrg, SelectedId As Integer, SetDefault As Boolean)
+Public Sub FillComboForOrg(Cbo As ComboBox, Org As clsOrg, SelectedId As Long, IdIfNoDefault As Long, SetDefault As Boolean)
 
    Dim I As Integer
    Dim J As Integer
    Dim NewIdx As Integer
    Dim SelectedIndex As Integer
+   Dim IndexIfNoDefault As Integer
    Dim DefaultIndex As Integer
-   Dim CurrId As Integer
+   Dim CurrId As Long
    
    SelectedIndex = -1
+   IndexIfNoDefault = -1
    DefaultIndex = -1
    
    For I = 0 To mOrgDictTypeCount - 1
@@ -154,19 +165,20 @@ Public Sub FillComboForOrg(Cbo As ComboBox, Org As clsOrg, SelectedId As Integer
                If CurrId = SelectedId Then
                   SelectedIndex = NewIdx
                End If
+               If CurrId = IdIfNoDefault Then
+                  IndexIfNoDefault = NewIdx
+               End If
                If mOrgDictTypeArr(I).Def Then
                   DefaultIndex = NewIdx
-               'Else
-               '   If DefaultIndex < 0 Then
-               '      If CurrId = Client.SysSettings.DictInfoDefaultDictTypeId Then
-               '         DefaultIndex = NewIdx
-               '      End If
-               '   End If
                End If
             End If
          Next J
       End If
    Next I
+   
+   If DefaultIndex < 0 Then
+      DefaultIndex = IndexIfNoDefault
+   End If
    
    If Cbo.ListCount > 0 Then                 'Set selected only if list is not empty
       If SelectedIndex >= 0 Then             'Did we detect one item to select?
@@ -175,8 +187,6 @@ Public Sub FillComboForOrg(Cbo As ComboBox, Org As clsOrg, SelectedId As Integer
          If SetDefault Then                  'Should we look for a default
             If DefaultIndex >= 0 Then        'Did we found a default?
                Cbo.ListIndex = DefaultIndex
-            'Else
-            '   Cbo.ListIndex = 0             'Take first entry
             End If
          End If
       End If

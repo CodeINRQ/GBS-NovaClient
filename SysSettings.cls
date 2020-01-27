@@ -28,6 +28,10 @@ Public DictListUpdateMax As Long
 Public DictListUpdateValues As Long
 Public DictListCurrStatusStart As Long
 Public DictListCurrStatusEnd As Long
+Public DictListCacheMax As Long
+Public DictListCacheRefresh As Long
+Public DictListCacheClean As Long
+Public DictListTSOverlap As Long
 
 Public VoiceExpressActive As Boolean
 Public VoiceExpressShowTab As Boolean
@@ -35,6 +39,8 @@ Public VoiceExpressShowInToolbar As Boolean
 Public VoiceExpressActivateOnIndexButton As Boolean
 
 Public DictInfoDefaultDictTypeId As Long
+Public DictInfoKeepDictTypeNoDef As Boolean
+Public DictInfoKeepDictTypeAlways As Boolean
 Public DictInfoDefaultPriorityId As Long
 Public DictInfoMandatoryPatId As Boolean
 Public DictInfoMandatoryPatIdCentury As Boolean
@@ -50,6 +56,8 @@ Public LoginPasswordMinLength As Long
 Public LoginPasswordCaseSensitive As Boolean
 Public LoginAllowChangePassword As Boolean
 
+Public PlayerWarningLowRecLevel As Long
+Public PlayerWarningHighRecLevel As Long
 Public PlayerWindingSpeed As Long
 Public PlayerHWcheckfreq As Integer
 Public PlayerCaption As String
@@ -116,6 +124,18 @@ Public ImportDefaultNote As String
 
 Public ExportAllowMenu As Boolean
 
+Public IndicatorActive As Boolean
+Public IndicatorBgColor As Long
+Public IndicatorLightColor As Long
+Public IndicatorLightTime As Long
+Public IndicatorDarkTime As Long
+Public IndicatorMaxBlink As Long
+
+Public ShowMeUrl As String
+Public ShowMeSite As String
+
+Public LicenseActivate As Boolean
+
 Public Property Get Store() As clsStringStore
 
    Set Store = mSysSettings
@@ -153,10 +173,14 @@ Public Sub Init(Ty As String)
    DictListShowDictId = mSysSettings.GetBool("DictList", "ShowDictId", False)
    DictListUpdateK = mSysSettings.GetLong("DictList", "UpdateK", 10)
    DictListUpdateM = mSysSettings.GetLong("DictList", "UpdateM", 2000)
-   DictListUpdateMax = mSysSettings.GetLong("DictList", "UpdateMax", 100000)
+   DictListUpdateMax = mSysSettings.GetLong("DictList", "UpdateMax", 30000)
    DictListUpdateValues = mSysSettings.GetLong("DictList", "UpdateValues", 5)
    DictListCurrStatusStart = mSysSettings.GetLong("DictList", "CurrStatusStart", 20)
    DictListCurrStatusEnd = mSysSettings.GetLong("DictList", "CurrStatusEnd", 60)
+   DictListCacheMax = mSysSettings.GetLong("DictList", "CacheMax", 25000)
+   DictListCacheRefresh = mSysSettings.GetLong("DictList", "CacheRefresh", 60)
+   DictListCacheClean = mSysSettings.GetLong("DictList", "CacheClean", 120)
+   DictListTSOverlap = mSysSettings.GetLong("DictList", "TSOverlap", 10)
    
    VoiceExpressActive = mSysSettings.GetBool("VoiceExpress", "Active", False)
    VoiceExpressShowTab = mSysSettings.GetBool("VoiceExpress", "ShowTab", False)
@@ -165,6 +189,8 @@ Public Sub Init(Ty As String)
    
    DictInfoDefaultPriorityId = mSysSettings.GetLong("DictInfo", "DefaultPriorityId", 3)
    DictInfoDefaultDictTypeId = mSysSettings.GetLong("DictInfo", "DefaultDictTypeId", 3)
+   DictInfoKeepDictTypeNoDef = mSysSettings.GetBool("DictInfo", "KeepDictTypeNoDef", False)
+   DictInfoKeepDictTypeAlways = mSysSettings.GetBool("DictInfo", "KeepDictTypeAlways", False)
    DictInfoMandatoryPatId = mSysSettings.GetBool("DictInfo", "MandatoryPatId", True)
    DictInfoMandatoryPatIdCentury = mSysSettings.GetBool("DictInfo", "MandatoryPatIdCentury", False)
    DictInfoAlfaInPatid = mSysSettings.GetBool("DictInfo", "AlfaInPatid", True)
@@ -183,6 +209,8 @@ Public Sub Init(Ty As String)
    ClientForceLogoffMsg = mSysSettings.GetString("Client", "ForceLogoffMsg", "")
    ClientMinVersion = mSysSettings.GetString("Client", "MinVersion", "")
    
+   PlayerWarningLowRecLevel = mSysSettings.GetLong("Player", "WarningLowRecLevel", 5)
+   PlayerWarningHighRecLevel = mSysSettings.GetLong("Player", "WarningHighRecLevel", 40)
    PlayerWindingSpeed = mSysSettings.GetLong("Player", "WindingSpeed", 6000)
    PlayerHWcheckfreq = mSysSettings.GetLong("Player", "HWcheckfreq", 10)
    PlayerCaption = mSysSettings.GetString("Player", "Caption", "")
@@ -244,6 +272,18 @@ Public Sub Init(Ty As String)
    ImportDefaultNote = mSysSettings.GetString("Import", "DefaultNote", "")
 
    ExportAllowMenu = mSysSettings.GetBool("Export", "AllowMenu", True)
+
+   IndicatorActive = mSysSettings.GetBool("Indicator", "Active", True)
+   IndicatorBgColor = mSysSettings.GetLong("Indicator", "BgColor", 8454143)
+   IndicatorLightColor = mSysSettings.GetLong("Indicator", "LightColor", 49152)
+   IndicatorLightTime = mSysSettings.GetLong("Indicator", "LightTime", 2)
+   IndicatorDarkTime = mSysSettings.GetLong("Indicator", "DarkTime", 20)
+   IndicatorMaxBlink = mSysSettings.GetLong("Indicator", "MaxBlink", -1)
+
+   ShowMeUrl = mSysSettings.GetString("ShowMe", "Url", "")
+   ShowMeSite = mSysSettings.GetString("ShowMe", "Site", "")
+
+   LicenseActivate = mSysSettings.GetBool("License", "Activate", True)
 
 End Sub
 Public Sub Save(Ty As String)

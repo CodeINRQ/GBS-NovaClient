@@ -1,7 +1,7 @@
 Attribute VB_Name = "modParse"
 Option Explicit
 
-Public Function FindString(ByVal S As String, ByVal ParseString As String) As String
+Public Function FindString(ByVal s As String, ByVal ParseString As String) As String
 
    Dim Res As String
    Dim StartPosString As String
@@ -10,26 +10,26 @@ Public Function FindString(ByVal S As String, ByVal ParseString As String) As St
    Dim EndPos As Integer
    
    If Len(ParseString) = 0 Then
-      FindString = S
+      FindString = s
       Exit Function
    End If
    
    StartPosString = ConsumeToNextChar(ParseString, ";")
    EndPosString = ConsumeToNextChar(ParseString, ";")
    
-   StartPos = FindPos(S, StartPosString)
+   StartPos = FindPos(s, StartPosString)
    If StartPos > 0 Then
-      S = mId$(S, StartPos)
+      s = mId$(s, StartPos)
    Else
-      S = ""
+      s = ""
    End If
-   EndPos = FindPos(S, EndPosString)
+   EndPos = FindPos(s, EndPosString)
    If EndPos > 0 Then
-      S = Left$(S, EndPos - 1)
+      s = Left$(s, EndPos - 1)
    End If
-   FindString = Trim$(S)
+   FindString = Trim$(s)
 End Function
-Private Function FindPos(ByVal S As String, ByVal PosString As String) As Integer
+Private Function FindPos(ByVal s As String, ByVal PosString As String) As Integer
 
    Dim FirstPos As Integer
    Dim MAXLEN As Integer
@@ -56,13 +56,13 @@ Private Function FindPos(ByVal S As String, ByVal PosString As String) As Intege
    StartAlfa = CInt(ConsumeToNextChar(PosString, ","))
    StartControl = CInt(ConsumeToNextChar(PosString, ","))
    
-   S = mId$(S, FirstPos, MAXLEN)
+   s = mId$(s, FirstPos, MAXLEN)
    Ret = 0
    
    If Len(DelimitString) > 0 Then
       Pos = 1
       For I = 1 To DelimitCount
-         Pos = InStr(Pos, S, DelimitString)
+         Pos = InStr(Pos, s, DelimitString)
          If Pos = 0 Then Exit For
       Next I
       If Pos > 0 Then
@@ -71,21 +71,21 @@ Private Function FindPos(ByVal S As String, ByVal PosString As String) As Intege
    End If
    
    If StartNumeric > 0 Then
-      I = FindFirstNumeric(S, Ret + 1)
+      I = FindFirstNumeric(s, Ret + 1)
       If I > 0 Then
          Ret = I
       End If
    End If
    
    If StartAlfa > 0 Then
-      I = FindFirstAlfa(S, Ret + 1)
+      I = FindFirstAlfa(s, Ret + 1)
       If I > 0 Then
          Ret = I
       End If
    End If
    
    If StartControl > 0 Then
-      I = FindFirstControl(S, Ret + 1)
+      I = FindFirstControl(s, Ret + 1)
       If I > 0 Then
          Ret = I
       End If
@@ -96,55 +96,55 @@ Private Function FindPos(ByVal S As String, ByVal PosString As String) As Intege
    End If
    FindPos = Ret
 End Function
-Private Function FindFirstNumeric(S, StartPos) As Integer
+Private Function FindFirstNumeric(s, StartPos) As Integer
 
    Dim C As String
    Dim I As Integer
    
-   For I = StartPos To Len(S)
-      C = mId$(S, I, 1)
+   For I = StartPos To Len(s)
+      C = mId$(s, I, 1)
       If C >= "0" And C <= "9" Then
          FindFirstNumeric = I
          Exit For
       End If
    Next I
 End Function
-Private Function FindFirstAlfa(S, StartPos) As Integer
+Private Function FindFirstAlfa(s, StartPos) As Integer
 
    Dim C As String
    Dim I As Integer
    
-   For I = StartPos To Len(S)
-      C = mId$(S, I, 1)
+   For I = StartPos To Len(s)
+      C = mId$(s, I, 1)
       If C >= "A" Then
          FindFirstAlfa = I
          Exit For
       End If
    Next I
 End Function
-Private Function FindFirstControl(S, StartPos) As Integer
+Private Function FindFirstControl(s, StartPos) As Integer
 
    Dim C As String
    Dim I As Integer
    
-   For I = StartPos To Len(S)
-      C = mId$(S, I, 1)
+   For I = StartPos To Len(s)
+      C = mId$(s, I, 1)
       If C < "0" Then
          FindFirstControl = I
          Exit For
       End If
    Next I
 End Function
-Private Function ConsumeToNextChar(ByRef S As String, C As String) As String
+Public Function ConsumeToNextChar(ByRef s As String, C As String) As String
 
    Dim Pos As Integer
    
-   Pos = InStr(S, C)
+   Pos = InStr(s, C)
    If Pos > 0 Then
-      ConsumeToNextChar = Left$(S, Pos - 1)
-      S = mId$(S, Pos + 1)
+      ConsumeToNextChar = Left$(s, Pos - 1)
+      s = mId$(s, Pos + 1)
    Else
-      ConsumeToNextChar = S
-      S = ""
+      ConsumeToNextChar = s
+      s = ""
    End If
 End Function

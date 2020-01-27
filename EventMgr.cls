@@ -117,7 +117,7 @@ Private Function CreateAppString(ExtSystem As String, Delimit As Integer, ByVal 
    C = CreateFormattedString(C)
    CreateAppString = CreateEnvironString(Delimit, C)
 End Function
-Private Function CreateDictString(ExtSystem As String, Delimit As Integer, ByVal C As String, D As clsDict) As String
+Public Function CreateDictString(ExtSystem As String, Delimit As Integer, ByVal C As String, D As clsDict) As String
 
    C = ChangeParam(C, Delimit, "DictId", D.DictId)
    C = ChangeParam(C, Delimit, "ExtDictId", D.ExtDictId)
@@ -243,22 +243,32 @@ Private Sub GetEventFromSettings(ExtSystem As String, EventName As String)
    E.EventName = UCase$(EventName)
    EId = EventId(E.ExtSystem, E.EventName)
    
-   E.Clipboard = Client.Settings.GetString(EId, "Clipboard", "")
-   E.ClipboardDelimit = Client.Settings.GetLong(EId, "ClipboardDelimit", Asc(""""))
+   If CheckFileExistForEventId(ExtSystem, EId) Then
+      E.Clipboard = Client.Settings.GetString(EId, "Clipboard", "")
+      If Len(E.Clipboard) > 0 Then
+         E.ClipboardDelimit = Client.Settings.GetLong(EId, "ClipboardDelimit", Asc(""""))
+      End If
+      
+      E.FilePath = Client.Settings.GetString(EId, "FilePath", "")
+      If Len(E.FilePath) > 0 Then
+         E.FileContent = Client.Settings.GetString(EId, "FileContent", "")
+         E.FileDelimit = Client.Settings.GetLong(EId, "FileDelimit", Asc(""""))
+      End If
    
-   E.FilePath = Client.Settings.GetString(EId, "FilePath", "")
-   E.FileContent = Client.Settings.GetString(EId, "FileContent", "")
-   E.FileDelimit = Client.Settings.GetLong(EId, "FileDelimit", Asc(""""))
-
-   E.Cmd = Client.Settings.GetString(EId, "Command", "")
-   E.CmdParams = Client.Settings.GetString(EId, "CommandParams", "")
-   E.CmdWindowStyle = Client.Settings.GetLong(EId, "CommandWindowStyle", 1)
-   E.CmdDelimit = Client.Settings.GetLong(EId, "CommandDelimit", Asc(""""))
-
-   E.Obj = Client.Settings.GetString(EId, "Object", "")
-
-   If Len(E.Clipboard) > 0 Or Len(E.FilePath) > 0 Or Len(E.Cmd) > 0 Or Len(E.Obj) > 0 Then
-      EventCol.Add E
+      E.Cmd = Client.Settings.GetString(EId, "Command", "")
+      If Len(E.Cmd) > 0 Then
+         E.CmdParams = Client.Settings.GetString(EId, "CommandParams", "")
+         E.CmdWindowStyle = Client.Settings.GetLong(EId, "CommandWindowStyle", 1)
+         E.CmdDelimit = Client.Settings.GetLong(EId, "CommandDelimit", Asc(""""))
+      End If
+   
+      E.Obj = Client.Settings.GetString(EId, "Object", "")
+   
+      If Len(E.Clipboard) > 0 Or Len(E.FilePath) > 0 Or Len(E.Cmd) > 0 Or Len(E.Obj) > 0 Then
+         EventCol.Add E
+      Else
+         Set E = Nothing
+      End If
    Else
       Set E = Nothing
    End If
@@ -272,13 +282,17 @@ Private Sub GetCtCmdFileFromSettings(ExtSystem As String, EventName As String)
    E.EventName = UCase$(EventName)
    EId = EventId(E.ExtSystem, E.EventName)
    
-   E.CtCmdFile = CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "CtCmdFile", ""))
-
-   If Len(E.CtCmdFile) > 0 Then
-      EventCol.Add E
-      ThereAreCtCmdFilesToWatch = True
-      frmMain.tmrCheckCtCmdFiles.Enabled = True
-      KillFileIgnoreError E.CtCmdFile
+   If CheckFileExistForEventId(ExtSystem, EId) Then
+      E.CtCmdFile = CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "CtCmdFile", ""))
+   
+      If Len(E.CtCmdFile) > 0 Then
+         EventCol.Add E
+         ThereAreCtCmdFilesToWatch = True
+         frmMain.tmrCheckCtCmdFiles.Enabled = True
+         KillFileIgnoreError E.CtCmdFile
+      Else
+         Set E = Nothing
+      End If
    Else
       Set E = Nothing
    End If
@@ -292,42 +306,77 @@ Private Sub GetWatchWindowFromSettings(ExtSystem As String, EventName As String)
    E.EventName = UCase$(EventName)
    EId = EventId(E.ExtSystem, E.EventName)
    
-   E.WindowModuleName = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "ModuleName", "")))
-
-   If Len(E.WindowModuleName) > 0 Then
-      E.WindowUseTopLevel = Client.Settings.GetBool(EId, "UseTopLevel", True)
-      E.WindowIdentControlId = Client.Settings.GetLong(EId, "IdentControlId", -1)
-      E.WindowIdentClassName = UCase$(Client.Settings.GetString(EId, "IdentClassName", ""))
-      E.WindowIdentCaption = UCase$(Client.Settings.GetString(EId, "IdentCaption", ""))
-      E.WindowIdentParse = UCase$(Client.Settings.GetString(EId, "IdentParse", ""))
-      E.WindowIdentWindowRectangle = UCase$(Client.Settings.GetString(EId, "IdentWindowRectangle", ""))
-      E.WindowIdentClientRectangle = UCase$(Client.Settings.GetString(EId, "IdentClientRectangle", ""))
-      
-      E.WindowIdControlId = Client.Settings.GetLong(EId, "IdControlId", -1)
-      E.WindowIdParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "IdParse", "")))
-      
-      E.WindowNameControlId = Client.Settings.GetLong(EId, "NameControlId", -1)
-      E.WindowNameParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "NameParse", "")))
-      
-      E.WindowKeywordControlId = Client.Settings.GetLong(EId, "KeywordControlId", -1)
-      E.WindowKeywordParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "KeywordParse", "")))
-      
-      E.WindowOrgControlId = Client.Settings.GetLong(EId, "OrgControlId", -1)
-      E.WindowOrgParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "OrgParse", "")))
-      
-      E.WindowPriControlId = Client.Settings.GetLong(EId, "PriControlId", -1)
-      E.WindowPriParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "PriParse", "")))
-      
-      E.WindowDictTypeControlId = Client.Settings.GetLong(EId, "DictTypeControlId", -1)
-      E.WindowDictTypeParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "DictTypeParse", "")))
-
-      EventCol.Add E
-      ThereAreWindowsToWatch = True
-      frmMain.tmrCheckCtCmdFiles.Enabled = True
+   If CheckFileExistForEventId(ExtSystem, EId) Then
+      E.WindowModuleName = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "ModuleName", "")))
+   
+      If Len(E.WindowModuleName) > 0 Then
+         E.WindowUseTopLevel = Client.Settings.GetBool(EId, "UseTopLevel", True)
+         E.WindowIdentControlId = Client.Settings.GetString(EId, "IdentControlId", "")
+         E.WindowIdentClassName = UCase$(Client.Settings.GetString(EId, "IdentClassName", ""))
+         E.WindowIdentCaption = UCase$(Client.Settings.GetString(EId, "IdentCaption", ""))
+         E.WindowIdentParse = UCase$(Client.Settings.GetString(EId, "IdentParse", ""))
+         E.WindowIdentWindowRectangle = UCase$(Client.Settings.GetString(EId, "IdentWindowRectangle", ""))
+         E.WindowIdentClientRectangle = UCase$(Client.Settings.GetString(EId, "IdentClientRectangle", ""))
+         
+         E.WindowIdControlId = Client.Settings.GetString(EId, "IdControlId", "")
+         If Len(E.WindowIdControlId) > 0 Then
+            E.WindowIdParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "IdParse", "")))
+         End If
+         
+         E.WindowNameControlId = Client.Settings.GetString(EId, "NameControlId", "")
+         If Len(E.WindowNameControlId) > 0 Then
+            E.WindowNameParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "NameParse", "")))
+         End If
+         
+         E.WindowKeywordControlId = Client.Settings.GetString(EId, "KeywordControlId", "")
+         If Len(E.WindowKeywordControlId) > 0 Then
+            E.WindowKeywordParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "KeywordParse", "")))
+         End If
+         
+         E.WindowOrgControlId = Client.Settings.GetString(EId, "OrgControlId", "")
+         If Len(E.WindowOrgControlId) > 0 Then
+            E.WindowOrgParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "OrgParse", "")))
+         End If
+         
+         E.WindowPriControlId = Client.Settings.GetString(EId, "PriControlId", "")
+         If Len(E.WindowPriControlId) > 0 Then
+            E.WindowPriParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "PriParse", "")))
+         End If
+         
+         E.WindowDictTypeControlId = Client.Settings.GetString(EId, "DictTypeControlId", "")
+         If Len(E.WindowDictTypeControlId) > 0 Then
+            E.WindowDictTypeParse = UCase$(CreateAppString(ExtSystem, 0, Client.Settings.GetString(EId, "DictTypeParse", "")))
+         End If
+         
+         E.WindowTipControlId = Client.Settings.GetString(EId, "TipControlId", "")
+   
+         EventCol.Add E
+         ThereAreWindowsToWatch = True
+         frmMain.tmrCheckCtCmdFiles.Enabled = True
+      Else
+         Set E = Nothing
+      End If
    Else
       Set E = Nothing
    End If
 End Sub
+Private Function CheckFileExistForEventId(ExtSystem As String, EventId As String) As Boolean
+
+   Dim Fn As String
+   Dim Res As Boolean
+   
+   Fn = CreateAppString(ExtSystem, 0, Client.Settings.GetString(EventId, "CheckFileExist", ""))
+   If Len(Fn) > 0 Then
+      Res = FileExists(Fn)
+   Else
+      Res = True
+   End If
+   CheckFileExistForEventId = Res
+End Function
+Private Function FileExists(ByVal sFileName As String) As Boolean
+
+   FileExists = Len(Dir(sFileName)) > 0
+End Function
 Public Sub CheckForCtCmdFiles()
 
    Dim E As clsEvent
@@ -451,10 +500,8 @@ Private Function WatchThisWindow(hWnd As Long, E As clsEvent) As Boolean
       If E.WindowIdentClassName <> WindowClassName Then Exit Function
    End If
    
-   If E.WindowIdentControlId > 0 Then
+   If Len(E.WindowIdentControlId) > 0 Then
       If Not FindControlOnWindow(hWnd, E.WindowIdentControlId, ControlCaption, hControl) Then Exit Function
-   Else
-      ControlCaption = winGetWindowText(hWnd)
    End If
    
    If Len(E.WindowIdentCaption) > 0 Then
@@ -491,6 +538,9 @@ Private Sub HandleWatchOneWindow(E As clsEvent)
    Dim Pri As String
    Dim DictType As String
    
+   If Len(E.WindowTipControlId) > 0 Then
+      Client.WindowHandleForIndicator = GetHandleToTipControl(E.WindowHndl, E.WindowTipControlId)
+   End If
    PatId = RemoveWhiteSpaceFromString(HandleWatchWindowField(E.WindowHndl, E.WindowIdControlId, E.WindowIdParse))
    If IsValidPatientId(PatId) Then
       PatName = HandleWatchWindowField(E.WindowHndl, E.WindowNameControlId, E.WindowNameParse)
@@ -522,8 +572,15 @@ Private Function IsValidPatientId(PatId As String) As Boolean
    FirstChar = Left$(PatId, 1)
    IsValidPatientId = Len(PatId) >= 10 And FirstChar >= "0" And FirstChar <= "9"
 End Function
+Private Function GetHandleToTipControl(hWnd As Long, ControlIdList As String) As Long
 
-Private Function HandleWatchWindowField(hWnd As Long, ControlId As Long, Parse As String) As String
+   Dim hControl As Long
+   Dim Caption As String
+   
+   FindControlOnWindow hWnd, ControlIdList, Caption, hControl
+   GetHandleToTipControl = hControl
+End Function
+Private Function HandleWatchWindowField(hWnd As Long, ControlIdList As String, Parse As String) As String
 
    Dim Caption As String
    Static LastCaption As String
@@ -531,12 +588,8 @@ Private Function HandleWatchWindowField(hWnd As Long, ControlId As Long, Parse A
    Dim hControl As Long
    Dim Ret As String
    
-   If ControlId >= 0 Then
-      If ControlId = 0 Then
-         Caption = winGetWindowText(hWnd)
-      Else
-         FindControlOnWindow hWnd, ControlId, Caption, hControl
-      End If
+   If Len(ControlIdList) > 0 Then
+      FindControlOnWindow hWnd, ControlIdList, Caption, hControl
       Ret = FindString(Caption, Parse)
       If Caption <> LastCaption Then
          LastCaption = Caption

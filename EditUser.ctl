@@ -336,6 +336,13 @@ Private Sub frmEdit_DeleteClicked()
    SetEnabled
 End Sub
 
+Private Sub frmEdit_ActivateClicked(Deactivate As Boolean)
+
+   UpdateList
+   RaiseEvent UsersChanged
+   SetEnabled
+End Sub
+
 Private Sub frmEdit_SaveClicked()
 
    UpdateList

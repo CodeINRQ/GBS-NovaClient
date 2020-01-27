@@ -157,7 +157,6 @@ Public Function CurrPat(PatId1 As String, _
    Const FuncName As String = "CurrPat"
    
    Dim Ret As Long
-   Dim BlankCurrPat As Boolean
 
    On Error GoTo CurrPat_Err
    If Not InitAtEveryFunction(FuncName, PatId1, PatId2) Then Exit Function
@@ -165,9 +164,7 @@ Public Function CurrPat(PatId1 As String, _
    'Body
    
    Dim CurrPatFilter As New clsFilter
-   
-   BlankCurrPat = Len(PatId1) = 0 And Len(PatId2) = 0
-   
+     
    If Len(PatId1) = 0 And Len(PatId2) > 0 Then
       Client.CurrPatient.PatId = PatId2
    Else
@@ -185,19 +182,11 @@ Public Function CurrPat(PatId1 As String, _
    CurrPatFilter.StatusEnd = Client.SysSettings.DictListCurrStatusEnd
    CurrPatFilter.Pat.PatId = StringReplace(StringReplace(PatId1, "-", ""), "/", "")
    CurrPatFilter.Pat.PatId2 = StringReplace(StringReplace(PatId2, "-", ""), "/", "")
+      
+   Set frmMain.ucDictList.CurrPatientFilter = CurrPatFilter
    
    frmMain.ShowNewCurrPat
    
-   Set frmMain.ucDictList.CurrPatientFilter = CurrPatFilter
-   
-   If Not RecorderInUse Then
-      If Not BlankCurrPat Then
-         frmMain.ucOrgTree.PickOrgId 30005
-      Else
-         frmMain.ucOrgTree.PickOrgId Client.User.HomeOrgId
-      End If
-      frmMain.Tabs.Tab = 0
-   End If
    CurrPat = 0
    
 CurrPat_Exit:

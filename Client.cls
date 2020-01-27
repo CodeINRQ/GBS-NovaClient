@@ -62,6 +62,10 @@ Public NewRecInfo As New clsNewRecInfo
 Public CurrPatient As New clsCurrPat
 Public PlayDictIdFromAPI As Long
 
+Public ExportSettings As clsExportSettings
+
+Public WindowHandleForIndicator As Long
+
 Private Sub Class_Initialize()
 
    Set Settings = New clsSettings
@@ -91,6 +95,7 @@ Private Sub Class_Initialize()
    Set RolesMgr = New clsRoleMgr
    Set StatMgr = New clsStatMgr
    Set HistMgr = New clsHistoryMgr
+   Set ExportSettings = New clsExportSettings
    
    Set DSSRecConnector = New CareTalkDSSRec3.Connector
    Set DSSRec = DSSRecConnector.DSSRecorder
@@ -103,6 +108,7 @@ End Sub
 
 Private Sub Class_Terminate()
 
+   Set ExportSettings = Nothing
    Set DSSRec = Nothing
    Set DSSRecConnector = Nothing
    Set DictMgr = Nothing

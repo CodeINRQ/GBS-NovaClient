@@ -2,7 +2,7 @@ VERSION 5.00
 Begin VB.Form frmDict 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "Diktat"
-   ClientHeight    =   5175
+   ClientHeight    =   5160
    ClientLeft      =   2760
    ClientTop       =   3750
    ClientWidth     =   8760
@@ -11,11 +11,58 @@ Begin VB.Form frmDict
    KeyPreview      =   -1  'True
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
-   ScaleHeight     =   5175
+   ScaleHeight     =   5160
    ScaleWidth      =   8760
    StartUpPosition =   1  'CenterOwner
    Tag             =   "1030100"
    WhatsThisHelp   =   -1  'True
+   Begin VB.PictureBox picShowMe 
+      Appearance      =   0  'Flat
+      BorderStyle     =   0  'None
+      ForeColor       =   &H80000008&
+      Height          =   255
+      HelpContextID   =   1030000
+      Left            =   5760
+      MouseIcon       =   "Dict.frx":058A
+      MousePointer    =   99  'Custom
+      Picture         =   "Dict.frx":0894
+      ScaleHeight     =   255
+      ScaleWidth      =   255
+      TabIndex        =   40
+      Top             =   840
+      Width           =   255
+   End
+   Begin VB.PictureBox picWarning 
+      Height          =   735
+      Left            =   240
+      ScaleHeight     =   675
+      ScaleWidth      =   8115
+      TabIndex        =   38
+      Top             =   3200
+      Width           =   8175
+      Visible         =   0   'False
+      Begin VB.Label lblWarning 
+         Alignment       =   2  'Center
+         BackColor       =   &H000000FF&
+         Caption         =   "Låg insignal"
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   24
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H00FFFFFF&
+         Height          =   735
+         Left            =   0
+         TabIndex        =   39
+         Tag             =   "1030124"
+         Top             =   0
+         Width           =   8175
+      End
+   End
    Begin VB.TextBox txtNote 
       Height          =   285
       Left            =   2400
@@ -27,7 +74,7 @@ Begin VB.Form frmDict
    Begin VB.CheckBox chkChangeDict 
       Height          =   270
       Left            =   5160
-      Picture         =   "Dict.frx":058A
+      Picture         =   "Dict.frx":0903
       Style           =   1  'Graphical
       TabIndex        =   34
       Top             =   840
@@ -185,14 +232,14 @@ Begin VB.Form frmDict
    Begin VB.Image imgLess 
       Height          =   480
       Left            =   8565
-      Picture         =   "Dict.frx":06C0
+      Picture         =   "Dict.frx":0A39
       Top             =   405
       Width           =   480
    End
    Begin VB.Image imgMore 
       Height          =   480
       Left            =   8565
-      Picture         =   "Dict.frx":0F8A
+      Picture         =   "Dict.frx":1303
       Top             =   405
       Width           =   480
       Visible         =   0   'False
@@ -200,7 +247,7 @@ Begin VB.Form frmDict
    Begin VB.Image imgPinin 
       Height          =   210
       Left            =   8520
-      Picture         =   "Dict.frx":1854
+      Picture         =   "Dict.frx":1BCD
       Tag             =   "1030115"
       ToolTipText     =   "Alltid överst"
       Top             =   120
@@ -210,7 +257,7 @@ Begin VB.Form frmDict
    Begin VB.Image imgPin 
       Height          =   210
       Left            =   8520
-      Picture         =   "Dict.frx":192F
+      Picture         =   "Dict.frx":1CA8
       Tag             =   "1030114"
       ToolTipText     =   "Normalt fönster"
       Top             =   120
@@ -506,7 +553,7 @@ Private Sub DSSRecorder_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As
       If Data = GRU_BUT_INDEX Then
          Debug.Print "GruEvent But_Index+"
          If Client.SysSettings.PlayerIndexButtonAsCloseDict Then
-            If CheckMandatoryData() Then
+            'If CheckMandatoryData() Then
                For I = 2 To 0 Step -1
                   If Len(ucCloseChoice.ChoiceText(I)) > 0 Then
                      ucCloseChoice.ChoiceValue = I
@@ -516,7 +563,7 @@ Private Sub DSSRecorder_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As
                      Exit Sub
                   End If
                Next I
-            End If
+            'End If
          End If
       End If
    Else
@@ -542,6 +589,7 @@ End Sub
 
 Private Sub Form_Activate()
 
+   ShowWarning ""
    If LastfrmDictLeft <> 0 Or LastfrmDictTop <> 0 Then
       Me.Move LastfrmDictLeft, LastfrmDictTop
       TranslateForm Me
@@ -748,6 +796,7 @@ Private Sub Form_Load()
       
    mForceUnload = False
    
+   EnableShowMeHelp Len(Client.SysSettings.ShowMeUrl) > 0
    imgPin.Visible = Client.SysSettings.PlayerShowOnTop
    imgPinin.Visible = Client.SysSettings.PlayerShowOnTop
    imgLess.Visible = Client.SysSettings.PlayerShowSmallerWindow
@@ -850,7 +899,7 @@ Private Sub ShowDictation()
    txtPatId.Text = mDict.Pat.PatIdFormatted
    txtPatName.Text = mDict.Pat.PatName
    
-   Client.DictTypeMgr.FillCombo cboDictType, mDict.OrgId, mDict.DictTypeId, True
+   Client.DictTypeMgr.FillCombo cboDictType, mDict.OrgId, mDict.DictTypeId, mDict.DictTypeIdNoDefault, True
    If cboDictType.ListIndex >= 0 Then
       Dim DictType As clsDictType
       Client.DictTypeMgr.GetFromId DictType, cboDictType.ItemData(cboDictType.ListIndex)
@@ -1008,6 +1057,12 @@ Private Sub lblTxtTitle_Click()
    Clipboard.SetText txtTxt.Text
 End Sub
 
+Private Sub picShowMe_Click()
+
+   Dim SM As New clsShowMe
+   SM.ShowMeContextHelp picShowMe
+End Sub
+
 Private Sub txtNote_Change()
 
    If Screen.ActiveControl Is txtNote Then
@@ -1092,6 +1147,38 @@ Private Sub ucDSSRecGUI_PosChange(PosInMilliSec As Long, LengthInMilliSec As Lon
    mPos = PosInMilliSec
 End Sub
 
+Private Sub ucDSSRecGUI_WarningHighInputWhenRecording(TimeWithHighInput As Long, MinInput As Long)
+
+   Debug.Print "Warning: " & TimeWithHighInput & ":" & MinInput
+   If TimeWithHighInput > 0 Then
+      ShowWarning Client.Texts.Txt(1030125, "High input level")
+   Else
+      ShowWarning ""
+   End If
+
+End Sub
+
+Private Sub ucDSSRecGUI_WarningLowInputWhenRecording(TimeWithLowInput As Long, MaxInput As Long)
+
+   Debug.Print "Warning: " & TimeWithLowInput & ":" & MaxInput
+   If TimeWithLowInput > 0 Then
+      ShowWarning Client.Texts.Txt(1030124, "Low input level")
+   Else
+      ShowWarning ""
+   End If
+End Sub
+
+Public Sub ShowWarning(WarningText As String)
+
+   If Len(WarningText) > 0 Then
+      lblWarning.Caption = WarningText
+      picWarning.Visible = True
+      SetWindowTopMostAndForeground Me
+   Else
+      picWarning.Visible = False
+   End If
+End Sub
+
 Private Sub ucOrgTree_NewSelect(OrgId As Long, Txt As String)
 
    If Screen.ActiveControl Is ucOrgTree Then
@@ -1099,7 +1186,7 @@ Private Sub ucOrgTree_NewSelect(OrgId As Long, Txt As String)
       mDict.OrgText = Txt
       mDict.InfoDirty = True
       
-      Client.DictTypeMgr.FillCombo cboDictType, mDict.OrgId, mDict.DictTypeId, True
+      Client.DictTypeMgr.FillCombo cboDictType, mDict.OrgId, mDict.DictTypeId, mDict.DictTypeIdNoDefault, True
       If cboDictType.ListIndex >= 0 Then
          Dim DictType As clsDictType
          Client.DictTypeMgr.GetFromId DictType, cboDictType.ItemData(cboDictType.ListIndex)
@@ -1219,3 +1306,8 @@ Private Function ChangeParam(ByVal S As String, ByVal Param As String, ByVal Val
 
    ChangeParam = Replace(S, "%" & Param & "%", Value, 1, -1, vbTextCompare)
 End Function
+Private Sub EnableShowMeHelp(Value As Boolean)
+
+   Me.picShowMe.Visible = Value
+End Sub
+

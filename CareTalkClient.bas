@@ -56,6 +56,7 @@ End Enum
 
 Public ApplicationVersion As String
 Public GlobalCommandLine As String
+Public GlobalAutostart As Boolean
 Public ReadyForApiCalls As Boolean
 Public RecorderInUse As Boolean
 
@@ -159,10 +160,10 @@ Public Function CreateTempPath() As String
     lngResult = GetTempPath(MAX_BUFFER_LENGTH, strBufferString)
     CreateTempPath = mId(strBufferString, 1, lngResult)
 End Function
-Public Sub KillFileIgnoreError(Filename As String)
+Public Sub KillFileIgnoreError(FileName As String)
 
    On Error Resume Next
-   Kill Filename
+   Kill FileName
 End Sub
 Public Function StringReplace(ByVal Str As String, SubStrToReplace As String, InsertInstead As String) As String
 
@@ -202,7 +203,7 @@ Public Function CheckPatId(ByVal PatId As String) As Boolean
    End If
    
    'Remove "-" if there is one
-   PatId = StringReplace(PatId, "-", "")
+   PatId = FormatPatIdForStoring(PatId)
    
    If Client.SysSettings.DictInfoMandatoryPatIdCentury Then
       'check length
@@ -502,7 +503,7 @@ Public Function GetExportFileName(DefFileName As String) As String
    Filter = Filter & Client.Texts.Txt(1000904, "Xml-filer") & " (*.xml)|*.xml|"
    Filter = Filter & Client.Texts.Txt(1000902, "Alla filer") & " (*.*)|*.*"
    
-   frmMain.CDialog.Filename = DefFileName
+   frmMain.CDialog.FileName = DefFileName
    frmMain.CDialog.InitDir = ""
    frmMain.CDialog.CancelError = True
    frmMain.CDialog.DefaultExt = "xls"
@@ -520,6 +521,27 @@ Public Function GetExportFileName(DefFileName As String) As String
    End If
    On Error GoTo 0
 
-   GetExportFileName = frmMain.CDialog.Filename
+   GetExportFileName = frmMain.CDialog.FileName
+End Function
+Public Function TryToCopyFile(Source As String, Dest As String) As Boolean
+
+   On Error GoTo TryToCopyFile_Err
+   FileCopy Source, Dest
+   TryToCopyFile = True
+   Exit Function
+   
+TryToCopyFile_Err:
+   TryToCopyFile = False
+   Exit Function
+End Function
+Public Function FormatPatIdForStoring(ByVal S As String) As String
+
+   S = StringReplace(S, "-", "")
+   S = StringReplace(S, "/", "")
+   S = StringReplace(S, "\", "")
+   S = StringReplace(S, ".", "")
+   S = StringReplace(S, ",", "")
+   S = StringReplace(S, "+", "")
+   FormatPatIdForStoring = S
 End Function
 

@@ -67,6 +67,7 @@ Private Function FormatPatIdForStoring(ByVal S As String) As String
    S = StringReplace(S, "\", "")
    S = StringReplace(S, ".", "")
    S = StringReplace(S, ",", "")
+   S = StringReplace(S, "+", "")
    FormatPatIdForStoring = S
 End Function
 

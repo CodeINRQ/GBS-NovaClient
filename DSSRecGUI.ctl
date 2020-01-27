@@ -464,10 +464,20 @@ Private mAutoRewind As Integer    'ms
 Private FileCLosedDueToLostHw As Boolean
 Private LastOkPos As Long
 
+Private RecMonitor_StartPos As Long
+Private RecMonitor_MaxLevel As Long
+Private RecMonitor_LowWarningVisible As Boolean
+Private RecMonitor_HighWarningVisible As Boolean
+Private RecMonitor_MinLevel As Long
+Private RecMonitor_LastLowWarningPos As Long
+Private RecMonitor_LastHighWarningPos As Long
+
 Private mReadOnly As Boolean
 
 Public Event PosChange(PosInMilliSec As Long, LengthInMilliSec As Long, Formated As String)
 Public Event ChangeIcon(NewIcon As Image)
+Public Event WarningLowInputWhenRecording(TimeWithLowInput As Long, MaxInput As Long)
+Public Event WarningHighInputWhenRecording(TimeWithHighInput As Long, MinInput As Long)
 
 Public Enum PlayerButEnum
    butPlay = 0
@@ -675,6 +685,7 @@ Private Sub optPlayer_Click(Index As Integer)
             optPlayer(butPause).Value = True
             DSSRec.PlayPause
          Case butRec
+            StartRecordingMonitoring
             DSSRec.Rec
       End Select
    End If
@@ -700,20 +711,29 @@ Private Sub DSSRec_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long
             LastOkPos = Data
          End If
          UpdatePos Data
+         Debug.Print RecMonitor_StartPos & ":" & Data - RecMonitor_StartPos & ":" & RecMonitor_MaxLevel & ":" & RecMonitor_LastLowWarningPos & ":" & Data - RecMonitor_LastLowWarningPos
+         CheckForLowRecLevel Data
+         CheckForHighRecLevel Data
       Case GRU_STATECHANGED
          LastState = Data
          Select Case LastState
             Case GRU_STOPPED
+               StopRecordingMonitoring
                optPlayer(butPause).Value = True
             Case GRU_PLAY
+               StopRecordingMonitoring
                optPlayer(butPlay).Value = True
             Case GRU_RECPAUSED
+               StartRecordingMonitoring
                optPlayer(butPause).Value = True
             Case GRU_REC
+               StartRecordingMonitoring
                optPlayer(butRec).Value = True
             Case GRU_REWIND
+               StopRecordingMonitoring
                optPlayer(butRewind).Value = True
             Case GRU_FORWARD
+               StopRecordingMonitoring
                optPlayer(butForward).Value = True
          End Select
          tmrBlink.Enabled = LastState = GRU_RECPAUSED
@@ -734,6 +754,7 @@ Private Sub DSSRec_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long
          If Data = GRU_BUT_INDEX Then
             If Client.SysSettings.PlayerIndexButtonAsInsertRec Then
                optInsert(0).Value = True
+               StartRecordingMonitoring
                DSSRec.Rec
             End If
          ElseIf Data = GRU_BUT_INSERT Then
@@ -741,10 +762,18 @@ Private Sub DSSRec_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long
                If optInsert(0).Enabled Then
                   optInsert(0).Value = True
                End If
+               StartRecordingMonitoring
                DSSRec.Rec
             End If
          End If
       Case GRU_INPUTCHANGE
+         Debug.Print "Input " & CStr(Data), RecMonitor_MaxLevel, RecMonitor_MinLevel
+         If RecMonitor_MaxLevel < Data Then
+            RecMonitor_MaxLevel = Data
+         End If
+         If RecMonitor_MinLevel > Data Then
+            RecMonitor_MinLevel = Data
+         End If
          ucVUmeter.Value = Data
       Case GRU_HWCHANGED
          If Len(NowPlayingFilename) > 0 Then
@@ -764,6 +793,93 @@ Private Sub DSSRec_GruEvent(EventType As CareTalkDSSRec3.Gru_Event, Data As Long
    End Select
    InGruEventHandler = False
 End Sub
+Private Sub CheckForLowRecLevel(Pos As Long)
+
+   If RecMonitor_StartPos > 0 Then
+      If RecMonitor_MaxLevel < Client.SysSettings.PlayerWarningLowRecLevel Then
+         If Pos - RecMonitor_StartPos > 5000 Then
+            If Pos - RecMonitor_LastLowWarningPos > 5000 Then
+               RecMonitor_LowWarningVisible = True
+               RaiseEvent WarningLowInputWhenRecording(Pos - RecMonitor_StartPos, RecMonitor_MaxLevel)
+               RecMonitor_LastLowWarningPos = Pos
+            End If
+         End If
+      Else
+         RestartLowRecordingMonitoring Pos
+      End If
+   End If
+End Sub
+Private Sub CheckForHighRecLevel(Pos As Long)
+
+   If RecMonitor_StartPos > 0 Then
+      If RecMonitor_MinLevel < 200 Then
+         If RecMonitor_MinLevel > Client.SysSettings.PlayerWarningHighRecLevel Then
+            If Pos - RecMonitor_StartPos > 3000 Then
+               If Pos - RecMonitor_LastHighWarningPos > 1000 Then
+                  RecMonitor_HighWarningVisible = True
+                  RaiseEvent WarningHighInputWhenRecording(Pos - RecMonitor_StartPos, RecMonitor_MinLevel)
+                  RecMonitor_LastHighWarningPos = Pos
+               End If
+            End If
+         Else
+            If RecMonitor_HighWarningVisible Then
+               If RecMonitor_MinLevel < 10 Then
+                  RestartHighRecordingMonitoring Pos
+               End If
+            Else
+               RestartHighRecordingMonitoring Pos
+            End If
+         End If
+      End If
+   End If
+End Sub
+
+Private Sub StartRecordingMonitoring()
+
+   If RecMonitor_StartPos = 0 Then
+      DSSRec.GetPos RecMonitor_StartPos
+      RecMonitor_StartPos = RecMonitor_StartPos + 1
+      RecMonitor_LastLowWarningPos = RecMonitor_StartPos
+      RecMonitor_LastHighWarningPos = RecMonitor_StartPos
+      RestartLowRecordingMonitoring RecMonitor_StartPos
+      RestartHighRecordingMonitoring RecMonitor_StartPos
+   End If
+End Sub
+Private Sub RestartLowRecordingMonitoring(Pos As Long)
+
+   RecMonitor_MaxLevel = 0
+   RecMonitor_LastLowWarningPos = Pos
+   If RecMonitor_LowWarningVisible Then
+      RecMonitor_LowWarningVisible = False
+      RaiseEvent WarningLowInputWhenRecording(0, 0)
+   End If
+End Sub
+Private Sub RestartHighRecordingMonitoring(Pos As Long)
+
+   RecMonitor_MinLevel = 200
+   RecMonitor_LastHighWarningPos = Pos
+   If RecMonitor_HighWarningVisible Then
+      RecMonitor_HighWarningVisible = False
+      RaiseEvent WarningHighInputWhenRecording(0, 0)
+   End If
+End Sub
+Private Sub StopRecordingMonitoring()
+ 
+   If RecMonitor_StartPos <> 0 Then
+      RecMonitor_StartPos = 0
+      RecMonitor_LastLowWarningPos = 0
+      
+      If RecMonitor_LowWarningVisible Then
+         RecMonitor_LowWarningVisible = False
+         RaiseEvent WarningLowInputWhenRecording(0, 0)
+      End If
+      If RecMonitor_HighWarningVisible Then
+         RecMonitor_HighWarningVisible = False
+         RaiseEvent WarningHighInputWhenRecording(0, 0)
+      End If
+   End If
+End Sub
+
 Private Sub UpdatePos(ByVal Pos As Long)
 
    Dim L As Long
@@ -872,6 +988,7 @@ Public Sub CreateNewFile(FileName As String)
          NowPlayingFilename = FileName
          EnableControls True
       End If
+      StartRecordingMonitoring
       DSSRec.Rec
    End If
 End Sub
@@ -949,6 +1066,7 @@ Public Property Get SoundLengthInSec() As Long
    DSSRec.GetLength SLen
    SoundLengthInSec = CLng(SLen / 1000)
 End Property
+
 Private Sub tmrBlink_Timer()
 
    Static Dark As Boolean

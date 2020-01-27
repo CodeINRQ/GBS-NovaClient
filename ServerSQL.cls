@@ -294,6 +294,10 @@ Public Sub SaveUser(Usr As clsUser)
    Else
       Rs("HomeOrgId") = Null
    End If
+   
+   Rs("LoginFailureCount") = 0
+   Rs("UserLockedUntil") = Null
+   
    Rs("InactivatedByUserId") = SaveNullIfZero(Usr.InactivatedByUserId)
    Rs("InactivatedTime") = SaveDate(Usr.InactivatedTime)
    Rs.Update
@@ -325,7 +329,7 @@ Public Sub SaveUserHomeOrg(Usr As clsUser)
    End If
    CloseRecordset Rs
 End Sub
-Public Sub DeleteUser(Usr As clsUser)
+Public Sub ActivateUser(Usr As clsUser, Deactivate As Boolean)
 
    Dim Rs As ADODB.Recordset
    Dim SQL As String
@@ -341,8 +345,13 @@ Public Sub DeleteUser(Usr As clsUser)
    OpenRecordset Rs, SQL
    
    If Not Rs.EOF Then
-      Rs("InactivatedByUserId") = Client.User.UserId
-      Rs("InactivatedTime") = Now
+      If Deactivate Then
+         Rs("InactivatedByUserId") = Client.User.UserId
+         Rs("InactivatedTime") = Now
+      Else
+         Rs("InactivatedByUserId") = Null
+         Rs("InactivatedTime") = Null
+      End If
    End If
    Rs.Update
    CloseRecordset Rs
@@ -828,15 +837,15 @@ Public Function ExtSystemGetNext(ByRef E As clsExtSystem) As Boolean
 End Function
 Private Sub ConvertExtSystemRsToClass(ByRef Rs As ADODB.Recordset, ByRef E As clsExtSystem)
 
-   Dim S As String
+   Dim s As String
    
    Set E = New clsExtSystem
    With E
       .ExtSystem = Rs("ExtSystem")
       On Error Resume Next    'Ok if field is not in table
-      S = nvl(Rs("ExtSystemPw"), "")
-      If Len(S) > 0 Then
-         .ExtSystemPw = RC4(S, ct_ext_crypto_key)
+      s = nvl(Rs("ExtSystemPw"), "")
+      If Len(s) > 0 Then
+         .ExtSystemPw = RC4(s, ct_ext_crypto_key)
       Else
          .ExtSystemPw = ""
       End If
@@ -1883,13 +1892,15 @@ Private Sub AddRole(SumRoles As clsRoles, ByVal Roles2 As clsRoles)
    Next I
    
    If DoWeAlreadyHaveARole Then
-      SumRoles.Delayed = SumRoles.Delayed And Roles2.Delayed
-      If SumRoles.Delayed Then
-         If Roles2.DelayedHours < SumRoles.DelayedHours Then
-            SumRoles.DelayedHours = Roles2.DelayedHours
+      SumRoles.Delayed = SumRoles.Delayed Or Roles2.Delayed
+      If Roles2.Delayed Then
+         If SumRoles.Delayed Then
+            If Roles2.DelayedHours < SumRoles.DelayedHours Then
+               SumRoles.DelayedHours = Roles2.DelayedHours
+            End If
+         Else
+            SumRoles.DelayedHours = 0
          End If
-      Else
-         SumRoles.DelayedHours = 0
       End If
    Else
       SumRoles.Delayed = Roles2.Delayed
@@ -2152,14 +2163,14 @@ Public Function SysSettingsListGetNext(ByRef Se As String, ByRef Ke As String, B
       SysSettingsListGetNext = True
    End If
 End Function
-Public Function WriteSysSettings(Ty As String, Se As String, Ke As String, S As String)
+Public Function WriteSysSettings(Ty As String, Se As String, Ke As String, s As String)
 
    Dim Cmd As New ADODB.Command
    
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 50, Ty)
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 50, Se)
    Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 50, Ke)
-   Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 200, S)
+   Cmd.Parameters.Append Cmd.CreateParameter(, adVarChar, adParamInput, 200, s)
    
    OpenStoredProcWithCommand "s_SysSettings_Set", Cmd
    
@@ -2325,12 +2336,12 @@ Private Function SaveNullIfZero(Value As Long) As Variant
       SaveNullIfZero = Value
    End If
 End Function
-Private Function SaveNullZeroLength(S As String, MAXLEN As Integer) As Variant
+Private Function SaveNullZeroLength(s As String, MAXLEN As Integer) As Variant
 
-   If Len(S) = 0 Then
+   If Len(s) = 0 Then
       SaveNullZeroLength = Null
    Else
-      SaveNullZeroLength = Left$(S, MAXLEN)
+      SaveNullZeroLength = Left$(s, MAXLEN)
    End If
 End Function
 Function FileToBlob(fld As ADODB.Field, FileName As String, Optional ChunkSize As Long = 8192) As Long

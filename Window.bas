@@ -22,6 +22,10 @@ Private Declare Function AttachThreadInput Lib "user32" (ByVal idAttach As Long,
 Private Declare Function IsIconic Lib "user32" (ByVal hWnd As Long) As Long
 Private Declare Function ShowWindow Lib "user32" (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
 
+Public Declare Function SetParent Lib "user32" _
+  (ByVal hWndChild As Long, _
+   ByVal hWndNewParent As Long) As Long
+   
 Private LastForegroundWindow As Long
 
 Sub SetWindowTopMostAndForeground(F As Form)
@@ -41,24 +45,49 @@ Function SaveForegroundWindow() As Long
    
    SaveForegroundWindow = LastForegroundWindow
 End Function
-Public Function FindControlOnWindow(hWnd As Long, ControlId As Long, ByRef Caption As String, ByRef hControl As Long) As Boolean
+Public Function FindControlOnWindow(hWnd As Long, ControlIdList As String, ByRef Caption As String, ByRef hControl As Long) As Boolean
 
-   Dim Ret As Long
-   Dim Rct As Rect
+   Dim ControlId As Long
+   Dim Hit As Boolean
    
-   Do
-      hControl = winFindWindowEx(hWnd, hControl, vbNullString, vbNullString)
-      If hControl <> 0 Then
-         If winGetWindowControlId(hControl) = ControlId Then
-            FindControlOnWindow = True
-            
-            Caption = winGetChildWindowText(hControl)
-               
-            Exit Function
-         End If
+   hControl = hWnd
+   Hit = False
+   
+   Do While Len(ControlIdList) > 0
+      ControlId = GetLongFromList(ControlIdList, ":")
+      
+      If ControlId = 0 Then
+         Caption = winGetWindowText(hControl)
+         FindControlOnWindow = True
+         Exit Function
       End If
-   Loop Until hControl = 0
-   
+      
+      Hit = False
+      hWnd = hControl
+      hControl = 0
+      Do
+         hControl = winFindWindowEx(hWnd, hControl, vbNullString, vbNullString)
+         If hControl <> 0 Then
+            If winGetWindowControlId(hControl) = ControlId Then
+               Hit = True
+               Exit Do
+            End If
+         Else
+            Hit = False
+         End If
+      Loop Until hControl = 0
+      
+      If Not Hit Then
+         Exit Do
+      End If
+   Loop
+               
+   If Hit Then
+      Caption = winGetChildWindowText(hControl)
+      FindControlOnWindow = True
+   Else
+      FindControlOnWindow = False
+   End If
 End Function
 Public Function GetWindowRectAsString(hWnd As Long) As String
 
@@ -218,6 +247,8 @@ Public Function ForceForegroundWindow(ByVal hWnd As Long) As Boolean
       ForceForegroundWindow = CBool(nRet)
    End If
 End Function
+Private Function GetLongFromList(ByRef S As String, Delimit As String) As Long
 
-
-
+   On Error Resume Next
+   GetLongFromList = CLng(ConsumeToNextChar(S, Delimit))
+End Function

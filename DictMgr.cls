@@ -29,7 +29,6 @@ Private DictCacheTimeStampOrg(30050) As Double
 Private DictIdList(MaxNumberOfDictation) As Long
 Private DictIdListIdx As Integer
 
-Private DictListTimeStamp As Double
 Private FilterCol As Collection
 Private mSearchFilter As clsFilter
 Private mCurrPatientFilter As clsFilter
@@ -71,8 +70,13 @@ End Property
 
 Public Function CreateList(ByVal OrgId As Long, TimeStamp As Double, ByRef TooMany As Boolean) As Double
 
-   DictListTimeStamp = TimeStamp
-   
+   If DictCacheNumber >= Client.SysSettings.DictListCacheMax Then
+      If Client.SysSettings.DictListCacheMax > 0 Then
+         EmptyDictCache
+         TimeStamp = 0
+      End If
+   End If
+
    Set FilterCol = Nothing
    Set FilterCol = New Collection
    Select Case OrgId
@@ -131,11 +135,19 @@ Public Function ListNextItem(ByRef Dict As clsDict) As Boolean
    ListNextItem = False
 End Function
 
+Private Sub EmptyDictCache()
+
+   DictCacheNumber = 0
+   DictCacheIndex = 0
+   DictCacheTimeStampTot = -1
+   ClearOrgTimestamp
+End Sub
 Private Function FillCache(ByVal OrgId As Long, ByRef TooMany As Boolean) As Double
 
    Dim Dict As clsDict
    Dim MaxTimeStamp As Double
-   Static CleanCounter As Integer
+   Static CleanNextTick As Long
+   Static ClearOrgTimeStampNextTick As Long
    Dim FirstUpdate As Boolean
 
    If DictCacheTimeStampTot = 0 Then
@@ -146,7 +158,7 @@ Private Function FillCache(ByVal OrgId As Long, ByRef TooMany As Boolean) As Dou
       DictCacheTimeStampOrg(OrgId) = FillCacheFromFilter(OrgId, TooMany)
       FillCache = DictCacheTimeStampOrg(OrgId)
    Else
-      Client.Server.CreateDictList 0, 0, 0, 0, 255, DictCacheTimeStampTot
+      Client.Server.CreateDictList 0, 0, 0, 0, 255, DateAdd("s", -Client.SysSettings.DictListTSOverlap, CDate(DictCacheTimeStampTot))
       MaxTimeStamp = DictCacheTimeStampTot
       FirstUpdate = True
       Do While Client.Server.DictListGetNext(Dict)
@@ -159,13 +171,28 @@ Private Function FillCache(ByVal OrgId As Long, ByRef TooMany As Boolean) As Dou
       DictCacheTimeStampTot = MaxTimeStamp
       FillCache = MaxTimeStamp
       
-      CleanCounter = CleanCounter + 1
-      If CleanCounter > 10 Then
-         CleanCounter = 0
-         CleanCacheFromFilter OrgId
+      If Client.SysSettings.DictListCacheClean > 0 Then
+         If CleanNextTick < GetTickCount() Then
+            CleanNextTick = GetTickCount() + Client.SysSettings.DictListCacheClean * 1000
+            CleanCacheFromFilter OrgId
+         End If
+      End If
+      If Client.SysSettings.DictListCacheRefresh > 0 Then
+         If ClearOrgTimeStampNextTick < GetTickCount() Then
+            ClearOrgTimeStampNextTick = GetTickCount() + Client.SysSettings.DictListCacheRefresh * 1000
+            ClearOrgTimestamp
+         End If
       End If
    End If
 End Function
+Private Sub ClearOrgTimestamp()
+
+   Dim I As Integer
+   
+   For I = LBound(DictCacheTimeStampOrg) To UBound(DictCacheTimeStampOrg)
+      DictCacheTimeStampOrg(I) = -1
+   Next I
+End Sub
 Private Sub CleanCacheFromFilter(OrgId As Long)
 
    Dim Flt As clsFilter
@@ -289,6 +316,11 @@ Private Function IsDictIdInDictIdList(DictId As Long) As Boolean
    Dim H As Long
    Dim L As Long
    Dim I As Long
+   
+   If DictIdListIdx = 0 Then        'Take care of strange behaviour if no match, better not to take away
+      IsDictIdInDictIdList = True
+      Exit Function
+   End If
    
    H = DictIdListIdx - 1
    L = 0
@@ -711,7 +743,10 @@ Public Function CheckIn(ByRef Dict As clsDict, ByVal DiscardChanges As Boolean) 
    If Dict.SoundDirty Then
       Client.DictAuditMgr.Insert Dict.DictId, AuditType_SoundChanged, Dict.StatusId
    End If
+   
+   AdjustDictBeforeCheckin Dict
    Res = Client.Server.CheckInDict(Dict, DiscardChanges)
+   
    If Res = 0 Then
       Client.DictAuditMgr.Insert Dict.DictId, AuditType_CheckIn, Dict.StatusId
    Else
@@ -746,7 +781,9 @@ Public Function CheckInNew(ByRef Dict As clsDict) As Integer
 
    Dim Res As Integer
    
+   AdjustDictBeforeCheckin Dict
    Res = Client.Server.CheckInNewDict(Dict)
+   
    If Res = 0 Then
       Client.LoggMgr.Insert 1320112, LoggLevel_DictInfo, Dict.DictId, Dict.LoggData
       Client.DictAuditMgr.Insert Dict.DictId, AuditType_CheckInNew, Dict.StatusId
@@ -777,11 +814,7 @@ End Function
 
 Private Sub Class_Initialize()
 
-   Dim I As Integer
-   
-   For I = LBound(DictCacheTimeStampOrg) To UBound(DictCacheTimeStampOrg)
-      DictCacheTimeStampOrg(I) = -1
-   Next I
+   ClearOrgTimestamp
 End Sub
 
 Public Sub SaveTempDictationInfo(D As clsDict, Mode As TempDictInfoTypeEnum)
@@ -843,4 +876,9 @@ Public Function RestoreTempDictationInfo(D As clsDict) As TempDictInfoTypeEnum
       D.AuthorId = Client.User.UserId
    End If
 End Function
+Private Sub AdjustDictBeforeCheckin(D As clsDict)
 
+   D.Pat.PatId = Trim(D.Pat.PatId)
+   D.Pat.PatId2 = Trim(D.Pat.PatId2)
+   D.Pat.PatName = Trim(D.Pat.PatName)
+End Sub

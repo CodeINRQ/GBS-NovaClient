@@ -19,6 +19,7 @@ Public ExtDictId        As String
 Public ExtSystem        As String
 
 Public DictTypeId       As Long
+Public DictTypeIdNoDefault As Long
 Public DictTypeText     As String
 
 Public PriorityId       As Long

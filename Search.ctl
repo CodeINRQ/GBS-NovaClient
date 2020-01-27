@@ -133,7 +133,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   16842753
+      Format          =   56033281
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -149,7 +149,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   16842753
+      Format          =   56033281
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -165,7 +165,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   16842753
+      Format          =   56033281
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -181,7 +181,7 @@ Begin VB.UserControl ucSearch
       _ExtentY        =   661
       _Version        =   393216
       Enabled         =   0   'False
-      Format          =   16842753
+      Format          =   56033281
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -341,7 +341,7 @@ Public Sub Init()
    TranscribedEndDate = DateAdd("d", 1, Int(Now))
    dtpTranscribedEndDate = Format$(Now, "ddddd")
 
-   Client.DictTypeMgr.FillCombo cboDictType, -1, -1, False
+   Client.DictTypeMgr.FillCombo cboDictType, -1, -1, -1, False
    Client.PriorityMgr.FillCombo cboPriority, -1, -1, False
    
    txtAuthor.Text = ""
@@ -421,7 +421,7 @@ Private Sub cmdSearch_Click()
    
    mFilter.FilterFromSearch = True
    
-   mFilter.Pat.PatId = StringReplace(txtPatId.Text, "-", "")
+   mFilter.Pat.PatId = FormatPatIdForStoring(txtPatId.Text)
    mFilter.Pat.PatName = txtPatName.Text
    
    mFilter.RecDateUsed = chkRecDate.Value = Checked
@@ -468,7 +468,7 @@ End Sub
 Public Sub SetNewCurrentOrg(OrgId As Long, OrgText As String)
 
    Dim S As String
-   Dim LastDictTypeId As Integer
+   Dim LastDictTypeId As Long
    Dim LastPriorityId As Integer
    
    mOrgId = OrgId
@@ -485,11 +485,11 @@ Public Sub SetNewCurrentOrg(OrgId As Long, OrgText As String)
    End If
    S = Client.Texts.Txt(1150112, "")
    If mOrgId < 30000 Then
-      Client.DictTypeMgr.FillCombo cboDictType, mOrgId, LastDictTypeId, False
+      Client.DictTypeMgr.FillCombo cboDictType, mOrgId, LastDictTypeId, -1, False
       Client.PriorityMgr.FillCombo cboPriority, mOrgId, LastPriorityId, False
       S = S & " " & OrgText
    Else
-      Client.DictTypeMgr.FillCombo cboDictType, Client.User.HomeOrgId, LastDictTypeId, False
+      Client.DictTypeMgr.FillCombo cboDictType, Client.User.HomeOrgId, LastDictTypeId, -1, False
       Client.PriorityMgr.FillCombo cboPriority, Client.User.HomeOrgId, LastPriorityId, False
    End If
    lblSearchOrg.Caption = S

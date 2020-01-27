@@ -1,6 +1,129 @@
+1.45.0.5
+--------
+Starts from 1.45.0.4
+Fix bug in delayed rights in cslServerSQL.AddRole. Wrong summery och right for current and parent org.
+New CareTalk.ini setting: [Export]\ExportHoursOld=N; where N is a long value. Never export a dictation newer than N hours
+
+
+
+1.45.0.4
+---------
+Starts from 1.40.0.45
+New menu item "Help\Training" tag 1000305
+New menu item "Help\Activate license" tab 1000304
+
+New SysSettings.ShowMeUrl url to ShowMe web site. Default blank.
+New SysSettings.ShowMeSite string defining CareTalk site. Make statistics possible.
+New SysSettings.LicenseActivate boolean. if true Show menu item Help\Activate license
+New SysSettings.PlayerWarningHighRecLevel sets level for warning of high input signal. Def 50
+
+Changed function in frmMain for Export. Use new settings from ExportSettings
+Changed function EventMgr.CreateDictString from Private to Public
+
+New class clsShowMe
+
+Move frmDict.picWarning to lower position to make input to cboPriority possible
+
+New public method frmDict.ShowWarning
+
+Some logic moved from ClientAPI.Currpat to frmMain.ShowCurrPat, for better structure
+If open dictation in frmDict when change i CUrrPat: Warn if CurrPat.Patid <> frmDict.txtPatid
+
+New SysSettings.DictListCacheMax
+New SysSettings.DictListCacheRefresh
+New SysSettings.DictListCacheClean
+New SysSettings.TSOverlap
+
+Remove 
+
+1.40.0.xx
+---------
+Starts from 1.40.0.39
+
+
+1.40.0.39
+---------
+Starts from 1.40.0.38
+Don't bring frmMain to top when set frmIndicator to invisible
+Correct spelling för frmEditUser (Activera)
+
+
+
+
+1.40.0.38
+---------
+Starts from 1.32.0.15
+
+Indicator (frmIndicator, modIndicator (earlier frmCurrTip and modCurrTip))
+New SysSettings: 
+	Indicator\Active
+	Indicator\BgColor
+	Indicator\LightColor
+	Indicator\LightTime
+	Indicator\DarkTime
+	Indicator\MaxBlink
+
+Enable menu File\Export initially in SetVisibleTabs
+
+New SysSettings:
+	DictInfo\KeepDictTypeNoDef
+	DictInfo\KeepDictTypeAlways
+frmMain.LastDictTypeIdForNewDictation
+New member clsDict.DictTypeIdNoDefault
+New parameter IdIfNoDeafult to clsDictTypeMgr.FillCombo
+
+New SysSetting:
+	PlayerWarningLowRecLevel (level 0-100, 0 no warning)
+ucDSSRecGUI: New Event WarningLowInputWhenRecording
+	New variables RecMonitor_
+	New subs StartRecMonitoring, StopRecMonitoring, CheckForLowRecLevel
+frmDict: Handle Event ucDSSRecGUI_WarningLowInputWhenRecording
+	New Picture with Label to warn user about low level
+
+frmEditUser: Both Deactivate na d activate user.
+	Change caption of button in SetEanbled
+	Changed event ActtivateClicked(Deactivate as boolean)
+	New texts för msgbox
+clsUserMgr.ActivateUser (earlier DeleteUser)
+	New logg texts
+clsServer.ActivateUser (earlier DeleteUser)
+
+Initial check in clsDictMgr.IsDictIdInDictIdList for DictIdListIdx=0
+
+Diasable frmMain when initializing Client object (DSSRec takes time)
+
+Alway unlock user account when saving user values. (clsServer.SaveUser)
+
+Always set ShutdownRequest in frmMain.Unload
+
+Don't check MandatoryData at Index button. We check later at Unload event
+
+clsDictMgr: AdjustDictBeforeCheckin added before server.CheckIn and ServerCheckInNew
+	Trim blanks for patid, patid2 and patname
+
+FormatPatIdForStorage moved to public module. Remove also + sign
+
+Strip Patid in ucSearch.cmdSearch before search (FormatPatIdForStorage)
+
+
+
+1.32.0.14
+---------
+Starts from 1.31.0.46
+WindowWatch in EventMgr: All ControlId is string instead of long, format x:y:z. For nested windows (frames) 0 is WindowText
+Embryo Indicator for demo  (frmCurrTip)
+
+
+1.31.0.46
+---------
+Starts from 1.30.0.39
+New CareTalk.ini section [Autostart]
+New CareTalk.ini section [Export]
+
+
 1.30.0.41
 ---------
-Starts from 1.22.0.39
+Starts from 1.30.0.39
 Clear Note label in ucDictList when user change tree folder.
 New SysSetting Plyer/WindingSpeed default 6000
 

@@ -18,7 +18,7 @@ Begin VB.UserControl ucLoggList
       _ExtentX        =   2355
       _ExtentY        =   661
       _Version        =   393216
-      Format          =   45744129
+      Format          =   56754177
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353
@@ -69,7 +69,7 @@ Begin VB.UserControl ucLoggList
       _ExtentX        =   2355
       _ExtentY        =   661
       _Version        =   393216
-      Format          =   45744129
+      Format          =   56754177
       CurrentDate     =   38595
       MaxDate         =   401768
       MinDate         =   38353

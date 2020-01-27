@@ -36,30 +36,32 @@ Public CtCmdFileDate As Date
 
 Public WindowModuleName As String
 Public WindowUseTopLevel As Boolean
-Public WindowIdentControlId As Long
+Public WindowIdentControlId As String
 Public WindowIdentClassName As String
 Public WindowIdentCaption As String
 Public WindowIdentParse As String
 Public WindowIdentWindowRectangle As String
 Public WindowIdentClientRectangle As String
 
-Public WindowIdControlId As Long
+Public WindowIdControlId As String
 Public WindowIdParse As String
 
-Public WindowNameControlId As Long
+Public WindowNameControlId As String
 Public WindowNameParse As String
 
-Public WindowKeywordControlId As Long
+Public WindowKeywordControlId As String
 Public WindowKeywordParse As String
 
-Public WindowOrgControlId As Long
+Public WindowOrgControlId As String
 Public WindowOrgParse As String
 
-Public WindowPriControlId As Long
+Public WindowPriControlId As String
 Public WindowPriParse As String
 
-Public WindowDictTypeControlId As Long
+Public WindowDictTypeControlId As String
 Public WindowDictTypeParse As String
+
+Public WindowTipControlId As String
 
 Public WindowHndl As Long
 Public WindowLastCheckedHndl As Long

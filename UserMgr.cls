@@ -110,20 +110,24 @@ SaveUser_Err:
    ErrorHandle "1310101", Eno, 1310101, "Användaren kan inte sparas", False
    Resume Next
 End Sub
-Public Sub DeleteUser(Usr As clsUser)
+Public Sub ActivateUser(Usr As clsUser, Deactivate As Boolean)
 
    Dim Eno As Long
 
    On Error GoTo DeleteUser_Err
-   Client.Server.DeleteUser Usr
-   Client.LoggMgr.Insert 1320118, LoggLevel_UserAdmin, 0, Usr.LoggData
+   Client.Server.ActivateUser Usr, Deactivate
+   If Deactivate Then
+      Client.LoggMgr.Insert 1320118, LoggLevel_UserAdmin, 0, Usr.LoggData
+   Else
+      Client.LoggMgr.Insert 1320122, LoggLevel_UserAdmin, 0, Usr.LoggData
+   End If
    mUsersCount = 0
    Init
    Exit Sub
    
 DeleteUser_Err:
    Eno = Err.Number
-   ErrorHandle "1310102", Eno, 1310102, "Användaren kan inte raderas", False
+   ErrorHandle "1310102", Eno, 1310102, "Användaren kan inte aktiveras", False
    Resume Next
 End Sub
 Private Function Validate(LoginName As String, Password As String, NewPassword As String, ExtSystem As String, ExtPassword As String) As Integer

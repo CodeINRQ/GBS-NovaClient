@@ -15,7 +15,7 @@ Begin VB.Form frmEditUser
    ShowInTaskbar   =   0   'False
    StartUpPosition =   1  'CenterOwner
    Tag             =   "1050100"
-   Begin VB.CommandButton cmdDelete 
+   Begin VB.CommandButton cmdActivate 
       Caption         =   "Inaktivera"
       Height          =   375
       Left            =   3360
@@ -185,25 +185,36 @@ Option Explicit
 
 Public UserToEdit As clsUser
 Public Event SaveClicked()
-Public Event DeleteClicked()
+Public Event ActivateClicked(Deactivate As Boolean)
 Public CurrHomeOrgId As Long
 
 Private Dirty As Boolean
 Private FirstPossibleHomeOrg As Long
 
+Private Sub cmdActivate_Click()
+
+   Dim Deactiveation As Boolean
+   Dim TxtMsg As String
+   
+   Deactiveation = UserToEdit.InactivatedTime = 0
+   
+   If Deactiveation Then
+      TxtMsg = Client.Texts.Txt(1050111, "Användare kommer att inaktiveras!")
+   Else
+      TxtMsg = Client.Texts.Txt(1050114, "Användare kommer att aktiveras!")
+   End If
+   
+   If MsgBox(TxtMsg, vbYesNo) = vbYes Then
+      Client.UserMgr.ActivateUser UserToEdit, Deactiveation
+
+      RaiseEvent ActivateClicked(Deactiveation)
+      Unload Me
+   End If
+End Sub
+
 Private Sub cmdCancel_Click()
 
    Unload Me
-End Sub
-
-Private Sub cmdDelete_Click()
-
-   If MsgBox(Client.Texts.Txt(1050111, "Användare kommer att tas bort! Är du säker?"), vbYesNo) = vbYes Then
-      Client.UserMgr.DeleteUser UserToEdit
-
-      RaiseEvent DeleteClicked
-      Unload Me
-   End If
 End Sub
 
 Private Sub cmdSave_Click()
@@ -286,7 +297,12 @@ Private Sub SetEnabled()
    Enbl = Enbl And LCase$(UserToEdit.ShortName) <> "sa"
    'Enbl = Enbl And lstUserGroup.SelCount > 0
    cmdSave.Enabled = Enbl
-   cmdDelete.Enabled = UserToEdit.UserId > 0 And UserToEdit.InactivatedTime = 0
+   cmdActivate.Enabled = UserToEdit.UserId > 0
+   If UserToEdit.InactivatedTime = 0 Then
+      cmdActivate.Caption = Client.Texts.Txt(1050110, "Inaktivera")
+   Else
+      cmdActivate.Caption = Client.Texts.Txt(1050113, "Aktivera")
+   End If
 End Sub
 
 Private Sub Form_Load()
