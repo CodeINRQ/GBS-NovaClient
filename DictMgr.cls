@@ -748,16 +748,19 @@ Public Function CheckInNew(ByRef Dict As clsDict) As Boolean
    AdjustDictBeforeCheckin Dict
    Res = Client.Server.CheckInNewDict(Dict)
    
-   If Res <> 0 Then
+   If Res > 0 Then
       Client.LoggMgr.Insert 1320112, LoggLevel_DictInfo, Dict.DictId, Dict.LoggData
       Client.DictAuditMgr.Insert Dict.DictId, AuditType_CheckInNew, Dict.StatusId
       Client.DictFileMgr.KillLocalTempDictationFile Dict.LocalDictFile
-   Else
+   ElseIf Res = 0 Then
       Client.LoggMgr.Insert 1320113, LoggLevel_DictFailure, Dict.DictId, Dict.LoggData
       MsgBox Client.Texts.Txt(1190102, "Diktatet kunde inte sparas")
+   ElseIf Res < 0 Then
+      Client.LoggMgr.Insert 1320113, LoggLevel_DictFailure, Dict.DictId, Dict.LoggData
+      MsgBox Client.Texts.Txt(1190103, "Diktatet sparades inte")
    End If
    
-   CheckInNew = Res <> 0
+   CheckInNew = Res > 0
 End Function
 
 Public Function IsThereDictations(OrgId As Long) As Boolean

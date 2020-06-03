@@ -102,6 +102,7 @@ Public ClientLoadTimeLimit As Long
 
 Public SoundUseImageField As Boolean
 Public SoundChunkSize As Long
+Public SoundMaxSizeToCheckIn As Long
 
 Public CultureDefaultLanguage As String
 Public CultureAllowChange As Boolean
@@ -252,6 +253,7 @@ Public Sub Init(Ty As String)
    
    SoundUseImageField = mSysSettings.GetBool("Sound", "UseImageField", True)
    SoundChunkSize = mSysSettings.GetLong("Sound", "ChunkSize", 8192)
+   SoundMaxSizeToCheckIn = mSysSettings.GetLong("Sound", "MaxSizeToCheckIn", 0)
    
    CultureDefaultLanguage = mSysSettings.GetString("Culture", "DefaultLanguage", "SE")
    CultureAllowChange = mSysSettings.GetBool("Culture", "AllowChange", True)

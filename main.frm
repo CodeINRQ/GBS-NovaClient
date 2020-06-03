@@ -1541,6 +1541,8 @@ Private Sub tmrUpdateList_Timer()
    Static OldUpdateInterval As Long
    Dim TickNow As Long
 
+   UpdateCurrentView
+   
    If Not RecorderInUse Then
       TickNow = MyGetTickCount()
       If TickNow > NextTickForAction Then
@@ -1967,7 +1969,29 @@ RecordNewDictation_Err:
 End Sub
 Public Sub ShowNewCurrPat()
 
+   Dim BlankCurrPat As Boolean
+
    StatusBar.Panels(4) = Client.CurrPatient.PatId & " " & Client.CurrPatient.PatName
+   
+   UpdateIndicator
+   
+   BlankCurrPat = Len(Client.CurrPatient.PatId) = 0 And Len(Client.CurrPatient.PatId2) = 0
+
+   If Not RecorderInUse Then
+      If Not BlankCurrPat Then
+         frmMain.ucOrgTree.PickOrgId 30005
+      Else
+         frmMain.ucOrgTree.PickOrgId Client.User.HomeOrgId
+      End If
+      frmMain.Tabs.Tab = 0
+   Else
+      On Error Resume Next
+      If FormatPatIdForStoring(mDictForm.txtPatId.Text) <> FormatPatIdForStoring(Client.CurrPatient.PatId) Then
+         mDictForm.ShowWarning Client.Texts.Txt(1030126, "Ny patient")
+      Else
+         mDictForm.ShowWarning ""
+      End If
+   End If
 End Sub
 
 Private Sub ImportNewDictationFromFile()

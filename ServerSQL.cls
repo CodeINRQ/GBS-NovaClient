@@ -1879,6 +1879,13 @@ Private Function CheckInDictInternal(ByRef Dict As clsDict) As Integer
 End Function
 Public Function clsServer_CheckInNewDict(ByRef Dict As clsDict) As Long
 
+   If Client.SysSettings.SoundMaxSizeToCheckIn > 0 Then
+      If FileLen(Dict.LocalDictFile.LocalFilenameFormat) > Client.SysSettings.SoundMaxSizeToCheckIn Then
+         clsServer_CheckInNewDict = -1
+         Exit Function
+      End If
+   End If
+
    'RaiseEvent UIStatusSet(Client.Texts.Txt(1260102, "Diktatet sparas"), True)
    Client.UIStatusSet Client.Texts.Txt(1260102, "Diktatet sparas"), True
       Dict.AuthorId = Client.User.UserId

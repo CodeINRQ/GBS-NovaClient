@@ -1,5 +1,12 @@
+1.95.0.1
+--------
+Starts from 1.94.0.1
+Warning about new current patient when recorder form opened
+New SysSettings: Sound\MaxSizeToCheckin
+
+
 1.94.0.1
-------
+--------
 Starts from 1.93.0.2
 Handle Windows position as long
 New setting in ini file. [EventMgr]/MarkSignEnviron ; Default is "%", can be set to "£"

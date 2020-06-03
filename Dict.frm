@@ -572,6 +572,8 @@ End Sub
 
 Private Sub Form_Activate()
 
+   ShowWarning ""
+   
    If LastfrmDictLeft <> 0 Or LastfrmDictTop <> 0 Then
       Me.Move LastfrmDictLeft, LastfrmDictTop
       TranslateForm Me
@@ -1122,10 +1124,31 @@ Private Sub ucDSSRecGUI_PosChange(PosInMilliSec As Long, LengthInMilliSec As Lon
    mPos = PosInMilliSec
 End Sub
 
+Private Sub ucDSSRecGUI_WarningHighInputWhenRecording(TimeWithHighInput As Long, MinInput As Long)
+
+   Debug.Print "Warning: " & TimeWithHighInput & ":" & MinInput
+   If TimeWithHighInput > 0 Then
+      ShowWarning Client.Texts.Txt(1030125, "High input level")
+   Else
+      ShowWarning ""
+   End If
+
+End Sub
+
 Private Sub ucDSSRecGUI_WarningLowInputWhenRecording(TimeWithLowInput As Long, MaxInput As Long)
 
    'Debug.Print "Warning: " & TimeWithLowInput & ":" & MaxInput
-   If TimeWithLowInput > 0 Then
+      If TimeWithLowInput > 0 Then
+      ShowWarning Client.Texts.Txt(1030124, "Low input level")
+   Else
+      ShowWarning ""
+   End If
+End Sub
+
+Public Sub ShowWarning(WarningText As String)
+
+   If Len(WarningText) > 0 Then
+      lblWarning.Caption = WarningText
       picWarning.Visible = True
       SetWindowTopMostAndForeground Me
    Else
