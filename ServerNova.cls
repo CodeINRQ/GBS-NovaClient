@@ -1539,6 +1539,7 @@ Public Function clsServer_CheckInNewDict(ByRef Dict As clsDict) As Long
 
    Dim I As Integer
 
+   Client.Trace.AddRow Trace_Level_FunctionCalls, "clsServerNova", "CheckInNewDict", "Enter"
    If Client.SysSettings.SoundMaxSizeToCheckIn > 0 Then
       If FileLen(Dict.LocalDictFile.LocalFilenameFormat) > Client.SysSettings.SoundMaxSizeToCheckIn Then
          clsServer_CheckInNewDict = -1
@@ -1566,6 +1567,12 @@ Public Function clsServer_CheckInNewDict(ByRef Dict As clsDict) As Long
       clsServer_CheckInNewDict = Dict.DictId
    'RaiseEvent UIStatusClear
    Client.UIStatusClear
+   Client.Trace.AddRow Trace_Level_FunctionCalls, "clsServerNova", "CheckInNewDict", "Exit"
+   Exit Function
+
+clsServer_CheckInNewDict_err:
+   Client.Trace.AddRow Trace_Level_FunctionCalls, "clsServerNova", "CheckInNewDict", "Err", Err.Number
+   Exit Function
 End Function
 
 Private Sub Delay(Sek As Integer)
