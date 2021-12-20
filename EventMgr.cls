@@ -203,21 +203,22 @@ Private Function CreateEnvironString(Delimit As Integer, ByVal C As String) As S
    Dim Key As String
    Dim Env As String
 
+   Pos1 = 1
    Do
       Pos2 = 0
       Pos1 = InStr(Pos1, C, MarkSignEnviron)
       If Pos1 > 0 Then
          Pos2 = InStr(Pos1 + 1, C, MarkSignEnviron)
+      End If
+      If Pos1 > 0 And Pos2 > Pos1 Then
+         Key = mId$(C, Pos1 + 1, Pos2 - Pos1 - 1)
+         Env = Environ(Key)
+         If Len(Env) > 0 Then
+            C = ChangeParam(C, Delimit, Key, Env, MarkSignEnviron)
+         Else
+            Pos1 = Pos2 + 1
          End If
-         If Pos1 > 0 And Pos2 > Pos1 Then
-            Key = mId$(C, Pos1 + 1, Pos2 - Pos1 - 1)
-            Env = Environ(Key)
-            If Len(Env) > 0 Then
-               C = ChangeParam(C, Delimit, Key, Env, MarkSignEnviron)
-            Else
-               Pos1 = Pos2 + 1
-            End If
-         End If
+      End If
    Loop While Pos1 > 0 And Pos2 > Pos1
    CreateEnvironString = C
 End Function
