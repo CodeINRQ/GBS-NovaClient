@@ -156,15 +156,15 @@ Begin VB.Form frmMain
       TabCaption(5)   =   "Organisation"
       TabPicture(5)   =   "main.frx":0B6E
       Tab(5).ControlEnabled=   0   'False
-      Tab(5).Control(0)=   "ucEditOrg"
+      Tab(5).Control(0)=   "ucOrgDictType"
       Tab(5).Control(1)=   "ucOrgPriority"
-      Tab(5).Control(2)=   "ucOrgDictType"
+      Tab(5).Control(2)=   "ucEditOrg"
       Tab(5).ControlCount=   3
       TabCaption(6)   =   "Systeminställningar"
       TabPicture(6)   =   "main.frx":0B8A
       Tab(6).ControlEnabled=   0   'False
-      Tab(6).Control(0)=   "ucEditSysSettings"
-      Tab(6).Control(1)=   "ucEditGroup"
+      Tab(6).Control(0)=   "ucEditGroup"
+      Tab(6).Control(1)=   "ucEditSysSettings"
       Tab(6).ControlCount=   2
       TabCaption(7)   =   "Tab 6"
       TabPicture(7)   =   "main.frx":0BA6
@@ -552,7 +552,7 @@ Attribute mDSSRec.VB_VarHelpID = -1
 Private WithEvents mVx As clsVoiceXpress
 Attribute mVx.VB_VarHelpID = -1
 Private mDictCloseChoice As Integer
-Private WithEvents mDictForm As frmDict
+Public WithEvents mDictForm As frmDict
 Attribute mDictForm.VB_VarHelpID = -1
 Private WithEvents mPopupForm As frmPopup
 Attribute mPopupForm.VB_VarHelpID = -1

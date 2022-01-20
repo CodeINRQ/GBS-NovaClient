@@ -117,8 +117,8 @@ Begin VB.Form frmDict
       TabIndex        =   14
       Top             =   600
       Width           =   2655
-      _ExtentX        =   4683
-      _ExtentY        =   2990
+      _extentx        =   4683
+      _extenty        =   2990
    End
    Begin CareTalk.ucDSSRecGUI ucDSSRecGUI 
       Height          =   495
@@ -126,8 +126,8 @@ Begin VB.Form frmDict
       TabIndex        =   17
       Top             =   60
       Width           =   8295
-      _ExtentX        =   14631
-      _ExtentY        =   873
+      _extentx        =   14631
+      _extenty        =   873
    End
    Begin CareTalk.ucOrgTree ucOrgTree 
       Height          =   4455
@@ -135,8 +135,8 @@ Begin VB.Form frmDict
       TabIndex        =   15
       Top             =   600
       Width           =   2175
-      _ExtentX        =   3836
-      _ExtentY        =   5953
+      _extentx        =   3836
+      _extenty        =   5953
    End
    Begin VB.Label lblNoteTitle 
       BackStyle       =   0  'Transparent
@@ -1210,7 +1210,7 @@ Private Sub SetEnabled()
    Client.DictMgr.SaveTempDictationInfo mDict, tdiUpdateInfo
    ShowFormCaption
 End Sub
-Private Function CheckMandatoryData() As Boolean
+Public Function CheckMandatoryData() As Boolean
 
    Dim Ok As Boolean
 

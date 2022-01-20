@@ -469,6 +469,7 @@ Private RecMonitor_MaxLevel As Long
 Private RecMonitor_LastWarningPos As Long
 
 Private mReadonly As Boolean
+Private mFirstRecord As Boolean
 
 Public Event PosChange(PosInMilliSec As Long, LengthInMilliSec As Long, Formated As String)
 Public Event ChangeIcon(NewIcon As Image)
@@ -718,9 +719,23 @@ Private Sub DSSRec_GruEvent(EventType As Gru_Event, Data As Long)
                StartRecordingMonitoring
                optPlayer(butPause).Value = True
             Case GRU_REC
-               Debug.Print "Recording" & " " & CStr(LastState)
-               StartRecordingMonitoring
-               optPlayer(butRec).Value = True
+               Debug.Print "Recording" & " " & CStr(LastState) & " " & CStr(mFirstRecord)
+               If Client.SysSettings.PlayerCheckMandatoryBeforeRecording Then
+                  If mFirstRecord Then
+                     mFirstRecord = False
+                     StartRecordingMonitoring
+                     optPlayer(butRec).Value = True
+                  ElseIf frmMain.mDictForm.CheckMandatoryData() Then
+                     StartRecordingMonitoring
+                     optPlayer(butRec).Value = True
+                  Else
+                     DSSRec.PlayPause
+                     MsgBox "V.g. ange ovillkorliga uppgifter före inspelning."
+                  End If
+               Else
+                  StartRecordingMonitoring
+                  optPlayer(butRec).Value = True
+               End If
             Case GRU_REWIND
                Debug.Print "Rewinding" & " " & CStr(LastState)
                StopRecordingMonitoring
@@ -788,7 +803,7 @@ Private Sub DSSRec_GruEvent(EventType As Gru_Event, Data As Long)
 End Sub
 Private Sub CheckForLowRecLevel(Pos As Long)
 
-   Debug.Print "RecMonitor", "Pos:" & Pos, "RecMonitor_StartPos:" & RecMonitor_StartPos, "RecMonitor_MaxLevel:" & RecMonitor_MaxLevel, "RecMonitor_LastWarningPos:" & RecMonitor_LastWarningPos, Timer
+   'Debug.Print "RecMonitor", "Pos:" & Pos, "RecMonitor_StartPos:" & RecMonitor_StartPos, "RecMonitor_MaxLevel:" & RecMonitor_MaxLevel, "RecMonitor_LastWarningPos:" & RecMonitor_LastWarningPos, Timer
    If RecMonitor_StartPos > 0 Then
       If RecMonitor_MaxLevel < Client.SysSettings.PlayerWarningLowRecLevel Then
          If Pos - RecMonitor_StartPos > 5000 Then
@@ -1032,6 +1047,7 @@ Private Sub UserControl_Initialize()
    Trc "ucDSS Initialize", ""
    ucVUmeter.Value = 0
    mAutoRewind = 1500
+   mFirstRecord = True
    InitPlayerButtons
    InitEditButtons
 End Sub

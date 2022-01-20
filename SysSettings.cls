@@ -89,6 +89,7 @@ Public PlayerKeyCloseXAlt As Integer
 Public PlayerKeyEscape As Integer
 Public PlayerKeyEscapeAlt As Integer
 Public PlayerKeyWindowSize As Integer
+Public PlayerCheckMandatoryBeforeRecording As Boolean
 
 Public DemoAllowGenerate As Boolean
 Public DemoShowTab As Boolean
@@ -244,12 +245,12 @@ Public Sub Init(Ty As String)
    PlayerKeyCloseXAlt = mSysSettings.GetLong("Player", "KeyCloseXAlt", 1089)
    PlayerKeyEscapeAlt = mSysSettings.GetLong("Player", "KeyEscapeAlt", 0)
    PlayerKeyWindowSize = mSysSettings.GetLong("Player", "KeyWindowSize", 1114)   'Alt-Z
+   PlayerCheckMandatoryBeforeRecording = mSysSettings.GetBool("Player", "CheckMandatoryBeforeRecording", False)  'Alt-Z
    
    DemoAllowGenerate = mSysSettings.GetBool("Demo", "AllowGenerate", False)
    DemoShowTab = mSysSettings.GetBool("Demo", "ShowTab", False)
    
    UserAllowChangeHome = mSysSettings.GetBool("User", "AllowChangeHome", False)
-   
    
    SoundUseImageField = mSysSettings.GetBool("Sound", "UseImageField", True)
    SoundChunkSize = mSysSettings.GetLong("Sound", "ChunkSize", 8192)
