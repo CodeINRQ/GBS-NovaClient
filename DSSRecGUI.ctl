@@ -730,7 +730,7 @@ Private Sub DSSRec_GruEvent(EventType As Gru_Event, Data As Long)
                      optPlayer(butRec).Value = True
                   Else
                      DSSRec.PlayPause
-                     MsgBox "V.g. ange ovillkorliga uppgifter före inspelning."
+                     MsgBox "Du måste välja diktattyp och prioritet innan du börjar diktera!"
                   End If
                Else
                   StartRecordingMonitoring
