@@ -1388,7 +1388,7 @@ Private Sub tmrCheckButtons_Timer()
       If Not RecorderInUse Then
          If FileExists(DictRecovery.LocalDictFile.LocalFilenamePlay) Then
             Client.LoggMgr.Insert 1320123, LoggLevel_DictFailure, DictRecovery.DictId, DictRecovery.LoggData
-            MsgBox Client.Texts.Txt(1000434, "Detta diktat har inte sparats tidigare. Spara nu eller radera!"), vbExclamation
+            MsgBox Client.Texts.Txt(1000434, "Detta diktat har inte sparats tidigare. Diktera klart eller radera!"), vbExclamation
             RecordNewDictation DictRecovery, False, 0
          End If
       End If
@@ -1833,7 +1833,7 @@ Private Sub RecordNewDictation(Dict As clsDict, UseCurrPat As Boolean, DictButto
    End If
       
    ThereIsALocalFile = Dict.LocalDictFile.IsSoundToPlay
-   Client.DictMgr.CreateNew Dict
+   Client.DictMgr.CreateNew Dict, Not ThereIsALocalFile
    
    Client.EventMgr.OnDictEvent "OnCreate", Dict
    RaiseEvent OnCreateDictation
@@ -2082,7 +2082,7 @@ Private Sub ImportNewDictationInternal(Fn As String, Dict As clsDict, WithDialog
 
    Dim Prio As clsPriority
 
-   Client.DictMgr.CreateNew Dict
+   Client.DictMgr.CreateNew Dict, True
    Client.EventMgr.OnDictEvent "OnCreate", Dict
    RaiseEvent OnCreateDictation
    

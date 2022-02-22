@@ -725,7 +725,7 @@ Public Function CheckIn(ByRef Dict As clsDict, ByVal DiscardChanges As Boolean) 
    End If
    CheckIn = Res
 End Function
-Public Function CreateNew(ByRef Dict As clsDict) As Integer
+Public Function CreateNew(ByRef Dict As clsDict, SetPrioAndType As Boolean) As Integer
 
    Dim Res As Integer
    Dim Idx As Integer
@@ -737,8 +737,10 @@ Public Function CreateNew(ByRef Dict As clsDict) As Integer
    Dict.AuthorLongName = Client.User.LongName
    Dict.AuthorShortName = Client.User.ShortName
    
-   Dict.PriorityId = -1
-   Dict.DictTypeId = -1
+   If SetPrioAndType Then
+      Dict.PriorityId = -1
+      Dict.DictTypeId = -1
+   End If
    CreateNew = 0
 End Function
 Public Function CheckInNew(ByRef Dict As clsDict) As Boolean

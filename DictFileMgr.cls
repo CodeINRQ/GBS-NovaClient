@@ -56,9 +56,9 @@ Public Sub CreateLocalValues(DictFile As clsDictFile)
    If Len(DictFile.OrgType) = 0 Then
       DictFile.OrgType = "DSS"
    End If
-   'If Len(DictFile.LocalFilenameFormat) = 0 Then
+   If Len(DictFile.LocalFilenameFormat) = 0 Then
       DictFile.LocalFilenameFormat = CreateTempFileName(DictFile.OrgType)
-   'End If
+   End If
    DictFile.LocalFilenamePlay = DictFile.LocalFilenameFormat
 End Sub
 
