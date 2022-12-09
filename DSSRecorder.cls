@@ -684,6 +684,7 @@ Public Function PlayPause() As Long
 
    PlayPause = PlayPauseIntern(False)
 End Function
+
 Private Function PlayPauseIntern(FromButtonOnDevice As Boolean) As Long
 
    Const FuncName As String = "PlayPauseIntern"

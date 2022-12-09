@@ -7,6 +7,12 @@ Begin VB.UserControl ucDSSRecGUI
    ClientWidth     =   8370
    ScaleHeight     =   510
    ScaleWidth      =   8370
+   Begin VB.Timer tmrStopRecordingLackMandatoryData 
+      Enabled         =   0   'False
+      Interval        =   10
+      Left            =   3600
+      Top             =   0
+   End
    Begin VB.PictureBox picRecording 
       AutoSize        =   -1  'True
       BackColor       =   &H00C0FFC0&
@@ -719,9 +725,11 @@ Private Sub DSSRec_GruEvent(EventType As Gru_Event, Data As Long)
                StartRecordingMonitoring
                optPlayer(butPause).Value = True
             Case GRU_REC
+               Debug.Print "+++++++++++++++++++++++"
                Debug.Print "Recording" & " " & CStr(LastState) & " " & CStr(mFirstRecord)
                If Client.SysSettings.PlayerCheckMandatoryBeforeRecording Then
                   If mFirstRecord Then
+                  Debug.Print "!!!!!!!!!!!!!!!!!!!!!!!"
                      mFirstRecord = False
                      StartRecordingMonitoring
                      optPlayer(butRec).Value = True
@@ -729,8 +737,10 @@ Private Sub DSSRec_GruEvent(EventType As Gru_Event, Data As Long)
                      StartRecordingMonitoring
                      optPlayer(butRec).Value = True
                   Else
-                     DSSRec.PlayPause
-                     MsgBox "Du måste välja diktattyp och prioritet innan du börjar diktera!"
+                     Debug.Print "-----------------------"
+                     StartRecordingMonitoring
+                     optPlayer(butRec).Value = True
+                     tmrStopRecordingLackMandatoryData.Enabled = True
                   End If
                Else
                   StartRecordingMonitoring
@@ -1037,6 +1047,18 @@ Private Sub tmrBlink_Timer()
       Dark = True
    End If
    SetNewIcon optPlayer(butRec).Picture
+End Sub
+
+Private Sub tmrStopRecordingLackMandatoryData_Timer()
+
+   tmrStopRecordingLackMandatoryData.Enabled = False
+   Debug.Print "#################################"
+   
+   optPlayer_Click butStop
+   StopRecordingMonitoring
+   optPlayer(butStop).Value = True
+   tmrBlink.Enabled = False
+   MsgBox "Du måste välja diktattyp och prioritet innan du börjar diktera!"
 End Sub
 
 Private Sub UserControl_Initialize()
