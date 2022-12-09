@@ -124,6 +124,11 @@ Private mAllreadyInit As Boolean
 Private mDirty As Boolean
 Private mRecorderInUse As Boolean
 
+Public Sub ClearButtonMemory()
+
+   mButton = 0
+End Sub
+
 Public Sub RegisterAndActivateLicens()
 
    frmRecord.DssRecorderBase.Register
@@ -684,7 +689,6 @@ Public Function PlayPause() As Long
 
    PlayPause = PlayPauseIntern(False)
 End Function
-
 Private Function PlayPauseIntern(FromButtonOnDevice As Boolean) As Long
 
    Const FuncName As String = "PlayPauseIntern"
@@ -1523,7 +1527,7 @@ Private Sub frmRecord_MicStat(Stat As Long)
 
    On Error GoTo MicStat_err
    
-   'Debug.Print , , CStr(Stat) & " " & CStr(mState)
+   Debug.Print , , CStr(Stat) & " " & CStr(mState)
    Client.Trace.AddRow Trace_Level_Events, ModuleName, FuncName, GruTraceTitleEntry, CStr(Stat) & "," & CStr(mButton)
    If Stat <> 20 Then
       If Stat <> 159 Then
@@ -1617,9 +1621,11 @@ Private Sub frmRecord_MicStat(Stat As Long)
                End If
             Case GRU_BUT_DICT
                mButton = NewButton
+               Debug.Print "Rec False"
                Rec False
             Case GRU_BUT_BUTREC
                mButton = NewButton
+               Debug.Print "Rec True"
                Rec True
             Case GRU_BUT_REC
                mButton = NewButton

@@ -1057,6 +1057,7 @@ Private Sub tmrStopRecordingLackMandatoryData_Timer()
    optPlayer_Click butStop
    StopRecordingMonitoring
    optPlayer(butStop).Value = True
+   DSSRec.ClearButtonMemory
    tmrBlink.Enabled = False
    MsgBox "Du måste välja diktattyp och prioritet innan du börjar diktera!"
 End Sub

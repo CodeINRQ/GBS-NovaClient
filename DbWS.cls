@@ -361,8 +361,6 @@ Public Function DictationStorageOpen(Server As String, _
       
    Dim Res As String
    Res = CallWS(wsStartSession, mSite & vbTab & mHost & vbTab & App.EXEName & vbTab & ApplicationVersion)
-   Res = CallWS(wsStartSession, mSite & vbTab & mHost & vbTab & App.EXEName & vbTab & ApplicationVersion)
-   Res = CallWS(wsStartSession, mSite & vbTab & mHost & vbTab & App.EXEName & vbTab & ApplicationVersion)
    mSessionId = ConsumeToNextChar(Res, vbTab)
    mSessionKey = ConsumeToNextChar(Res, vbTab)
    mSite = ConsumeToNextChar(Res, vbTab)
