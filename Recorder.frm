@@ -33,7 +33,7 @@ Private Declare Function GetCurrentProcessId Lib "kernel32" () As Long
 
 Private Const ModuleName = "frmRecord"
 
-Public Event MicStat(Stat As Long)
+Public Event MicStatEx(micStat As Long, micStatClickType As Long)
 Public Event MicStatHW(Hw As String)
 Public Event DssOnModeChanged(ByVal mode As Long)
 Public Event DssOnPositionChanged(ByVal Position As Long)
@@ -75,7 +75,7 @@ Public Sub SetMicRecordMode(Start As Boolean, Optional Overwrite As Boolean = Tr
       DssRecorderBase.MuteMicUnmuteSum
    End If
 End Sub
-Private Sub Adapter_MicStat(ByVal MicStat As Long, ByVal description As String)
+Private Sub Adapter_MicStat(ByVal micStat As Long, ByVal description As String)
 
    'MicrophoneStatPrevious = MicrophoneStat
    'MicrophoneStat = MicStat
@@ -87,26 +87,27 @@ Private Sub Adapter_MicStat(ByVal MicStat As Long, ByVal description As String)
    'End Select
    'RaiseEvent MicStat(MicStat)
    
-   Const FuncName As String = "Adapter_MicStat"
+   'Const FuncName As String = "Adapter_MicStat"
 
    'Debug.Print , , , , , MicStat, description
 
-   Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "MicStat", CStr(MicStat)
-   RaiseEvent MicStat(MicStat)
+   'Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "MicStat", CStr(micStat)
+   'RaiseEvent micStat(micStat)
 End Sub
 
-Private Sub Adapter_MicStatDebug(ByVal MicStat As Long, ByVal description As String)
+Private Sub Adapter_MicStatDebug(ByVal micStat As Long, ByVal description As String)
 
-   Const FuncName As String = "Adapter_MicStatDebug"
+   'Const FuncName As String = "Adapter_MicStatDebug"
 
-   Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "MicStatDebug", CStr(MicStat) & "," & description
+   'Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "MicStatDebug", CStr(micStat) & "," & description
 End Sub
 
-Private Sub Adapter_MicStatEx(ByVal MicStat As Long, ByVal micStatClickType As Long, ByVal description As String)
+Private Sub Adapter_MicStatEx(ByVal micStat As Long, ByVal micStatClickType As Long, ByVal description As String)
 
    Const FuncName As String = "Adapter_MicStatEx"
 
-   Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "MicStatEx", CStr(MicStat) & "," & CStr(micStatClickType) & "," & description
+   Client.Trace.AddRow Trace_Level_Adapter, ModuleName, FuncName, "MicStatEx", CStr(micStat) & "," & CStr(micStatClickType) & "," & description
+   RaiseEvent MicStatEx(micStat, micStatClickType)
 End Sub
 
 Private Sub Adapter_MicStatHW(ByVal Hw As String, ByVal lastHW As String)

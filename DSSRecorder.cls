@@ -46,20 +46,21 @@ Public Enum Gru_Event
    GRU_HWCHANGED        ' 7
 End Enum
 
-Public Enum Gru_Button
-   GRU_BUT_UNKNOWN = -1    ' -1
-   GRU_BUT_PLAY = 1        ' 0
-   GRU_BUT_PLAYPAUSE       ' 1
-   GRU_BUT_INDEX           ' 2
-   GRU_BUT_DICT            ' 3
-   GRU_BUT_REWIND          ' 4
-   GRU_BUT_FORWARD         ' 5
-   GRU_BUT_REC             ' 6
-   GRU_BUT_RECPAUSE        ' 7
-   GRU_BUT_INSERT          ' 8
-   GRU_BUT_GOTOSTART       ' 9
-   GRU_BUT_GOTOEND         ' 10
-   GRU_BUT_BUTREC          ' 11
+Public Enum Gru_Function
+   GRU_FUNC_UNKNOWN = -1    ' -1
+   GRU_FUNC_PLAY = 1        ' 0
+   GRU_FUNC_PLAYPAUSE       ' 1
+   GRU_FUNC_INDEX           ' 2
+   GRU_FUNC_DICT            ' 3
+   GRU_FUNC_REWIND          ' 4
+   GRU_FUNC_FORWARD         ' 5
+   GRU_FUNC_REC             ' 6
+   GRU_FUNC_RECPAUSE        ' 7
+   GRU_FUNC_INSERT          ' 8
+   GRU_FUNC_GOTOSTART       ' 9
+   GRU_FUNC_GOTOEND         ' 10
+   GRU_FUNC_BUTREC          ' 11
+   GRU_FUNC_INSERTTOGGLE    ' 12
 End Enum
 
 Public Enum Gru_Error
@@ -96,7 +97,7 @@ Private mState As Gru_State
 Private mLastReportedState As Gru_State
 Private mFastForwarding As Boolean
 Private mRewinding As Boolean
-Private mButton As Gru_Button
+Private mFunction As Gru_Function
 
 Private mErrCode As Long
 Private mErrDesc As String
@@ -126,7 +127,7 @@ Private mRecorderInUse As Boolean
 
 Public Sub ClearButtonMemory()
 
-   mButton = 0
+   mFunction = 0
 End Sub
 
 Public Sub RegisterAndActivateLicens()
@@ -492,7 +493,7 @@ Public Function CloseFile() As Long
       mReadonly = True
       Client.Trace.AddRow Trace_Level_DSSRec, ModuleName, FuncName, "Close"
       frmRecord.DssRecorderBase.Close
-      mButton = GRU_BUT_UNKNOWN
+      mFunction = GRU_FUNC_UNKNOWN
    End If
    
 CloseFile_Exit:
@@ -530,6 +531,7 @@ Public Function Play() As Long
             MoveTo Pos
          End If
       End If
+      frmRecord.DssRecorderBase.Stop
       Client.Trace.AddRow Trace_Level_DSSRec, ModuleName, FuncName, "Volume (let)", CStr(mPlayBackVolume)
       frmRecord.DssRecorderBase.Volume = mPlayBackVolume
       Client.Trace.AddRow Trace_Level_DSSRec, ModuleName, FuncName, "Play", CStr(mPlayBackVolume) & ",2"
@@ -631,7 +633,7 @@ Public Function Rec(ButtonDevice As Boolean) As Long
             frmRecord.DssRecorderBase.Record Ow
             'SetMicRecordMode True, False
             mDirty = True
-            'If mButton = GRU_BUT_PLAYPAUSE Or mButton = GRU_BUT_RECPAUSE Then   'Removed for SDK1 ver 4
+            'If mFunction = GRU_FUNC_PLAYPAUSE Or mFunction = GRU_FUNC_RECPAUSE Then   'Removed for SDK1 ver 4
             If Not ButtonDevice Then
                PlayPauseIntern True
             End If
@@ -951,17 +953,17 @@ Public Function GetPos(ByRef Pos As Long) As Long
    
    On Error GoTo GetPos_Err
    
-   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, GruTraceTitleEntry, ""
+   'Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, GruTraceTitleEntry, ""
    
    If mFileOpened Then
       Pos = frmRecord.DssRecorderBase.Position
-      Client.Trace.AddRow Trace_Level_DSSRec, ModuleName, FuncName, "Position (get)", CStr(Pos)
+      'Client.Trace.AddRow Trace_Level_DSSRec, ModuleName, FuncName, "Position (get)", CStr(Pos)
    Else
       Ret = GRU_ERR_FILENOTOPENED
    End If
    
 GetPos_Exit:
-   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, GruTraceTitleExit, CStr(Ret) & " " & CStr(Pos)
+   'Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, GruTraceTitleExit, CStr(Ret) & " " & CStr(Pos)
    GetPos = Ret
    Exit Function
    
@@ -977,7 +979,7 @@ Public Function GetLength(ByRef Length As Long) As Long
    
    On Error GoTo GetLength_Err
    
-   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, GruTraceTitleEntry, ""
+   'Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, GruTraceTitleEntry, ""
    
    If mFileOpened Then
       Length = frmRecord.DssRecorderBase.Length
@@ -987,7 +989,7 @@ Public Function GetLength(ByRef Length As Long) As Long
    End If
    
 GetLength_Exit:
-   Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, GruTraceTitleExit, CStr(Ret) & " " & CStr(Length)
+   'Client.Trace.AddRow Trace_Level_FunctionCalls, ModuleName, FuncName, GruTraceTitleExit, CStr(Ret) & " " & CStr(Length)
    GetLength = Ret
    Exit Function
    
@@ -1515,146 +1517,317 @@ DssOnRecord_Err:
    Resume DssOnRecord_Exit
 End Sub
 
-Private Sub frmRecord_MicStat(Stat As Long)
+Private Sub Olympus_MicStatEx(micStat As Long, micStatClickType As Long)
 
    Const FuncName As String = "MicStat"
    
-   Dim NewButton As Integer
+   Dim newFunction As Integer
    Dim QuitRecording As Boolean
    Static WindingDuringRec As Boolean
    Static ButDevice As Boolean
-   Static ButtonPressed As Long
+   Static lastMic As Long
+   Static SliderPos As Integer
+   Dim mic As Long
 
    On Error GoTo MicStat_err
    
-   Debug.Print , , CStr(Stat) & " " & CStr(mState)
-   Client.Trace.AddRow Trace_Level_Events, ModuleName, FuncName, GruTraceTitleEntry, CStr(Stat) & "," & CStr(mButton)
-   If Stat <> 20 Then
-      If Stat <> 159 Then
-         ButtonPressed = Stat
-      End If
-      Select Case Stat
-         Case 128
-            NewButton = GRU_BUT_PLAYPAUSE
-         Case 129, 163
-            WindingDuringRec = (mState = GRU_REC) Or (mState = GRU_RECPAUSED)
-            NewButton = GRU_BUT_REWIND
-         Case 130, 164
-            WindingDuringRec = (mState = GRU_REC) Or (mState = GRU_RECPAUSED)
-            NewButton = GRU_BUT_FORWARD
-         Case 131
-            NewButton = GRU_BUT_PLAY
-         Case 134
-            NewButton = GRU_BUT_DICT
-         Case 140
-            NewButton = GRU_BUT_INDEX
-         Case 141
-            NewButton = GRU_BUT_REC
-         Case 142
-            NewButton = GRU_BUT_RECPAUSE
-         Case 143
-            NewButton = GRU_BUT_INSERT
-         Case 150
-            mButton = 0
-            Select Case mState
-               Case GRU_PLAY
-                  NewButton = GRU_BUT_PLAYPAUSE
-               Case GRU_REC, GRU_RECPAUSED
-                  frmRecord.DssRecorderBase.Stop
-                  mRecording = False
-                  NewButton = GRU_BUT_PLAYPAUSE
-               Case Else
-                  NewButton = GRU_BUT_PLAY
-            End Select
-         Case 155
-            mButton = 0
-            Select Case mState
-               Case GRU_REC
-                  NewButton = GRU_BUT_RECPAUSE
-               Case GRU_RECPAUSED
-                  NewButton = GRU_BUT_REC
-               Case Else
-                  NewButton = GRU_BUT_BUTREC
-            End Select
-         Case 157
-            NewButton = GRU_BUT_GOTOSTART
-         Case 158
-            NewButton = GRU_BUT_GOTOEND
-         Case 159
-            ButDevice = True
-            If ButtonPressed = 129 Or ButtonPressed = 130 Then
-               If Not WindingDuringRec Then
-                  NewButton = GRU_BUT_PLAY
-               Else
-                  WindingDuringRec = False
-               End If
-            End If
+   Debug.Print , , CStr(micStat) & " " & CStr(mState)
+   Client.Trace.AddRow Trace_Level_Events, ModuleName, FuncName, GruTraceTitleEntry, CStr(micStat) & "," & CStr(micStatClickType)
+   
+   mic = micStat * 100 + micStatClickType
+   
+   If mic = lastMic Then Return
+   lastMic = mic
+   
+   Select Case mic
+      Case 12800
+         SliderPos = GRU_FUNC_PLAYPAUSE
+         newFunction = GRU_FUNC_PLAYPAUSE
+      Case 12900
+         newFunction = GRU_FUNC_REWIND
+      Case 13000
+         newFunction = GRU_FUNC_FORWARD
+      Case 13100
+         SliderPos = GRU_FUNC_PLAY
+         newFunction = GRU_FUNC_PLAY
+'         Select Case mState
+'            Case GRU_RECPAUSED
+'               newFunction = GRU_FUNC_REC
+'            Case Else
+'               newFunction = GRU_FUNC_PLAY
+'         End Select
+      Case 13400                                      'rec click
+         newFunction = GRU_FUNC_DICT
+      Case 14000
+         newFunction = GRU_FUNC_INDEX
+      Case 14100                                      'rec play click
+         newFunction = GRU_FUNC_REC
+      Case 14200
+         newFunction = GRU_FUNC_RECPAUSE
+      Case 14300
+         mFunction = 0
+         newFunction = GRU_FUNC_INSERTTOGGLE
+      Case 15000
+         If mState = GRU_PLAY Then
+            newFunction = GRU_FUNC_PLAYPAUSE
+         Else
+            newFunction = GRU_FUNC_PLAY
+         End If
+      'Case 15004
+      '   mFunction = 0
+      '   newFunction = GRU_FUNC_PLAY
+      'Case 15503
+      '   SliderPos = GRU_FUNC_REC
+      '   newFunction = GRU_FUNC_REC
+      Case 15500
+         If mState = GRU_REC Then
+            newFunction = GRU_FUNC_RECPAUSE
+         Else
+            newFunction = GRU_FUNC_REC
+         End If
+      Case 15900   '15504
+         SliderPos = GRU_FUNC_PLAYPAUSE
+         newFunction = GRU_FUNC_PLAYPAUSE
+      Case 15700
+         newFunction = GRU_FUNC_GOTOSTART
+      Case 15800
+         newFunction = GRU_FUNC_GOTOEND
+      Case 15900
+         newFunction = GRU_FUNC_GOTOEND
+      Case 16303
+         newFunction = GRU_FUNC_REWIND
+      Case 16304
+         If SliderPos = GRU_FUNC_PLAY Then
+            newFunction = GRU_FUNC_PLAY
+         Else
+            newFunction = GRU_FUNC_PLAYPAUSE
+         End If
+      Case 16403
+         newFunction = GRU_FUNC_FORWARD
+      Case 16404
+         If SliderPos = GRU_FUNC_PLAY Then
+            newFunction = GRU_FUNC_PLAY
+         Else
+            newFunction = GRU_FUNC_PLAYPAUSE
+         End If
+      Case Else
+         newFunction = GRU_FUNC_UNKNOWN
+   End Select
+   
+   If newFunction = mFunction Then Exit Sub
+   
+   If newFunction = GRU_FUNC_UNKNOWN Then
+      'Client.Trace.AddRow Trace_Level_Events, ModuleName, FuncName, "Unknown button", CStr(mic) & "," & CStr(mFunction) & "," & CStr(newFunction) & "," & CStr(mState)
+      Exit Sub
+   Else
+      Client.Trace.AddRow Trace_Level_Events, ModuleName, FuncName, "Check button", CStr(mic) & "," & CStr(mFunction) & "," & CStr(newFunction) & "," & CStr(mState)
+   End If
+   
+   Select Case newFunction
+      Case GRU_FUNC_PLAYPAUSE
+         PlayPauseIntern True
+      Case GRU_FUNC_REWIND
+         Rewind
+      Case GRU_FUNC_FORWARD
+         FastForward
+      Case GRU_FUNC_PLAY
+         Play
+      Case GRU_FUNC_DICT
+         Rec False
+      Case GRU_FUNC_BUTREC
+         Rec True
+      Case GRU_FUNC_REC
+         Rec True
+      Case GRU_FUNC_RECPAUSE
+         PlayPauseIntern True
+      Case GRU_FUNC_INDEX              'To be handled in calling app
+      Case GRU_FUNC_INSERT
+      Case GRU_FUNC_INSERTTOGGLE
+      Case GRU_FUNC_GOTOSTART
+         GotoStart
+      Case GRU_FUNC_GOTOEND
+         GotoEnd
+      Case Else
+         mFunction = GRU_FUNC_UNKNOWN
+   End Select
+   
+   mFunction = newFunction
+   
+   Client.Trace.AddRow Trace_Level_Events, ModuleName, FuncName, "Raise button", CStr(mic) & "," & CStr(mFunction) & "," & CStr(newFunction) & "," & CStr(mState)
+
+   RaiseGruEvent GRU_BUTTONPRESS, mFunction
+   
+   ReportStateChanged
+   
+MicStat_Exit:
+   Client.Trace.AddRow Trace_Level_Events, ModuleName, FuncName, GruTraceTitleExit, CStr(mFunction)
+   Exit Sub
+   
+MicStat_err:
+   ErrorHandler FuncName, Err
+   Resume MicStat_Exit
+End Sub
+Private Sub frmRecord_MicStatEx(micStat As Long, micStatClickType As Long)
+
+   Olympus_MicStatEx micStat, micStatClickType
+   Exit Sub
+
+   Const FuncName As String = "MicStat"
+   
+   Dim newFunction As Integer
+   Dim QuitRecording As Boolean
+   Static WindingDuringRec As Boolean
+   Static ButDevice As Boolean
+   Static lastMic As Long
+   Dim mic As Long
+
+   On Error GoTo MicStat_err
+   
+   Debug.Print , , CStr(micStat) & " " & CStr(mState)
+   Client.Trace.AddRow Trace_Level_Events, ModuleName, FuncName, GruTraceTitleEntry, CStr(micStat) & "," & CStr(micStatClickType)
+   
+   mic = micStat * 100 + micStatClickType
+   
+   If mic = lastMic Then Return
+   lastMic = mic
+   
+   Select Case mic
+      Case 12800
+         Select Case mState
+            Case GRU_REC
+               newFunction = GRU_FUNC_RECPAUSE
+            Case Else
+               newFunction = GRU_FUNC_PLAYPAUSE
+         End Select
+      Case 12900, 16300
+         WindingDuringRec = (mState = GRU_REC) Or (mState = GRU_RECPAUSED)
+         newFunction = GRU_FUNC_REWIND
+      Case 13000, 16400
+         WindingDuringRec = (mState = GRU_REC) Or (mState = GRU_RECPAUSED)
+         newFunction = GRU_FUNC_FORWARD
+      Case 13100
+         newFunction = GRU_FUNC_PLAY
+      Case 13400                                      'rec click
+         newFunction = GRU_FUNC_DICT
+      Case 14000
+         newFunction = GRU_FUNC_INDEX
+      Case 14100                                      'rec play click
+         newFunction = GRU_FUNC_REC
+      Case 14200, 1
+         newFunction = GRU_FUNC_RECPAUSE
+      Case 14300
+         newFunction = GRU_FUNC_INSERT
+      Case 15000
+         mFunction = 0
+         Select Case mState
+            Case GRU_PLAY
+               newFunction = GRU_FUNC_PLAYPAUSE
+            Case GRU_REC, GRU_RECPAUSED
+               frmRecord.DssRecorderBase.Stop
+               mRecording = False
+               newFunction = GRU_FUNC_PLAYPAUSE
+            Case Else
+               newFunction = GRU_FUNC_PLAY
+         End Select
+      Case 15503
+         mFunction = 0
+         Select Case mState
+            Case GRU_REC
+               newFunction = GRU_FUNC_RECPAUSE
+            Case GRU_RECPAUSED
+               newFunction = GRU_FUNC_REC
+            Case Else
+               newFunction = GRU_FUNC_REC
+         End Select
+      Case 15700
+         newFunction = GRU_FUNC_GOTOSTART
+      Case 15800
+         newFunction = GRU_FUNC_GOTOEND
+      Case 159000
+         Client.Trace.AddRow Trace_Level_Tmp, ModuleName, FuncName, "case 15900+", CStr(mic) & "," & CStr(mFunction) & "," & CStr(newFunction) & "," & CStr(mState)
+         ButDevice = True
+         mFunction = 0
+         Select Case mState
+            Case GRU_REC
+               newFunction = GRU_FUNC_RECPAUSE
+            Case GRU_RECPAUSED
+               newFunction = GRU_FUNC_REC
+         End Select
+         Client.Trace.AddRow Trace_Level_Tmp, ModuleName, FuncName, "case 15900-", CStr(mic) & "," & CStr(mFunction) & "," & CStr(newFunction) & "," & CStr(mState)
+         'If lastMic = 12900 Or lastMic = 13000 Then
+'            If Not WindingDuringRec Then
+'               newFunction = GRU_FUNC_PLAY
+'            Else
+'               WindingDuringRec = False
+'            End If
+         'End If
 '            Select Case mState
 '               Case GRU_REWIND, GRU_FORWARD
 '                  If Not WindingDuringRec Then
-'                     NewButton = GRU_BUT_PLAY
+'                     newFunction = GRU_FUNC_PLAY
 '                  Else
 '                     WindingDuringRec = False
 '                  End If
 '            End Select
-         Case Else
-            NewButton = GRU_BUT_UNKNOWN
-      End Select
-   Client.Trace.AddRow Trace_Level_Events, ModuleName, FuncName, "Check new button", CStr(Stat) & "," & CStr(mButton) & "," & CStr(NewButton) & "," & CStr(mState)
-      If NewButton <> mButton Then
-         Select Case NewButton
-            Case GRU_BUT_PLAYPAUSE
-               If (Not mRecording) Or QuitRecording Then
-                  mButton = NewButton
-                  PlayPauseIntern True
-               End If
-            Case GRU_BUT_REWIND
-               mButton = NewButton
-               Rewind
-            Case GRU_BUT_FORWARD
-               mButton = NewButton
-               FastForward
-            Case GRU_BUT_PLAY
-               If Not mRecording Then
-                  mButton = NewButton
-                  Play
-               End If
-            Case GRU_BUT_DICT
-               mButton = NewButton
-               Debug.Print "Rec False"
-               Rec False
-            Case GRU_BUT_BUTREC
-               mButton = NewButton
-               Debug.Print "Rec True"
-               Rec True
-            Case GRU_BUT_REC
-               mButton = NewButton
-               RecResume
-            Case GRU_BUT_RECPAUSE
-               mButton = NewButton
-               PlayPauseIntern True
-            Case GRU_BUT_INDEX            'To be handled in calling app
-               mButton = NewButton
-            Case GRU_BUT_INSERT
-               mButton = NewButton        'To be handled in calling app
-            Case GRU_BUT_GOTOSTART
-               mButton = NewButton
-               GotoStart
-            Case GRU_BUT_GOTOEND
-               mButton = NewButton
-               GotoEnd
-            Case Else
-               'ErrorHandler "MicStat", GRU_ERR_UNKNOWNBUTTON
-               mButton = GRU_BUT_UNKNOWN
-         End Select
-         
-         RaiseGruEvent GRU_BUTTONPRESS, mButton
-      End If
-      ReportStateChanged
-   End If
+      Case Else
+         newFunction = GRU_FUNC_UNKNOWN
+   End Select
+   
+   If newFunction = mFunction Then Return
+      
+   Client.Trace.AddRow Trace_Level_Events, ModuleName, FuncName, "Check new button", CStr(mic) & "," & CStr(mFunction) & "," & CStr(newFunction) & "," & CStr(mState)
+   
+   If newFunction = GRU_FUNC_UNKNOWN Then Return
+   
+   Select Case newFunction
+      Case GRU_FUNC_PLAYPAUSE
+         If (Not mRecording) Or QuitRecording Then
+            mFunction = newFunction
+            PlayPauseIntern True
+         End If
+      Case GRU_FUNC_REWIND
+         mFunction = newFunction
+         Rewind
+      Case GRU_FUNC_FORWARD
+         mFunction = newFunction
+         FastForward
+      Case GRU_FUNC_PLAY
+         If Not mRecording Then
+            mFunction = newFunction
+            Play
+         End If
+      Case GRU_FUNC_DICT
+         mFunction = newFunction
+         Rec False
+      Case GRU_FUNC_BUTREC
+         mFunction = newFunction
+         Rec True
+      Case GRU_FUNC_REC
+         mFunction = newFunction
+         RecResume
+      Case GRU_FUNC_RECPAUSE
+         mFunction = newFunction
+         PlayPauseIntern True
+      Case GRU_FUNC_INDEX              'To be handled in calling app
+         mFunction = newFunction
+      Case GRU_FUNC_INSERT
+         mFunction = newFunction       'To be handled in calling app
+      Case GRU_FUNC_GOTOSTART
+         mFunction = newFunction
+         GotoStart
+      Case GRU_FUNC_GOTOEND
+         mFunction = newFunction
+         GotoEnd
+      Case Else
+         mFunction = GRU_FUNC_UNKNOWN
+   End Select
+   
+   RaiseGruEvent GRU_BUTTONPRESS, mFunction
+   
+   ReportStateChanged
    
 MicStat_Exit:
-   Client.Trace.AddRow Trace_Level_Events, ModuleName, FuncName, GruTraceTitleExit, CStr(mButton)
+   Client.Trace.AddRow Trace_Level_Events, ModuleName, FuncName, GruTraceTitleExit, CStr(mFunction)
    Exit Sub
    
 MicStat_err:

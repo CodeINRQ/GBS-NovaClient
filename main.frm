@@ -156,15 +156,15 @@ Begin VB.Form frmMain
       TabCaption(5)   =   "Organisation"
       TabPicture(5)   =   "main.frx":0B6E
       Tab(5).ControlEnabled=   0   'False
-      Tab(5).Control(0)=   "ucEditOrg"
+      Tab(5).Control(0)=   "ucOrgDictType"
       Tab(5).Control(1)=   "ucOrgPriority"
-      Tab(5).Control(2)=   "ucOrgDictType"
+      Tab(5).Control(2)=   "ucEditOrg"
       Tab(5).ControlCount=   3
       TabCaption(6)   =   "Systeminställningar"
       TabPicture(6)   =   "main.frx":0B8A
       Tab(6).ControlEnabled=   0   'False
-      Tab(6).Control(0)=   "ucEditSysSettings"
-      Tab(6).Control(1)=   "ucEditGroup"
+      Tab(6).Control(0)=   "ucEditGroup"
+      Tab(6).Control(1)=   "ucEditSysSettings"
       Tab(6).ControlCount=   2
       TabCaption(7)   =   "Tab 6"
       TabPicture(7)   =   "main.frx":0BA6
@@ -1257,14 +1257,14 @@ Private Sub mDSSRec_GruEvent(EventType As Gru_Event, Data As Long)
    Select Case EventType
       Case GRU_BUTTONPRESS
          Select Case Data
-            Case GRU_BUT_DICT, GRU_BUT_INSERT, GRU_BUT_BUTREC, GRU_BUT_RECPAUSE
+            Case GRU_FUNC_DICT, GRU_FUNC_INSERT, GRU_FUNC_BUTREC, GRU_FUNC_RECPAUSE
                If Not RecorderInUse Then
                   If RecordingAllowed Then
                      IsDictButtonPressed = True
                      DictButton = Data
                   End If
                End If
-            Case GRU_BUT_INDEX
+            Case GRU_FUNC_INDEX
                If Not RecorderInUse Then
                   If Client.SysSettings.VoiceExpressActivateOnIndexButton Then
                      If frmMain.Toolbar1.Buttons(3).Value = tbrPressed Then
@@ -1274,6 +1274,11 @@ Private Sub mDSSRec_GruEvent(EventType As Gru_Event, Data As Long)
                         frmMain.Toolbar1.Buttons(3).Value = tbrPressed
                      End If
                      mVx.Activate = frmMain.Toolbar1.Buttons(3).Value = tbrPressed
+                  Else
+                     If RecordingAllowed Then
+                        IsDictButtonPressed = True
+                        DictButton = Data
+                     End If
                   End If
                End If
          End Select

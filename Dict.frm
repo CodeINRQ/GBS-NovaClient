@@ -117,8 +117,8 @@ Begin VB.Form frmDict
       TabIndex        =   14
       Top             =   600
       Width           =   2655
-      _extentx        =   4683
-      _extenty        =   2990
+      _ExtentX        =   4683
+      _ExtentY        =   2990
    End
    Begin CareTalk.ucDSSRecGUI ucDSSRecGUI 
       Height          =   495
@@ -126,8 +126,8 @@ Begin VB.Form frmDict
       TabIndex        =   17
       Top             =   60
       Width           =   8295
-      _extentx        =   14631
-      _extenty        =   873
+      _ExtentX        =   14631
+      _ExtentY        =   873
    End
    Begin CareTalk.ucOrgTree ucOrgTree 
       Height          =   4455
@@ -135,8 +135,8 @@ Begin VB.Form frmDict
       TabIndex        =   15
       Top             =   600
       Width           =   2175
-      _extentx        =   3836
-      _extenty        =   5953
+      _ExtentX        =   3836
+      _ExtentY        =   5953
    End
    Begin VB.Label lblNoteTitle 
       BackStyle       =   0  'Transparent
@@ -533,7 +533,7 @@ Private Sub DSSRecorder_GruEvent(EventType As Gru_Event, Data As Long)
    Dim Pos As Long
    
    If EventType = GRU_BUTTONPRESS Then
-      If Data = GRU_BUT_INDEX Then
+      If Data = GRU_FUNC_INDEX Then
          'Debug.Print "GruEvent But_Index+"
          If Client.SysSettings.PlayerIndexButtonAsCloseDict Then
             'If CheckMandatoryData() Then
@@ -571,6 +571,8 @@ Private Sub DSSRecorder_GruEvent(EventType As Gru_Event, Data As Long)
 End Sub
 
 Private Sub Form_Activate()
+
+   Client.Trace.AddRow Trace_Level_Tmp, "frmDict", "Form_Activate", "", ""
 
    ShowWarning ""
    
@@ -854,7 +856,7 @@ Public Sub EditDictation(ByRef Dictation As clsDict, ByVal NewDict As Boolean, D
       ucDSSRecGUI.AutoRewind = mAutoRewind
       If mNewDict Then
          ucDSSRecGUI.ReadOnly = mSoundReadOnly
-         ucDSSRecGUI.CreateNewFile mDict.LocalDictFile.LocalFilenamePlay, DictButton = GRU_BUT_BUTREC
+         ucDSSRecGUI.CreateNewFile mDict.LocalDictFile.LocalFilenamePlay, DictButton = GRU_FUNC_BUTREC
       Else
          ucDSSRecGUI.ReadOnly = mSoundReadOnly
          ucDSSRecGUI.OpenAndPlay mDict.LocalDictFile.LocalFilenamePlay
@@ -870,6 +872,8 @@ Public Sub EditDictation(ByRef Dictation As clsDict, ByVal NewDict As Boolean, D
 End Sub
 
 Private Sub ShowDictation()
+
+   Client.Trace.AddRow Trace_Level_Tmp, "frmDict", "ShowDictation", "", ""
 
    If mDict.OrgId > 0 Then
       ucOrgTree.PickOrgId mDict.OrgId

@@ -24,6 +24,7 @@ Enum TraceLevelType
    Trace_Level_Events = 16
    Trace_Level_DSSRec = 32
    Trace_Level_Adapter = 64
+   Trace_Level_Tmp = 128
    Trace_Level_Full = 255
 End Enum
 

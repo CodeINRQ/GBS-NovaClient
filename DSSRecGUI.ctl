@@ -767,25 +767,35 @@ Private Sub DSSRec_GruEvent(EventType As Gru_Event, Data As Long)
          Else
             optInsert(0).Enabled = True
             optInsert(1).Enabled = True
-            If Client.SysSettings.PlayerAutoOverwrite Then
-               optInsert(1).Value = True
-            End If
+            'If Client.SysSettings.PlayerAutoOverwrite Then   'can't allow when using insert button as toogle 2023-08-15
+            '   optInsert(1).Value = True
+            'End If
             optPlayer(butRec).Picture = ilButtons16.ListImages(icoRecDark).Picture
          End If
       Case GRU_BUTTONPRESS
-         If Data = GRU_BUT_INDEX Then
+         If Data = GRU_FUNC_INDEX Then
             If Client.SysSettings.PlayerIndexButtonAsInsertRec Then
                optInsert(0).Value = True
-               StartRecordingMonitoring
+               StartRecordingMonitoring   'Maybe mic doesn't allow this.
                DSSRec.Rec False
             End If
-         ElseIf Data = GRU_BUT_INSERT Then
+         ElseIf Data = GRU_FUNC_INSERT Then
             If Client.SysSettings.PlayerAllowInsertFromMic Then
                If optInsert(0).Enabled Then
                   optInsert(0).Value = True
                End If
-               StartRecordingMonitoring
+               StartRecordingMonitoring   'Maybe mic doesn't allow this.
                DSSRec.Rec True
+            End If
+         ElseIf Data = GRU_FUNC_INSERTTOGGLE Then
+            If optInsert(0).Enabled Then
+               If optInsert(0).Value Then
+                  optInsert(1).Value = True
+                  DSSRec.SetRecordMode GRU_OVERWRITE
+               Else
+                  optInsert(0) = True
+                  DSSRec.SetRecordMode GRU_INSERT
+               End If
             End If
          End If
       Case GRU_INPUTCHANGE
@@ -964,6 +974,8 @@ Private Sub InitPlayerBeforeUse()
 
    Dim I As Integer
    Dim Speed As Integer
+   
+   Client.Trace.AddRow Trace_Level_Tmp, "ucDSSRecGUI", "InitPlayerBeforeUse", "Enter", ""
    
    picEdit.Visible = Client.SysSettings.PlayerShowEditButtons
    optInsert(0).Visible = Client.SysSettings.PlayerAllowInsertFromGUI
